@@ -7,35 +7,41 @@ export const UNREACHABLE = 1e9;
 const NB = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
 
 // File de priorité minimale (tas binaire) sur des index de tuiles.
+// Sans allocation par opération (le champ est recalculé plusieurs fois par seconde) : tableaux typés
+// qui doublent quand ils sont pleins, et pop() range la distance extraite dans heap.out[0].
 function createHeap() {
-  const hI = [], hD = [];
+  let hI = new Int32Array(MW * MH), hD = new Float64Array(MW * MH), n = 0;
+  const out = new Float64Array(1);
+  function swap(j, k) { const ti = hI[j], td = hD[j]; hI[j] = hI[k]; hD[j] = hD[k]; hI[k] = ti; hD[k] = td; }
   function push(i, d) {
-    hI.push(i); hD.push(d); let k = hI.length - 1;
-    while (k > 0) { const p = (k - 1) >> 1; if (hD[p] <= hD[k]) break; [hI[p], hI[k]] = [hI[k], hI[p]]; [hD[p], hD[k]] = [hD[k], hD[p]]; k = p; }
+    if (n === hI.length) { const gI = new Int32Array(n * 2), gD = new Float64Array(n * 2); gI.set(hI); gD.set(hD); hI = gI; hD = gD; }
+    hI[n] = i; hD[n] = d; let k = n++;
+    while (k > 0) { const p = (k - 1) >> 1; if (hD[p] <= hD[k]) break; swap(p, k); k = p; }
   }
   function pop() {
-    const i = hI[0], d = hD[0], li = hI.pop(), ld = hD.pop();
-    if (hI.length) {
-      hI[0] = li; hD[0] = ld; let k = 0; const n = hI.length;
+    const i = hI[0]; out[0] = hD[0]; n--;
+    if (n) {
+      hI[0] = hI[n]; hD[0] = hD[n]; let k = 0;
       for (;;) {
         const l = 2 * k + 1, r = l + 1; let m = k;
         if (l < n && hD[l] < hD[m]) m = l; if (r < n && hD[r] < hD[m]) m = r;
         if (m === k) break;
-        [hI[m], hI[k]] = [hI[k], hI[m]]; [hD[m], hD[k]] = [hD[k], hD[m]]; k = m;
+        swap(m, k); k = m;
       }
     }
-    return [i, d];
+    return i;
   }
-  return { push, pop, size: () => hI.length };
+  return { push, pop, out, size: () => n };
 }
 
 // viaVoid : on fait comme si le vide se traversait (sert à trouver le bord le plus proche du joueur)
 function walkable(map, i, viaVoid) { const v = map[i]; return v === 0 || (viaVoid && v === 3); }
 function relax(map, blocks, heap, D, viaVoid) {
   while (heap.size()) {
-    const [i, d] = heap.pop(); if (d > D[i]) continue;
+    const i = heap.pop(), d = heap.out[0]; if (d > D[i]) continue;
     const x = i % MW, y = i / MW | 0;
-    for (const [dx, dy] of NB) {
+    for (let k = 0; k < NB.length; k++) {
+      const dx = NB[k][0], dy = NB[k][1];
       const nx = x + dx, ny = y + dy;
       if (nx < 0 || ny < 0 || nx >= MW || ny >= MH) continue;
       const ni = ny * MW + nx;
