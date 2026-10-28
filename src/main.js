@@ -14,6 +14,7 @@ import * as Field from './rules/pathfield.js';
 import { rollCards } from './rules/cards.js';
 import * as Waves from './rules/waves.js';
 import { killPoints, soifHeal, rollDrop } from './rules/scoring.js';
+import { resolveEnemyHit, playerProtected, secondWind } from './rules/damage.js';
 
 (() => {
 'use strict';
@@ -347,23 +348,22 @@ function spawnEnemy(type, door) {
 // renvoie 'blocked' quand le coup s'écrase sur le bouclier
 function hurtEnemy(e, dmg, dx, dy, knock, kind) {
   if (e.dead) return;
-  if (e.type === 'a') {
-    knock *= kind === 'blast' ? .45 : .2;
+  const hit = resolveEnemyHit(e, dmg, dx, dy, knock, kind);
+  knock = hit.knock;
+  if (hit.blocked) {
     const fl = Math.hypot(e.fx, e.fy) || 1;
-    if (e.shield > 0 && kind !== 'blast' && kind !== 'ap' && (dx || dy) && (dx * e.fx + dy * e.fy) / fl < -.45) {
-      e.shield -= dmg * .85; e.hp -= dmg * .15; e.shieldFlash = .08;
-      e.vx += dx * knock; e.vy += dy * knock;
-      sparks(e.x + e.fx / fl * 12, e.y + e.fy / fl * 6, 4, '#dfe8ef'); sfx('clang', 45);
-      if (e.shield <= 0) {
-        e.shield = 0;
-        gibs(e.x + e.fx * 10, e.y + e.fy * 5, 9, ['#8fa3b5', '#5f7385', '#c9d6e0']);
-        sfx('shieldbreak'); pop(e.x, e.y - 48, 'Bouclier brisé', '#dfe8ef');
-      }
-      if (e.hp <= 0) killEnemy(e, dx, dy);
-      return 'blocked';
+    e.shield -= hit.shieldDmg; e.hp -= hit.hpDmg; e.shieldFlash = .08;
+    e.vx += dx * knock; e.vy += dy * knock;
+    sparks(e.x + e.fx / fl * 12, e.y + e.fy / fl * 6, 4, '#dfe8ef'); sfx('clang', 45);
+    if (e.shield <= 0) {
+      e.shield = 0;
+      gibs(e.x + e.fx * 10, e.y + e.fy * 5, 9, ['#8fa3b5', '#5f7385', '#c9d6e0']);
+      sfx('shieldbreak'); pop(e.x, e.y - 48, 'Bouclier brisé', '#dfe8ef');
     }
+    if (e.hp <= 0) killEnemy(e, dx, dy);
+    return 'blocked';
   }
-  e.hp -= dmg; e.flash = .08; e.vx += dx * knock; e.vy += dy * knock;
+  e.hp -= hit.hpDmg; e.flash = .08; e.vx += dx * knock; e.vy += dy * knock;
   if (knock >= 150) e.knockT = .3;
   blood(e.x, e.y, 2 + (Math.random() * 3 | 0), dx, dy);
   sfx('hit', 35);
@@ -390,15 +390,15 @@ function killEnemy(e, dx, dy, fell) {
 /* ---------- Joueur ---------- */
 function hurtPlayer(dmg, soft) {
   if (player.dead || state !== 'play') return;
-  if (player.roll && player.roll.t >= ROLL.A && player.roll.t < ROLL.B) return;
-  if (player.invuln > 0) return;
+  if (playerProtected(player)) return;
   player.hp -= dmg; player.hurtT = .35; player.flash = .08; player.lastHurt = S.time;
   if (!soft) { shake = Math.min(16, shake + 4); S.comboT = Math.max(0, S.comboT - .6); }
   blood(player.x, player.y, 4);
   sfx('hurt', 120);
   if (soft) rumble(0, .15, 50); else rumble(.6, .4, 140);
-  if (player.hp <= 0 && mod('souffle') && !S.souffleUsed) {
-    S.souffleUsed = true; player.hp = Math.round(player.maxHp * .4); player.invuln = 1.6;
+  const revive = secondWind(player.hp, player.maxHp, S.mods, S.souffleUsed);
+  if (revive) {
+    S.souffleUsed = true; player.hp = revive.hp; player.invuln = revive.invuln;
     shockwave(player.x, player.y, 110, 80);
     banner('Second souffle', 'Tu te relèves'); sfx('unlock');
     return;
