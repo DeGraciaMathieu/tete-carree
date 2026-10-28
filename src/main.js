@@ -10,6 +10,7 @@ import { createRng } from './rules/rng.js';
 import * as Mods from './rules/modifiers.js';
 import { weaponsToUnlock, ammoOnUnlock } from './rules/unlock.js';
 import * as Grid from './rules/map.js';
+import * as Field from './rules/pathfield.js';
 
 (() => {
 'use strict';
@@ -252,75 +253,12 @@ function walkLine(ax, ay, bx, by) { return Grid.walkLine(map, ax, ay, bx, by); }
 function los(ax, ay, bx, by) { return Grid.los(map, blocks, ax, ay, bx, by); }
 
 /* ---------- Champ de distances (Dijkstra) ---------- */
-const NB = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
-const dist = new Float32Array(MW * MH);
-let hI = [], hD = [];
-function hpush(i, d) {
-  hI.push(i); hD.push(d); let k = hI.length - 1;
-  while (k > 0) { const p = (k - 1) >> 1; if (hD[p] <= hD[k]) break; [hI[p], hI[k]] = [hI[k], hI[p]]; [hD[p], hD[k]] = [hD[k], hD[p]]; k = p; }
-}
-function hpop() {
-  const i = hI[0], d = hD[0], li = hI.pop(), ld = hD.pop();
-  if (hI.length) {
-    hI[0] = li; hD[0] = ld; let k = 0; const n = hI.length;
-    for (;;) {
-      const l = 2 * k + 1, r = l + 1; let m = k;
-      if (l < n && hD[l] < hD[m]) m = l; if (r < n && hD[r] < hD[m]) m = r;
-      if (m === k) break;
-      [hI[m], hI[k]] = [hI[k], hI[m]]; [hD[m], hD[k]] = [hD[k], hD[m]]; k = m;
-    }
-  }
-  return [i, d];
-}
-// viaVoid : on fait comme si le vide se traversait (sert à trouver le bord le plus proche du joueur)
-function walkable(i, viaVoid) { const v = map[i]; return v === 0 || (viaVoid && v === 3); }
-function relax(D, viaVoid) {
-  while (hI.length) {
-    const [i, d] = hpop(); if (d > D[i]) continue;
-    const x = i % MW, y = i / MW | 0;
-    for (const [dx, dy] of NB) {
-      const nx = x + dx, ny = y + dy;
-      if (nx < 0 || ny < 0 || nx >= MW || ny >= MH) continue;
-      const ni = ny * MW + nx;
-      if (!walkable(ni, viaVoid)) continue;
-      if (dx && dy) {
-        const a = y * MW + nx, b = ny * MW + x;
-        if (!walkable(a, viaVoid) || blocks.has(a) || !walkable(b, viaVoid) || blocks.has(b)) continue;
-      }
-      const c = (dx && dy ? 1.414 : 1) + (blocks.has(ni) ? 9 : 0);
-      if (d + c < D[ni]) { D[ni] = d + c; hpush(ni, d + c); }
-    }
-  }
-}
-const distV = new Float32Array(MW * MH);
+let dist = new Float32Array(MW * MH);
 function computeField() {
   const ptx = clamp(Math.floor(player.x / T), 0, MW - 1), pty = clamp(Math.floor(player.y / T), 0, MH - 1);
-  const s = pty * MW + ptx;
-  // 1. vrais chemins jusqu'au joueur : la horde contourne le vide
-  dist.fill(1e9); hI = []; hD = []; dist[s] = 0; hpush(s, 0); relax(dist, false);
-  // 2. zones coupées du joueur par le vide : chaque zone converge vers son bord le plus proche du joueur
-  let cut = false;
-  for (let i = 0; i < dist.length; i++) if (map[i] === 0 && dist[i] > 1e8) { cut = true; break; }
-  if (!cut) return;
-  distV.fill(1e9); hI = []; hD = []; distV[s] = 0; hpush(s, 0); relax(distV, true);
-  hI = []; hD = [];
-  for (let i = 0; i < dist.length; i++) if (map[i] === 0 && dist[i] > 1e8 && distV[i] < 1e8) { dist[i] = 1000 + distV[i]; hpush(i, dist[i]); }
-  relax(dist, false);
+  dist = Field.computeField(map, blocks, ptx, pty);
 }
-function nextStep(e) {
-  const tx = Math.floor(e.x / T), ty = Math.floor(e.y / T);
-  if (!passable(tx, ty)) return null;
-  let bestD = dist[ty * MW + tx], bi = -1;
-  for (const [dx, dy] of NB) {
-    const nx = tx + dx, ny = ty + dy;
-    if (!passable(nx, ny)) continue;
-    if (dx && dy && (!openT(tx + dx, ty) || !openT(tx, ty + dy))) continue;
-    const v = dist[ny * MW + nx];
-    if (v < bestD) { bestD = v; bi = ny * MW + nx; }
-  }
-  if (bi < 0) return null;
-  return [(bi % MW) * T + T / 2, (bi / MW | 0) * T + T / 2];
-}
+function nextStep(e) { return Field.nextStep(map, blocks, dist, e.x, e.y); }
 
 /* ---------- Effets ---------- */
 function addPart(p) { if (parts.length < MAX_PARTS) parts.push(p); }
