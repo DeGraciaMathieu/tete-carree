@@ -1,0 +1,99 @@
+/* Constantes du jeu : grille, armes, cartes, équilibrage, réglages. Aucune logique ici. */
+
+/* ---------- Arène ---------- */
+export const T = 32, MW = 44, MH = 30;
+export const ZOOM_MIN = 0.72, ZOOM_MAX = 1.7;
+
+/* ---------- Armes ---------- */
+export const W = [
+  { id: 'pistol',  name: 'Pistolet',  short: 'Pistolet',  unlock: 0,     cd: .26, refill: 0 },
+  { id: 'uzi',     name: 'Uzi',       short: 'Uzi',       unlock: 1000,  cd: .07, refill: 120 },
+  { id: 'shotgun', name: 'Fusil à pompe', short: 'Pompe', unlock: 3500,  cd: .62, refill: 22 },
+  { id: 'wall',    name: 'Barricade', short: 'Barricade', unlock: 7000,  cd: .22, refill: 6 },
+  { id: 'barrel',  name: 'Baril',     short: 'Baril',     unlock: 11000, cd: .22, refill: 5 },
+  { id: 'grenade', name: 'Grenade',   short: 'Grenade',   unlock: 17000, cd: .55, refill: 8 },
+  { id: 'rocket',  name: 'Lance-roquettes', short: 'Roquette', unlock: 26000, cd: .85, refill: 6 },
+  { id: 'rail',    name: 'Railgun',   short: 'Railgun',   unlock: 38000, cd: 1.1, refill: 5 },
+];
+
+/* ---------- Combo ---------- */
+export const COMBO_T = 2.6;
+export const TENACE_BONUS = 1.4; // secondes de combo en plus par niveau de Combo tenace
+export const KILLS_PER_MULTIPLIER = 5;
+export const FRENZY_MULTIPLIER = 5; // Frénésie s'active à partir de ×5
+export const SOIF_MULTIPLIER = 3;   // Soif de sang soigne à partir de ×3
+
+/* ---------- Cartes de modificateurs ---------- */
+export const RAR = { c: { name: 'Commune', w: 55 }, r: { name: 'Rare', w: 28 }, l: { name: 'Légendaire', w: 9 }, p: { name: 'Pacte', w: 12 } };
+const pct = x => Math.round(x * 100) + ' %';
+export const MODS = [
+  { id: 'perce', rar: 'c', max: 3, name: 'Balles perforantes', short: 'Perforantes', desc: n => `Les balles du pistolet et de l'Uzi traversent ${n} ennemi${n > 1 ? 's' : ''} de plus.` },
+  { id: 'ricochet', rar: 'r', max: 2, name: 'Ricochet', short: 'Ricochet', desc: n => `Balles et plombs rebondissent ${n > 1 ? n + ' fois' : 'une fois'} sur les murs.` },
+  { id: 'cadence', rar: 'c', max: 3, name: 'Gâchette nerveuse', short: 'Cadence', desc: n => `Toutes les armes tirent plus vite : +${pct(Math.pow(1.25, n) - 1)} de cadence au total.` },
+  { id: 'calibre', rar: 'c', max: 2, name: 'Gros calibre', short: 'Gros calibre', desc: n => `Le fusil à pompe repousse les ennemis ${n > 1 ? 'trois' : 'deux'} fois plus loin.` },
+  { id: 'double', rar: 'r', max: 1, name: 'Double roulade', short: 'Double roulade', desc: () => `Deux roulades d'affilée avant la recharge.` },
+  { id: 'rollboom', rar: 'r', max: 2, name: 'Roulade explosive', short: 'Roulade explosive', desc: n => n > 1 ? `L'onde de choc de la roulade est plus large et plus forte.` : `Chaque roulade libère une onde de choc qui blesse et repousse la horde.` },
+  { id: 'rollammo', rar: 'c', max: 3, name: 'Roulade tactique', short: 'Roulade tactique', desc: n => `Chaque roulade rend ${pct(.25 * n)} d'une caisse de munitions à l'arme en main.` },
+  { id: 'firetrail', rar: 'r', max: 2, name: 'Traînée de feu', short: 'Traînée de feu', desc: n => n > 1 ? `Les flammes de la roulade brûlent deux fois plus fort.` : `La roulade laisse une ligne de flammes qui brûle la horde.` },
+  { id: 'tenace', rar: 'c', max: 2, name: 'Combo tenace', short: 'Combo tenace', desc: n => `Le combo tient ${(COMBO_T + 1.4 * n).toFixed(1).replace('.', ',')} s au lieu de ${(COMBO_T + 1.4 * (n - 1)).toFixed(1).replace('.', ',')} s.` },
+  { id: 'soif', rar: 'r', max: 3, name: 'Soif de sang', short: 'Soif de sang', desc: n => `À partir de ×3, chaque kill te rend ${n} point${n > 1 ? 's' : ''} de vie.` },
+  { id: 'frenesie', rar: 'l', max: 1, name: 'Frénésie', short: 'Frénésie', desc: () => `À partir de ×5 : déplacement +25 % et cadence de tir +33 %.` },
+  { id: 'barbeles', rar: 'c', max: 3, name: 'Barbelés', short: 'Barbelés', desc: n => `Tes barricades blessent les zombies qui les frappent : ${14 * n} dégâts par coup.` },
+  { id: 'grosbaril', rar: 'c', max: 2, name: 'Gros barils', short: 'Gros barils', desc: n => `Rayon d'explosion des barils +${pct(Math.pow(1.4, n) - 1)}.` },
+  { id: 'tourelle', rar: 'l', max: 1, name: 'Tourelle', short: 'Tourelle', desc: () => `Une barricade sur trois porte une tourelle qui tire toute seule sur la horde.` },
+  { id: 'constitution', rar: 'c', max: 4, name: 'Constitution', short: 'Constitution', desc: n => `+25 points de vie max (${100 + 25 * n} au total), et soigne de 25.` },
+  { id: 'aimant', rar: 'c', max: 2, name: 'Aimant', short: 'Aimant', desc: n => `Les caisses glissent vers toi dans un rayon de ${5 * n} cases.` },
+  { id: 'souffle', rar: 'l', max: 1, name: 'Second souffle', short: 'Second souffle', desc: () => `Une fois par partie, un coup mortel te laisse à 40 % de vie et repousse la horde.` },
+  { id: 'prime', rar: 'p', max: 2, name: 'Prime de risque', short: 'Prime de risque', plus: n => `+50 % de points sur chaque kill${n > 1 ? ' (cumulable)' : ''}`, minus: () => `Les meutes de coureurs comptent 2 coureurs de plus` },
+  { id: 'chair', rar: 'p', max: 2, name: 'Chair à canon', short: 'Chair à canon', plus: () => `Les Gonflés rapportent deux fois plus de points`, minus: () => `Leur explosion est 40 % plus large` },
+  { id: 'sansarmure', rar: 'p', max: 1, name: 'Sans armure', short: 'Sans armure', plus: () => `Cadence de tir doublée`, minus: () => `Plus aucune régénération de santé` },
+];
+
+/* ---------- Joueur ---------- */
+export const PLAYER_HP = 100;
+export const PLAYER_SPEED = 140;
+export const FRENZY_SPEED_MUL = 1.25;
+export const ACID_SPEED_MUL = 0.55;
+export const REGEN_DELAY = 4; // secondes sans dégât avant de régénérer
+export const REGEN_RATE = 3;  // points de vie par seconde
+export const LOW_HP = 30;
+export const MEDKIT_HP = 35;
+export const ROLL = { A: .06, B: .36, D: .46, CD: .7, V: 430, R: 10.5 };
+
+/* ---------- Constructions ---------- */
+export const WALL_HP = 170, TURRET_WALL_HP = 240, BARREL_HP = 45;
+export const TURRET_EVERY = 3; // une barricade sur trois porte une tourelle
+
+/* ---------- Ennemis ---------- */
+export const KILL_POINTS = { z: 50, b: 100, r: 75, s: 120, a: 200, d: 150 };
+export const DROP_CHANCE = { z: .05, b: .15, r: .04, s: .1, a: .25, d: .2 };
+export const BLOATER_RADIUS = 74, BLOATER_DAMAGE = 120;
+export const MAX_ENEMIES = 120;
+
+/* ---------- Vagues ---------- */
+export const FIRST_BREAK = 1.6;
+export const WAVE_BREAK = 10;
+export const PICK_DELAY = 1.1;
+export const WAVE_BONUS = 250; // multiplié par le numéro de vague
+
+/* ---------- Caisses de ravitaillement ---------- */
+export const BOX_FIRST = 7;
+export const BOX_PERIOD_MIN = 9, BOX_PERIOD_RAND = 5;
+export const MAX_PICKUPS = 3;
+export const BOX_HP_CHANCE = .35;
+
+/* ---------- Moteur ---------- */
+export const MAX_PARTS = 1600;
+export const FIELD_PERIOD = .22; // recalcul du champ de distances (s)
+
+/* ---------- Entrées ---------- */
+export const STICK_RADIUS = 48;
+export const PAD_MOVE_DEADZONE = .22, PAD_AIM_DEADZONE = .25;
+
+/* ---------- Réglages joueur ---------- */
+// Clés historiques : ne pas les renommer, les joueurs perdraient record et réglages.
+export const STORAGE_BEST = 'tete-carree-best';
+export const STORAGE_FPS = 'tete-carree-fps';
+export const STORAGE_OUTLINE = 'tete-carree-outline';
+// Version publiée : compteur masqué tant que le joueur ne l'a pas activé lui-même.
+export const SHOW_FPS_BY_DEFAULT = false;

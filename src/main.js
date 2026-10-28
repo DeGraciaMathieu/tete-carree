@@ -1,6 +1,14 @@
+import {
+  T, MW, MH, ZOOM_MIN, ZOOM_MAX, W, COMBO_T, TENACE_BONUS, KILLS_PER_MULTIPLIER, FRENZY_MULTIPLIER, SOIF_MULTIPLIER,
+  RAR, MODS, PLAYER_HP, PLAYER_SPEED, FRENZY_SPEED_MUL, ACID_SPEED_MUL, REGEN_DELAY, REGEN_RATE, LOW_HP, MEDKIT_HP, ROLL,
+  WALL_HP, TURRET_WALL_HP, BARREL_HP, TURRET_EVERY, KILL_POINTS, DROP_CHANCE, BLOATER_RADIUS, BLOATER_DAMAGE, MAX_ENEMIES,
+  FIRST_BREAK, WAVE_BREAK, PICK_DELAY, WAVE_BONUS, BOX_FIRST, BOX_PERIOD_MIN, BOX_PERIOD_RAND, MAX_PICKUPS, BOX_HP_CHANCE,
+  MAX_PARTS, FIELD_PERIOD, STICK_RADIUS, PAD_MOVE_DEADZONE, PAD_AIM_DEADZONE,
+  STORAGE_BEST, STORAGE_FPS, STORAGE_OUTLINE, SHOW_FPS_BY_DEFAULT,
+} from './config.js';
+
 (() => {
 'use strict';
-const T = 32, MW = 44, MH = 30;
 const cv = document.getElementById('cv');
 let ctx = cv.getContext('2d');
 const $ = id => document.getElementById(id);
@@ -14,52 +22,15 @@ function resize() {
   VW = innerWidth; VH = innerHeight;
   cv.width = Math.round(VW * dpr); cv.height = Math.round(VH * dpr);
   cv.style.width = VW + 'px'; cv.style.height = VH + 'px';
-  zoom = clamp(Math.min(VW / (22 * T), VH / (14 * T)), 0.72, 1.7);
+  zoom = clamp(Math.min(VW / (22 * T), VH / (14 * T)), ZOOM_MIN, ZOOM_MAX);
 }
 addEventListener('resize', resize); resize();
 
-/* ---------- Armes ---------- */
-const W = [
-  { id: 'pistol',  name: 'Pistolet',  short: 'Pistolet',  unlock: 0,     cd: .26, refill: 0 },
-  { id: 'uzi',     name: 'Uzi',       short: 'Uzi',       unlock: 1000,  cd: .07, refill: 120 },
-  { id: 'shotgun', name: 'Fusil à pompe', short: 'Pompe', unlock: 3500,  cd: .62, refill: 22 },
-  { id: 'wall',    name: 'Barricade', short: 'Barricade', unlock: 7000,  cd: .22, refill: 6 },
-  { id: 'barrel',  name: 'Baril',     short: 'Baril',     unlock: 11000, cd: .22, refill: 5 },
-  { id: 'grenade', name: 'Grenade',   short: 'Grenade',   unlock: 17000, cd: .55, refill: 8 },
-  { id: 'rocket',  name: 'Lance-roquettes', short: 'Roquette', unlock: 26000, cd: .85, refill: 6 },
-  { id: 'rail',    name: 'Railgun',   short: 'Railgun',   unlock: 38000, cd: 1.1, refill: 5 },
-];
-const COMBO_T = 2.6;
 
-/* ---------- Cartes de modificateurs ---------- */
-const RAR = { c: { name: 'Commune', w: 55 }, r: { name: 'Rare', w: 28 }, l: { name: 'Légendaire', w: 9 }, p: { name: 'Pacte', w: 12 } };
-const pct = x => Math.round(x * 100) + ' %';
-const MODS = [
-  { id: 'perce', rar: 'c', max: 3, name: 'Balles perforantes', short: 'Perforantes', desc: n => `Les balles du pistolet et de l'Uzi traversent ${n} ennemi${n > 1 ? 's' : ''} de plus.` },
-  { id: 'ricochet', rar: 'r', max: 2, name: 'Ricochet', short: 'Ricochet', desc: n => `Balles et plombs rebondissent ${n > 1 ? n + ' fois' : 'une fois'} sur les murs.` },
-  { id: 'cadence', rar: 'c', max: 3, name: 'Gâchette nerveuse', short: 'Cadence', desc: n => `Toutes les armes tirent plus vite : +${pct(Math.pow(1.25, n) - 1)} de cadence au total.` },
-  { id: 'calibre', rar: 'c', max: 2, name: 'Gros calibre', short: 'Gros calibre', desc: n => `Le fusil à pompe repousse les ennemis ${n > 1 ? 'trois' : 'deux'} fois plus loin.` },
-  { id: 'double', rar: 'r', max: 1, name: 'Double roulade', short: 'Double roulade', desc: () => `Deux roulades d'affilée avant la recharge.` },
-  { id: 'rollboom', rar: 'r', max: 2, name: 'Roulade explosive', short: 'Roulade explosive', desc: n => n > 1 ? `L'onde de choc de la roulade est plus large et plus forte.` : `Chaque roulade libère une onde de choc qui blesse et repousse la horde.` },
-  { id: 'rollammo', rar: 'c', max: 3, name: 'Roulade tactique', short: 'Roulade tactique', desc: n => `Chaque roulade rend ${pct(.25 * n)} d'une caisse de munitions à l'arme en main.` },
-  { id: 'firetrail', rar: 'r', max: 2, name: 'Traînée de feu', short: 'Traînée de feu', desc: n => n > 1 ? `Les flammes de la roulade brûlent deux fois plus fort.` : `La roulade laisse une ligne de flammes qui brûle la horde.` },
-  { id: 'tenace', rar: 'c', max: 2, name: 'Combo tenace', short: 'Combo tenace', desc: n => `Le combo tient ${(COMBO_T + 1.4 * n).toFixed(1).replace('.', ',')} s au lieu de ${(COMBO_T + 1.4 * (n - 1)).toFixed(1).replace('.', ',')} s.` },
-  { id: 'soif', rar: 'r', max: 3, name: 'Soif de sang', short: 'Soif de sang', desc: n => `À partir de ×3, chaque kill te rend ${n} point${n > 1 ? 's' : ''} de vie.` },
-  { id: 'frenesie', rar: 'l', max: 1, name: 'Frénésie', short: 'Frénésie', desc: () => `À partir de ×5 : déplacement +25 % et cadence de tir +33 %.` },
-  { id: 'barbeles', rar: 'c', max: 3, name: 'Barbelés', short: 'Barbelés', desc: n => `Tes barricades blessent les zombies qui les frappent : ${14 * n} dégâts par coup.` },
-  { id: 'grosbaril', rar: 'c', max: 2, name: 'Gros barils', short: 'Gros barils', desc: n => `Rayon d'explosion des barils +${pct(Math.pow(1.4, n) - 1)}.` },
-  { id: 'tourelle', rar: 'l', max: 1, name: 'Tourelle', short: 'Tourelle', desc: () => `Une barricade sur trois porte une tourelle qui tire toute seule sur la horde.` },
-  { id: 'constitution', rar: 'c', max: 4, name: 'Constitution', short: 'Constitution', desc: n => `+25 points de vie max (${100 + 25 * n} au total), et soigne de 25.` },
-  { id: 'aimant', rar: 'c', max: 2, name: 'Aimant', short: 'Aimant', desc: n => `Les caisses glissent vers toi dans un rayon de ${5 * n} cases.` },
-  { id: 'souffle', rar: 'l', max: 1, name: 'Second souffle', short: 'Second souffle', desc: () => `Une fois par partie, un coup mortel te laisse à 40 % de vie et repousse la horde.` },
-  { id: 'prime', rar: 'p', max: 2, name: 'Prime de risque', short: 'Prime de risque', plus: n => `+50 % de points sur chaque kill${n > 1 ? ' (cumulable)' : ''}`, minus: () => `Les meutes de coureurs comptent 2 coureurs de plus` },
-  { id: 'chair', rar: 'p', max: 2, name: 'Chair à canon', short: 'Chair à canon', plus: () => `Les Gonflés rapportent deux fois plus de points`, minus: () => `Leur explosion est 40 % plus large` },
-  { id: 'sansarmure', rar: 'p', max: 1, name: 'Sans armure', short: 'Sans armure', plus: () => `Cadence de tir doublée`, minus: () => `Plus aucune régénération de santé` },
-];
 const mod = id => (S && S.mods && S.mods[id]) || 0;
-function frenzy() { return mod('frenesie') > 0 && multiplier() >= 5; }
+function frenzy() { return mod('frenesie') > 0 && multiplier() >= FRENZY_MULTIPLIER; }
 function fireMul() { return Math.pow(.8, mod('cadence')) * (mod('sansarmure') ? .5 : 1) * (frenzy() ? .75 : 1); }
-function comboTime() { return COMBO_T + 1.4 * mod('tenace'); }
+function comboTime() { return COMBO_T + TENACE_BONUS * mod('tenace'); }
 function rollMax() { return 1 + mod('double'); }
 
 /* ---------- Carte ---------- */
@@ -210,12 +181,12 @@ let state = 'title';
 let S, player, enemies, projs, grenades, rockets, parts, tracers, pops, booms, pickups, blocks, pending, bursts, fires, fallers, globs, puddles, unlocked, ammo, cam, shake;
 let fieldDirty = true;
 let best = 0;
-try { best = +localStorage.getItem('tete-carree-best') || 0; } catch (e) {}
+try { best = +localStorage.getItem(STORAGE_BEST) || 0; } catch (e) {}
 
 function newGame() {
   buildMap(); paintFloor();
-  S = { score: 0, wave: 0, waveActive: false, breakT: 1.6, queue: [], spawnT: 0, combo: 0, comboT: 0, bestCombo: 0, kills: 0, time: 0, boxT: 7, fieldT: 0, overT: 0, mods: {}, wallCount: 0, souffleUsed: false, pickT: 0 };
-  player = { x: 22 * T, y: 15 * T + 4, r: 9, hp: 100, fx: 0, fy: 1, cd: 0, weapon: 0, hurtT: 0, flash: 0, walk: 0, moving: false, muzzle: 0, lastHurt: -9, dead: false, roll: null, rollCd: 0, rollReady: 0, maxHp: 100, rollCharges: 1, invuln: 0 };
+  S = { score: 0, wave: 0, waveActive: false, breakT: FIRST_BREAK, queue: [], spawnT: 0, combo: 0, comboT: 0, bestCombo: 0, kills: 0, time: 0, boxT: BOX_FIRST, fieldT: 0, overT: 0, mods: {}, wallCount: 0, souffleUsed: false, pickT: 0 };
+  player = { x: 22 * T, y: 15 * T + 4, r: 9, hp: PLAYER_HP, fx: 0, fy: 1, cd: 0, weapon: 0, hurtT: 0, flash: 0, walk: 0, moving: false, muzzle: 0, lastHurt: -9, dead: false, roll: null, rollCd: 0, rollReady: 0, maxHp: PLAYER_HP, rollCharges: 1, invuln: 0 };
   enemies = []; projs = []; grenades = []; rockets = []; parts = []; tracers = []; pops = []; booms = []; pickups = []; pending = []; bursts = []; fires = []; fallers = []; globs = []; puddles = [];
   blocks = new Map();
   unlocked = W.map(w => w.unlock === 0);
@@ -370,7 +341,7 @@ function nextStep(e) {
 }
 
 /* ---------- Effets ---------- */
-function addPart(p) { if (parts.length < 1600) parts.push(p); }
+function addPart(p) { if (parts.length < MAX_PARTS) parts.push(p); }
 function blood(x, y, n, dx = 0, dy = 0, spd = 90) {
   for (let k = 0; k < n; k++) addPart({ t: 'blood', x, y, z: 14 + Math.random() * 8, vx: dx * spd + rnd(70), vy: dy * spd + rnd(70), vz: 40 + Math.random() * 120, life: 2, size: 1.5 + Math.random() * 2.2, color: '#9c1a16' });
 }
@@ -419,7 +390,7 @@ function addScore(n) {
     }
   });
 }
-function multiplier() { return 1 + Math.floor(S.combo / 5); }
+function multiplier() { return 1 + Math.floor(S.combo / KILLS_PER_MULTIPLIER); }
 
 /* ---------- Ennemis ---------- */
 function queueCount() { let c = 0; for (const t of S.queue) c += t[0] === 'p' ? +t.slice(1) : 1; return c; }
@@ -480,8 +451,8 @@ function hurtEnemy(e, dmg, dx, dy, knock, kind) {
 // fell : l'ennemi a été projeté dans une crevasse
 function killEnemy(e, dx, dy, fell) {
   e.dead = true; S.kills++; S.combo++; S.comboT = comboTime(); S.bestCombo = Math.max(S.bestCombo, S.combo);
-  const m = multiplier(), pts = Math.round((e.type === 'z' ? 50 : e.type === 'b' ? 100 * Math.pow(2, mod('chair')) : e.type === 'r' ? 75 : e.type === 's' ? 120 : e.type === 'a' ? 200 : 150) * m * Math.pow(1.5, mod('prime')));
-  if (mod('soif') && m >= 3 && !player.dead) player.hp = Math.min(player.maxHp, player.hp + mod('soif'));
+  const m = multiplier(), pts = Math.round((e.type === 'z' ? KILL_POINTS.z : e.type === 'b' ? KILL_POINTS.b * Math.pow(2, mod('chair')) : e.type === 'r' ? KILL_POINTS.r : e.type === 's' ? KILL_POINTS.s : e.type === 'a' ? KILL_POINTS.a : KILL_POINTS.d) * m * Math.pow(1.5, mod('prime')));
+  if (mod('soif') && m >= SOIF_MULTIPLIER && !player.dead) player.hp = Math.min(player.maxHp, player.hp + mod('soif'));
   addScore(pts);
   pop(e.x, e.y - 40, (fell ? 'Chute ! +' : '+') + fmt(pts), m > 1 || fell ? '#f2c230' : '#ffffff');
   const cEl = $('comboNum'); cEl.classList.add('bump'); setTimeout(() => cEl.classList.remove('bump'), 90);
@@ -491,7 +462,7 @@ function killEnemy(e, dx, dy, fell) {
   if (e.type === 'b') bursts.push({ x: e.x, y: e.y, t: .08 });
   stampBlood(e.x + dx * 6, e.y + dy * 6, 9 + Math.random() * 6, .7);
   sfx('splat', 25);
-  const drop = e.type === 'z' ? .05 : e.type === 'b' ? .15 : e.type === 'r' ? .04 : e.type === 's' ? .1 : e.type === 'a' ? .25 : .2;
+  const drop = e.type === 'z' ? DROP_CHANCE.z : e.type === 'b' ? DROP_CHANCE.b : e.type === 'r' ? DROP_CHANCE.r : e.type === 's' ? DROP_CHANCE.s : e.type === 'a' ? DROP_CHANCE.a : DROP_CHANCE.d;
   if (Math.random() < drop && !isVoid(e.x, e.y)) pickups.push({ x: e.x, y: e.y, kind: Math.random() < .5 ? 'hp' : 'ammo', ph: Math.random() * 6 });
 }
 
@@ -577,11 +548,11 @@ function placeBlock(kind) {
   const rx = tx * T, ry = ty * T;
   const overl = e => { const cx = clamp(e.x, rx, rx + T), cy = clamp(e.y, ry, ry + T); return (e.x - cx) ** 2 + (e.y - cy) ** 2 < e.r * e.r; };
   if (overl(player) || enemies.some(e => !e.dead && overl(e))) return false;
-  const hp = kind === 'wall' ? 170 : 45;
+  const hp = kind === 'wall' ? WALL_HP : BARREL_HP;
   const blk = { kind, i, tx, ty, hp, max: hp, flash: 0, drop: 1 };
   if (kind === 'wall') {
     S.wallCount++;
-    if (mod('tourelle') && S.wallCount % 3 === 0) { blk.turret = { cd: .3, ang: Math.atan2(player.fy, player.fx), flash: 0 }; blk.hp = blk.max = 240; }
+    if (mod('tourelle') && S.wallCount % TURRET_EVERY === 0) { blk.turret = { cd: .3, ang: Math.atan2(player.fy, player.fx), flash: 0 }; blk.hp = blk.max = TURRET_WALL_HP; }
   }
   blocks.set(i, blk);
   fieldDirty = true;
@@ -741,7 +712,7 @@ function bindStick(zoneId, baseId, knobId, st) {
   });
   zone.addEventListener('pointermove', e => {
     if (e.pointerId !== st.id) return;
-    let dx = e.clientX - st.ox, dy = e.clientY - st.oy; const l = Math.hypot(dx, dy), M = 48;
+    let dx = e.clientX - st.ox, dy = e.clientY - st.oy; const l = Math.hypot(dx, dy), M = STICK_RADIUS;
     if (l > M) { dx *= M / l; dy *= M / l; }
     st.x = dx / M; st.y = dy / M;
     knob.style.transform = `translate(${dx}px,${dy}px)`;
@@ -767,7 +738,7 @@ function pause() { state = 'pause'; $('pauseScreen').hidden = false; }
 function resume() { audio(); state = 'play'; $('pauseScreen').hidden = true; }
 function gameOver() {
   state = 'over';
-  if (S.score > best) { best = S.score; try { localStorage.setItem('tete-carree-best', String(best)); } catch (e) {} }
+  if (S.score > best) { best = S.score; try { localStorage.setItem(STORAGE_BEST, String(best)); } catch (e) {} }
   $('ovScore').textContent = fmt(S.score); $('ovWave').textContent = S.wave; $('ovCombo').textContent = S.bestCombo;
   $('overLine').textContent = `Tombé pendant la vague ${S.wave}, après ${S.kills} éliminations.`;
   showBest(); $('overScreen').hidden = false;
@@ -849,7 +820,7 @@ function updateHud() {
   renderMods();
   const fz = frenzy();
   if (hudCache.fz !== fz) { hudCache.fz = fz; document.querySelector('.combo').classList.toggle('frenzy', fz); }
-  const low = player.hp < 30 ? 'low' : '';
+  const low = player.hp < LOW_HP ? 'low' : '';
   if (hudCache.low !== low) { hudCache.low = low; $('hpBar').classList.toggle('low', !!low); }
   setText('score', fmt(S.score));
   const rc = player.rollCharges <= 0 || !!player.roll;
@@ -911,13 +882,13 @@ function update(dt) {
         player.fx = Math.round(Math.cos(a) * 1000) / 1000; player.fy = Math.round(Math.sin(a) * 1000) / 1000;
       }
       if (l > 1) { mx /= l; my /= l; l = 1; }
-      const v = 140 * (frenzy() ? 1.25 : 1) * (player.inAcid ? .55 : 1);
+      const v = PLAYER_SPEED * (frenzy() ? FRENZY_SPEED_MUL : 1) * (player.inAcid ? ACID_SPEED_MUL : 1);
       moveCircle(player, mx * v * dt, 0); moveCircle(player, 0, my * v * dt);
       player.walk += dt * 14;
     }
     player.cd -= dt;
     if ((aiming || mouseFire || pad.fire) && player.cd <= 0) fireWeapon();
-    if (!mod('sansarmure') && S.time - player.lastHurt > 4 && player.hp < player.maxHp) player.hp = Math.min(player.maxHp, player.hp + 3 * dt);
+    if (!mod('sansarmure') && S.time - player.lastHurt > REGEN_DELAY && player.hp < player.maxHp) player.hp = Math.min(player.maxHp, player.hp + REGEN_RATE * dt);
   }
   player.flash -= dt; player.hurtT -= dt; player.muzzle -= dt; player.invuln -= dt;
   if (playing && !player.dead && frenzy() && Math.random() < dt * 14) addPart({ t: 'spark', x: player.x + rnd(10), y: player.y + rnd(4), z: 8 + Math.random() * 22, vx: rnd(20), vy: rnd(20), vz: 50, life: .35, size: 1.8, color: '#f2c230' });
@@ -931,14 +902,14 @@ function update(dt) {
     }
     else {
       S.spawnT -= dt;
-      if (S.queue.length && S.spawnT <= 0 && enemies.length < 120) {
+      if (S.queue.length && S.spawnT <= 0 && enemies.length < MAX_ENEMIES) {
         const burst = S.wave > 6 ? 2 : 1;
         for (let k = 0; k < burst && S.queue.length; k++) spawnEnemy(S.queue.pop());
         S.spawnT = Math.max(.16, .85 - S.wave * .05);
       }
       if (!S.queue.length && enemies.length === 0) {
-        S.waveActive = false; S.breakT = 10; S.pickT = 1.1;
-        const bonus = 250 * S.wave; addScore(bonus);
+        S.waveActive = false; S.breakT = WAVE_BREAK; S.pickT = PICK_DELAY;
+        const bonus = WAVE_BONUS * S.wave; addScore(bonus);
         banner('Vague terminée', 'Bonus +', 'end', bonus);
       }
     }
@@ -947,13 +918,13 @@ function update(dt) {
     // caisses de ravitaillement
     S.boxT -= dt;
     if (S.boxT <= 0) {
-      S.boxT = 9 + Math.random() * 5;
-      if (pickups.length < 3) {
+      S.boxT = BOX_PERIOD_MIN + Math.random() * BOX_PERIOD_RAND;
+      if (pickups.length < MAX_PICKUPS) {
         for (let tries = 0; tries < 40; tries++) {
           const tx = 2 + Math.random() * (MW - 4) | 0, ty = 2 + Math.random() * (MH - 4) | 0;
           const x = tx * T + T / 2, y = ty * T + T / 2;
           if (!openT(tx, ty) || Math.hypot(x - player.x, y - player.y) < 140 || dist[ty * MW + tx] > 1e8) continue;
-          pickups.push({ x, y, kind: Math.random() < .35 ? 'hp' : 'ammo', ph: Math.random() * 6 });
+          pickups.push({ x, y, kind: Math.random() < BOX_HP_CHANCE ? 'hp' : 'ammo', ph: Math.random() * 6 });
           break;
         }
       }
@@ -963,7 +934,7 @@ function update(dt) {
 
   // champ de distances
   S.fieldT -= dt;
-  if (fieldDirty || S.fieldT <= 0) { computeField(); fieldDirty = false; S.fieldT = .22; }
+  if (fieldDirty || S.fieldT <= 0) { computeField(); fieldDirty = false; S.fieldT = FIELD_PERIOD; }
 
   // ennemis
   for (const e of enemies) {
@@ -1110,7 +1081,7 @@ function update(dt) {
     }
     if (Math.hypot(p.x - player.x, p.y - player.y) < 20) {
       p.taken = true; sfx('pickup');
-      if (p.kind === 'hp') { player.hp = Math.min(player.maxHp, player.hp + 35); pop(p.x, p.y - 30, '+35 santé', '#62c46e'); }
+      if (p.kind === 'hp') { player.hp = Math.min(player.maxHp, player.hp + MEDKIT_HP); pop(p.x, p.y - 30, `+${MEDKIT_HP} santé`, '#62c46e'); }
       else {
         const pool = W.map((w, i) => i).filter(i => i > 0 && unlocked[i]);
         if (!pool.length) { addScore(150); pop(p.x, p.y - 30, '+150', '#ffffff'); }
@@ -1223,7 +1194,7 @@ function drawChar(e, kind) {
 }
 /* Gonflé : zombie boursouflé qui explose */
 function toxicBurst(x, y) {
-  explosion(x, y, 74 * Math.pow(1.4, mod('chair')), 120);
+  explosion(x, y, BLOATER_RADIUS * Math.pow(1.4, mod('chair')), BLOATER_DAMAGE);
   for (let k = 0; k < 18; k++) addPart({ t: 'smoke', x: x + rnd(24), y: y + rnd(24), z: 6 + Math.random() * 12, vx: rnd(60), vy: rnd(60), vz: 14 + Math.random() * 24, life: 1.6, max: 1.6, size: 7 + Math.random() * 8, color: 'rgba(150,200,70,' });
   for (let k = 0; k < 14; k++) addPart({ t: 'blood', x, y, z: 16, vx: rnd(190), vy: rnd(190), vz: 60 + Math.random() * 140, life: 2, size: 2 + Math.random() * 2.5, color: '#8fb03c' });
   for (let k = 0; k < 6; k++) {
@@ -1484,7 +1455,6 @@ function drawBloater(e) {
 }
 
 /* ---------- Roulade ---------- */
-const ROLL = { A: .06, B: .36, D: .46, CD: .7, V: 430, R: 10.5 };
 function moveInput() {
   let mx = (keys.KeyD ? 1 : 0) - (keys.KeyA ? 1 : 0);
   let my = (keys.KeyS ? 1 : 0) - (keys.KeyW ? 1 : 0);
@@ -1775,7 +1745,7 @@ function drawPlayer(e) {
 // opaque en presque noir et un peu plus grosse. Le vrai dessin vient ensuite par-dessus : il ne reste
 // qu'un liseré sombre tout autour. Les ombres et effets translucides sont ignorés.
 let outlineOn = true;
-try { outlineOn = localStorage.getItem('tete-carree-outline') !== '0'; } catch (e) {}
+try { outlineOn = localStorage.getItem(STORAGE_OUTLINE) !== '0'; } catch (e) {}
 const OUT = '#0f1012', OUT_W = 1.15;
 const alphaCache = new Map();
 function opaque(c) {
@@ -2170,7 +2140,7 @@ function render() {
 
   // vignette
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  const pulse = player.hp < 30 && !player.dead ? (.25 + .15 * Math.sin(S.time * 6)) : 0;
+  const pulse = player.hp < LOW_HP && !player.dead ? (.25 + .15 * Math.sin(S.time * 6)) : 0;
   const hurt = Math.max(0, player.hurtT) * 1.6 + pulse;
   if (hurt > .01) {
     const g = ctx.createRadialGradient(cv.width / 2, cv.height / 2, Math.min(cv.width, cv.height) * .3, cv.width / 2, cv.height / 2, Math.max(cv.width, cv.height) * .7);
@@ -2182,17 +2152,17 @@ function render() {
 /* ---------- Compteur de FPS ---------- */
 const fpsEl = $('fps'), fpsTxt = $('fpsTxt'), fpsCtx = $('fpsCv').getContext('2d');
 const ftHist = new Float32Array(96);
-let ftI = 0, fpsAcc = 0, fpsN = 0, fpsT = 0, fpsOn = true;
-try { fpsOn = localStorage.getItem('tete-carree-fps') !== '0'; } catch (e) {}
+let ftI = 0, fpsAcc = 0, fpsN = 0, fpsT = 0, fpsOn = SHOW_FPS_BY_DEFAULT;
+try { const saved = localStorage.getItem(STORAGE_FPS); if (saved !== null) fpsOn = saved !== '0'; } catch (e) {}
 function setFps(v) {
   fpsOn = v; fpsEl.hidden = !v;
   $('fpsBtn').textContent = 'FPS : ' + (v ? 'affichés' : 'masqués');
-  try { localStorage.setItem('tete-carree-fps', v ? '1' : '0'); } catch (e) {}
+  try { localStorage.setItem(STORAGE_FPS, v ? '1' : '0'); } catch (e) {}
 }
 $('fpsBtn').addEventListener('click', () => setFps(!fpsOn));
 function setOutline(v) {
   outlineOn = v; $('olBtn').textContent = 'Contours : ' + (v ? 'activés' : 'désactivés');
-  try { localStorage.setItem('tete-carree-outline', v ? '1' : '0'); } catch (e) {}
+  try { localStorage.setItem(STORAGE_OUTLINE, v ? '1' : '0'); } catch (e) {}
 }
 $('olBtn').addEventListener('click', () => setOutline(!outlineOn));
 setOutline(outlineOn);
@@ -2259,8 +2229,8 @@ function pollPad() {
   pad.idx = gp.index;
   const ax = gp.axes, btn = i => !!(gp.buttons[i] && (gp.buttons[i].pressed || gp.buttons[i].value > .5));
   const now = gp.buttons.map((_, i) => btn(i));
-  [pad.mx, pad.my] = deadzone(ax[0] || 0, ax[1] || 0, .22);
-  [pad.ax, pad.ay] = ax.length >= 4 ? deadzone(ax[2] || 0, ax[3] || 0, .25) : [0, 0];
+  [pad.mx, pad.my] = deadzone(ax[0] || 0, ax[1] || 0, PAD_MOVE_DEADZONE);
+  [pad.ax, pad.ay] = ax.length >= 4 ? deadzone(ax[2] || 0, ax[3] || 0, PAD_AIM_DEADZONE) : [0, 0];
   pad.fire = !!(gp.buttons[7] && gp.buttons[7].value > .35);
   const prev = pad.prev, hit = i => now[i] && !prev[i];
   const fdir = Math.abs(ax[0] || 0) > .6 ? Math.sign(ax[0]) : Math.abs(ax[1] || 0) > .6 ? Math.sign(ax[1]) * 2 : 0;
