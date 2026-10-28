@@ -140,14 +140,14 @@ export const ENEMY_STATS = {
 // Marges de contact ajoutées aux rayons (px)
 export const MELEE_REACH = 6, BLOATER_TRIGGER_REACH = 14, FIREBALL_HIT_REACH = 6, ROCKET_HIT_REACH = 6;
 export const ENEMY_FIRST_ATTACK = .6;                          // délai avant le premier coup (s)
-export const ENEMY_MELEE_DAMAGE = { z: 8, r: 5, s: 6, a: 12, d: 14 };
+export const ENEMY_MELEE_DAMAGE = { z: 10, r: 6, s: 8, a: 15, d: 17 };
 export const ENEMY_ATTACK_CD = { z: .9, r: .55, s: .9, a: 1.1, d: .9 };
 export const ENEMY_BLOCK_DAMAGE = { z: 12, b: 16, r: 6, s: 10, a: 30, d: 22 }; // coups portés aux constructions
 export const BLOCK_ATTACK_CD = .85;
 export const BARBELES_DAMAGE = 14; // par niveau de Barbelés, à chaque coup porté à une barricade
 // Diable : tir de boule de feu
 export const DEVIL_FIRE_CD = 2.1, DEVIL_FIRE_RAND = 1.6, DEVIL_RANGE = 340, DEVIL_SPREAD = .06;
-export const FIREBALL_SPEED = 230, FIREBALL_LIFE = 3, FIREBALL_DAMAGE = 15, FIREBALL_BLOCK_DAMAGE = 25;
+export const FIREBALL_SPEED = 230, FIREBALL_LIFE = 3, FIREBALL_DAMAGE = 18, FIREBALL_BLOCK_DAMAGE = 25;
 // Cracheur et acide
 export const SPIT_CD = 2.8, SPIT_CD_RAND = .9;
 export const ACID_SPLASH_DAMAGE = 10, ACID_SPLASH_RADIUS = 24;
