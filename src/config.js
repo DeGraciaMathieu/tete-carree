@@ -45,8 +45,8 @@ export const MODS = [
   { id: 'constitution', rar: 'c', max: 4, name: 'Constitution', short: 'Constitution', desc: n => `+25 points de vie max (${100 + 25 * n} au total), et soigne de 25.` },
   { id: 'aimant', rar: 'c', max: 2, name: 'Aimant', short: 'Aimant', desc: n => `Les caisses glissent vers toi dans un rayon de ${5 * n} cases.` },
   { id: 'souffle', rar: 'l', max: 1, name: 'Second souffle', short: 'Second souffle', desc: () => `Une fois par partie, un coup mortel te laisse à 40 % de vie et repousse la horde.` },
-  { id: 'prime', rar: 'p', max: 2, name: 'Prime de risque', short: 'Prime de risque', plus: n => `+50 % de points sur chaque kill${n > 1 ? ' (cumulable)' : ''}`, minus: () => `Les meutes de coureurs comptent 2 coureurs de plus` },
-  { id: 'chair', rar: 'p', max: 2, name: 'Chair à canon', short: 'Chair à canon', plus: () => `Les Gonflés rapportent deux fois plus de points`, minus: () => `Leur explosion est 40 % plus large` },
+  { id: 'prime', rar: 'p', max: 2, name: 'Prime de risque', short: 'Prime de risque', plus: n => `+${pct(Math.pow(PRIME_POINTS_MUL, n) - 1)} de points sur chaque kill${n > 1 ? ' au total' : ''}`, minus: n => `Les meutes de coureurs comptent ${PRIME_PACK_BONUS * n} coureurs de plus` },
+  { id: 'chair', rar: 'p', max: 2, name: 'Chair à canon', short: 'Chair à canon', plus: n => `Les Gonflés rapportent ${{ 2: 'deux', 4: 'quatre' }[Math.pow(CHAIR_POINTS_MUL, n)] || Math.pow(CHAIR_POINTS_MUL, n)} fois plus de points`, minus: n => `Leur explosion est ${pct(Math.pow(CHAIR_RADIUS_MUL, n) - 1)} plus large` },
   { id: 'sansarmure', rar: 'p', max: 1, name: 'Sans armure', short: 'Sans armure', plus: () => `Cadence de tir doublée`, minus: () => `Plus aucune régénération de santé` },
 ];
 
