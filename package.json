@@ -1,0 +1,19 @@
+{
+  "name": "tete-carree",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "package": "vite build && rm -f tete-carree-itch.zip && cd dist && zip -r ../tete-carree-itch.zip .",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "devDependencies": {
+    "vite": "^8.3.5",
+    "vitest": "^5.0.5"
+  }
+}
