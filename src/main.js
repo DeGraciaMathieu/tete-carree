@@ -6,13 +6,17 @@ import {
   MAX_PARTS, FIELD_PERIOD, STICK_RADIUS, PAD_MOVE_DEADZONE, PAD_AIM_DEADZONE,
   STORAGE_BEST, STORAGE_FPS, STORAGE_OUTLINE, SHOW_FPS_BY_DEFAULT,
 } from './config.js';
+import { createRng } from './rules/rng.js';
 
 (() => {
 'use strict';
 const cv = document.getElementById('cv');
 let ctx = cv.getContext('2d');
 const $ = id => document.getElementById(id);
-const rnd = (a = 1) => (Math.random() * 2 - 1) * a;
+const rnd = (a = 1) => (Math.random() * 2 - 1) * a; // cosmétique uniquement
+// Aléatoire qui décide du gameplay : graine tirée à chaque nouvelle partie.
+let rng = Math.random;
+const jitter = (a = 1) => (rng() * 2 - 1) * a;
 const clamp = (v, a, b) => v < a ? a : v > b ? b : v;
 const fmt = n => Math.floor(n).toLocaleString('fr-FR');
 
@@ -184,6 +188,7 @@ let best = 0;
 try { best = +localStorage.getItem(STORAGE_BEST) || 0; } catch (e) {}
 
 function newGame() {
+  rng = createRng(Math.random() * 4294967296);
   buildMap(); paintFloor();
   S = { score: 0, wave: 0, waveActive: false, breakT: FIRST_BREAK, queue: [], spawnT: 0, combo: 0, comboT: 0, bestCombo: 0, kills: 0, time: 0, boxT: BOX_FIRST, fieldT: 0, overT: 0, mods: {}, wallCount: 0, souffleUsed: false, pickT: 0 };
   player = { x: 22 * T, y: 15 * T + 4, r: 9, hp: PLAYER_HP, fx: 0, fy: 1, cd: 0, weapon: 0, hurtT: 0, flash: 0, walk: 0, moving: false, muzzle: 0, lastHurt: -9, dead: false, roll: null, rollCd: 0, rollReady: 0, maxHp: PLAYER_HP, rollCharges: 1, invuln: 0 };
@@ -399,25 +404,25 @@ function spawnEnemy(type, door) {
     // la meute se répartit sur les différents côtés de l'arène pour prendre le joueur en tenaille
     const k = +type.slice(1), groups = {};
     for (const d of doors) { const side = d[1] === 0 ? 'n' : d[1] === MH - 1 ? 's' : d[0] === 0 ? 'o' : 'e'; (groups[side] = groups[side] || []).push(d); }
-    const sides = Object.values(groups).sort(() => Math.random() - .5);
-    for (let i = 0; i < k; i++) { const g = sides[i % sides.length]; spawnEnemy('r', g[Math.random() * g.length | 0]); }
+    const sides = Object.values(groups).sort(() => rng() - .5);
+    for (let i = 0; i < k; i++) { const g = sides[i % sides.length]; spawnEnemy('r', g[rng() * g.length | 0]); }
     sfx('screech');
     return;
   }
-  const [dx, dy] = door || doors[Math.random() * doors.length | 0];
+  const [dx, dy] = door || doors[rng() * doors.length | 0];
   const n = S.wave;
   const e = type === 'z'
-    ? { type, r: 9, hp: 55 + n * 6, sp: 44 + Math.min(32, n * 2.6) + Math.random() * 10 }
+    ? { type, r: 9, hp: 55 + n * 6, sp: 44 + Math.min(32, n * 2.6) + rng() * 10 }
     : type === 'b'
-    ? { type, r: 12, hp: 110 + n * 9, sp: 34 + Math.min(14, n) + Math.random() * 6 }
+    ? { type, r: 12, hp: 110 + n * 9, sp: 34 + Math.min(14, n) + rng() * 6 }
     : type === 'a'
-    ? { type, r: 11, hp: 200 + n * 14, sp: 34 + Math.min(10, n) + Math.random() * 4, shield: 320 + n * 22 }
+    ? { type, r: 11, hp: 200 + n * 14, sp: 34 + Math.min(10, n) + rng() * 4, shield: 320 + n * 22 }
     : type === 's'
-    ? { type, r: 9, hp: 70 + n * 6, sp: 46 + Math.min(12, n) + Math.random() * 6, spitCd: 1.2 + Math.random() * 1.5, wind: 0 }
+    ? { type, r: 9, hp: 70 + n * 6, sp: 46 + Math.min(12, n) + rng() * 6, spitCd: 1.2 + rng() * 1.5, wind: 0 }
     : type === 'r'
-    ? { type, r: 8, hp: 24 + n * 1.5, sp: 112 + Math.min(22, n * 1.5) + Math.random() * 8 }
-    : { type, r: 10, hp: 140 + n * 12, sp: 62 + Math.min(22, n * 1.6) + Math.random() * 6, fire: 1.6 + Math.random() * 2 };
-  Object.assign(e, { x: dx * T + T / 2 + rnd(6), y: dy * T + T / 2 + rnd(6), vx: 0, vy: 0, fx: 0, fy: 1, flash: 0, atk: .6, walk: Math.random() * 6, moving: true, bump: -1, dead: false });
+    ? { type, r: 8, hp: 24 + n * 1.5, sp: 112 + Math.min(22, n * 1.5) + rng() * 8 }
+    : { type, r: 10, hp: 140 + n * 12, sp: 62 + Math.min(22, n * 1.6) + rng() * 6, fire: 1.6 + rng() * 2 };
+  Object.assign(e, { x: dx * T + T / 2 + jitter(6), y: dy * T + T / 2 + jitter(6), vx: 0, vy: 0, fx: 0, fy: 1, flash: 0, atk: .6, walk: Math.random() * 6, moving: true, bump: -1, dead: false });
   e.shieldMax = e.shield || 0;
   e.x = clamp(e.x, e.r + 1, MW * T - e.r - 1); e.y = clamp(e.y, e.r + 1, MH * T - e.r - 1);
   enemies.push(e);
@@ -463,7 +468,7 @@ function killEnemy(e, dx, dy, fell) {
   stampBlood(e.x + dx * 6, e.y + dy * 6, 9 + Math.random() * 6, .7);
   sfx('splat', 25);
   const drop = e.type === 'z' ? DROP_CHANCE.z : e.type === 'b' ? DROP_CHANCE.b : e.type === 'r' ? DROP_CHANCE.r : e.type === 's' ? DROP_CHANCE.s : e.type === 'a' ? DROP_CHANCE.a : DROP_CHANCE.d;
-  if (Math.random() < drop && !isVoid(e.x, e.y)) pickups.push({ x: e.x, y: e.y, kind: Math.random() < .5 ? 'hp' : 'ammo', ph: Math.random() * 6 });
+  if (rng() < drop && !isVoid(e.x, e.y)) pickups.push({ x: e.x, y: e.y, kind: rng() < .5 ? 'hp' : 'ammo', ph: Math.random() * 6 });
 }
 
 /* ---------- Joueur ---------- */
@@ -605,13 +610,13 @@ function fireWeapon() {
   let ok = true;
   switch (w.id) {
     case 'pistol':
-      shoot(ang + rnd(.03), 420, 34, 1 + mod('perce'), 70, { t: .07, w: 1.6, c: '255,236,170' }, mod('ricochet'));
+      shoot(ang + jitter(.03), 420, 34, 1 + mod('perce'), 70, { t: .07, w: 1.6, c: '255,236,170' }, mod('ricochet'));
       player.muzzle = .05; shake = Math.min(16, shake + .8); sfx('pistol'); casing(); rumble(0, .14, 35); break;
     case 'uzi':
-      shoot(ang + rnd(.09), 380, 20, 1 + mod('perce'), 34, { t: .05, w: 1.3, c: '255,226,150' }, mod('ricochet'));
+      shoot(ang + jitter(.09), 380, 20, 1 + mod('perce'), 34, { t: .05, w: 1.3, c: '255,226,150' }, mod('ricochet'));
       player.muzzle = .04; shake = Math.min(16, shake + .5); sfx('uzi'); casing(); rumble(0, .12, 30); break;
     case 'shotgun':
-      for (let k = 0; k < 8; k++) shoot(ang + rnd(.3), 220 + Math.random() * 30, 24, 1, 95 * (1 + mod('calibre')), { t: .08, w: 1.2, c: '255,214,140' }, mod('ricochet'));
+      for (let k = 0; k < 8; k++) shoot(ang + jitter(.3), 220 + rng() * 30, 24, 1, 95 * (1 + mod('calibre')), { t: .08, w: 1.2, c: '255,214,140' }, mod('ricochet'));
       player.muzzle = .08; shake = Math.min(16, shake + 5); sfx('shotgun'); rumble(.35, .25, 90);
       moveCircle(player, -player.fx * 4, -player.fy * 4); break;
     case 'wall': ok = placeBlock('wall'); if (!ok) sfx('click'); break;
@@ -648,12 +653,12 @@ function startWave() {
   S.wave++; const n = S.wave;
   const z = 8 + n * 5, d = n >= 3 ? Math.floor((n - 1) * 1.4) : 0, bl = n >= 2 ? Math.floor(n * .7) : 0, pk = n >= 4 ? Math.floor((n - 2) * .6) : 0, sc = n >= 5 ? Math.floor((n - 3) * .7) : 0, ar = n >= 6 ? Math.floor((n - 4) * .5) : 0;
   const q = [];
-  for (let i = 0; i < z; i++) q.push(['z', Math.random()]);
-  for (let i = 0; i < d; i++) q.push(['d', Math.random() * .7]);
-  for (let i = 0; i < bl; i++) q.push(['b', .2 + Math.random() * .8]);
-  for (let i = 0; i < sc; i++) q.push(['s', .1 + Math.random() * .8]);
-  for (let i = 0; i < ar; i++) q.push(['a', .3 + Math.random() * .7]);
-  for (let i = 0; i < pk; i++) q.push(['p' + (3 + (Math.random() * 3 | 0) + Math.min(3, n / 4 | 0) + 2 * mod('prime')), .1 + Math.random() * .9]);
+  for (let i = 0; i < z; i++) q.push(['z', rng()]);
+  for (let i = 0; i < d; i++) q.push(['d', rng() * .7]);
+  for (let i = 0; i < bl; i++) q.push(['b', .2 + rng() * .8]);
+  for (let i = 0; i < sc; i++) q.push(['s', .1 + rng() * .8]);
+  for (let i = 0; i < ar; i++) q.push(['a', .3 + rng() * .7]);
+  for (let i = 0; i < pk; i++) q.push(['p' + (3 + (rng() * 3 | 0) + Math.min(3, n / 4 | 0) + 2 * mod('prime')), .1 + rng() * .9]);
   q.sort((a, b) => a[1] - b[1]);
   S.queue = q.map(a => a[0]);
   S.waveActive = true; S.spawnT = .4;
@@ -779,7 +784,7 @@ function rollCards() {
   const pool = MODS.filter(m => mod(m.id) < m.max), out = [];
   while (out.length < 3 && pool.length) {
     const tot = pool.reduce((a, m) => a + RAR[m.rar].w, 0);
-    let x = Math.random() * tot, k = 0;
+    let x = rng() * tot, k = 0;
     for (; k < pool.length - 1; k++) { x -= RAR[pool[k].rar].w; if (x <= 0) break; }
     out.push(pool.splice(k, 1)[0]);
   }
@@ -918,13 +923,13 @@ function update(dt) {
     // caisses de ravitaillement
     S.boxT -= dt;
     if (S.boxT <= 0) {
-      S.boxT = BOX_PERIOD_MIN + Math.random() * BOX_PERIOD_RAND;
+      S.boxT = BOX_PERIOD_MIN + rng() * BOX_PERIOD_RAND;
       if (pickups.length < MAX_PICKUPS) {
         for (let tries = 0; tries < 40; tries++) {
-          const tx = 2 + Math.random() * (MW - 4) | 0, ty = 2 + Math.random() * (MH - 4) | 0;
+          const tx = 2 + rng() * (MW - 4) | 0, ty = 2 + rng() * (MH - 4) | 0;
           const x = tx * T + T / 2, y = ty * T + T / 2;
           if (!openT(tx, ty) || Math.hypot(x - player.x, y - player.y) < 140 || dist[ty * MW + tx] > 1e8) continue;
-          pickups.push({ x, y, kind: Math.random() < BOX_HP_CHANCE ? 'hp' : 'ammo', ph: Math.random() * 6 });
+          pickups.push({ x, y, kind: rng() < BOX_HP_CHANCE ? 'hp' : 'ammo', ph: Math.random() * 6 });
           break;
         }
       }
@@ -995,9 +1000,9 @@ function update(dt) {
     if (e.type === 'd' && playing && !player.dead) {
       e.fire -= dt;
       if (e.fire <= 0) {
-        e.fire = 2.1 + Math.random() * 1.6;
+        e.fire = 2.1 + rng() * 1.6;
         if (dp < 340 && los(e.x, e.y, player.x, player.y)) {
-          const a = Math.atan2(dyp, dxp) + rnd(.06);
+          const a = Math.atan2(dyp, dxp) + jitter(.06);
           projs.push({ x: e.x + Math.cos(a) * 12, y: e.y + Math.sin(a) * 12, vx: Math.cos(a) * 230, vy: Math.sin(a) * 230, life: 3 });
           sfx('fire', 80);
         }
@@ -1086,7 +1091,7 @@ function update(dt) {
         const pool = W.map((w, i) => i).filter(i => i > 0 && unlocked[i]);
         if (!pool.length) { addScore(150); pop(p.x, p.y - 30, '+150', '#ffffff'); }
         else {
-          const picks = pool.sort(() => Math.random() - .5).slice(0, 2);
+          const picks = pool.sort(() => rng() - .5).slice(0, 2);
           for (const i of picks) ammo[i] += W[i].refill;
           pop(p.x, p.y - 30, picks.map(i => `+${W[i].refill} ${W[i].short}`).join(' · '), '#f2c230');
         }
@@ -1206,10 +1211,10 @@ function toxicBurst(x, y) {
 /* Coureur : zombie maigre en survêtement, penché en avant */
 /* Cracheur : zombie voûté en blouse d'hôpital, poche à acide sous la gorge */
 function spit(e) {
-  e.spitCd = 2.8 + Math.random() * .9;
+  e.spitCd = 2.8 + rng() * .9;
   const [mx, my] = moveInput(), ml = Math.hypot(mx, my);
   const d = Math.hypot(player.x - e.x, player.y - e.y), fl = clamp(d / 260, .45, .9);
-  const lead = ml > .2 && !player.roll ? 140 * fl * (.4 + Math.random() * .4) / ml : 0;
+  const lead = ml > .2 && !player.roll ? 140 * fl * (.4 + rng() * .4) / ml : 0;
   const x1 = clamp(player.x + mx * lead, T, (MW - 1) * T), y1 = clamp(player.y + my * lead, T, (MH - 1) * T);
   globs.push({ x0: e.x + e.fx * 6, y0: e.y + e.fy * 3, x1, y1, t: 0, T: fl, H: 36 + d * .15, x: e.x, y: e.y, z: 22 });
   sfx('spit');
