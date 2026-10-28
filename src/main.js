@@ -9,6 +9,7 @@ import {
 import { createRng } from './rules/rng.js';
 import * as Mods from './rules/modifiers.js';
 import { weaponsToUnlock, ammoOnUnlock } from './rules/unlock.js';
+import * as Grid from './rules/map.js';
 
 (() => {
 'use strict';
@@ -204,13 +205,9 @@ function newGame() {
 }
 
 /* ---------- Collisions & grille ---------- */
-function tileAt(tx, ty) {
-  if (tx < 0 || ty < 0 || tx >= MW || ty >= MH) return 1;
-  const i = ty * MW + tx;
-  return map[i] ? 1 : blocks.has(i) ? 2 : 0;
-}
-function passable(tx, ty) { return tx >= 0 && ty >= 0 && tx < MW && ty < MH && map[ty * MW + tx] === 0; }
-function openT(tx, ty) { return passable(tx, ty) && !blocks.has(ty * MW + tx); }
+function tileAt(tx, ty) { return Grid.tileAt(map, blocks, tx, ty); }
+function passable(tx, ty) { return Grid.passable(map, tx, ty); }
+function openT(tx, ty) { return Grid.openT(map, blocks, tx, ty); }
 // fly : en l'air (roulade au-dessus d'une crevasse, ennemi projeté), le vide ne bloque plus, les murs si
 function moveCircle(e, dx, dy, fly) {
   const tile = fly ? shotTile : tileAt;
@@ -248,33 +245,11 @@ function unstick(e) {
   if (best) { e.x = best[0]; e.y = best[1]; e.vx = e.vy = 0; }
 }
 // le vide (3) arrête les corps mais laisse passer balles, roquettes et boules de feu
-function shotTile(tx, ty) {
-  if (tx < 0 || ty < 0 || tx >= MW || ty >= MH) return 1;
-  const i = ty * MW + tx, v = map[i];
-  return v === 3 ? 0 : v ? 1 : blocks.has(i) ? 2 : 0;
-}
-const isVoid = (x, y) => map[Math.floor(y / T) * MW + Math.floor(x / T)] === 3;
-// vrai si on peut marcher en ligne droite de a à b (ni mur ni vide)
-function circleTouchesVoid(o, m) {
-  const rr = o.r + m;
-  for (let ty = Math.floor((o.y - rr) / T); ty <= Math.floor((o.y + rr) / T); ty++)
-    for (let tx = Math.floor((o.x - rr) / T); tx <= Math.floor((o.x + rr) / T); tx++)
-      if (tx >= 0 && ty >= 0 && tx < MW && ty < MH && map[ty * MW + tx] === 3) return true;
-  return false;
-}
-function walkLine(ax, ay, bx, by) {
-  const d = Math.hypot(bx - ax, by - ay), n = Math.max(1, d / 6 | 0);
-  for (let k = 1; k <= n; k++) if (!passable(Math.floor((ax + (bx - ax) * k / n) / T), Math.floor((ay + (by - ay) * k / n) / T))) return false;
-  return true;
-}
-function los(ax, ay, bx, by) {
-  const d = Math.hypot(bx - ax, by - ay), n = Math.max(1, d / 8 | 0);
-  for (let k = 1; k < n; k++) {
-    const x = ax + (bx - ax) * k / n, y = ay + (by - ay) * k / n;
-    if (shotTile(Math.floor(x / T), Math.floor(y / T))) return false;
-  }
-  return true;
-}
+function shotTile(tx, ty) { return Grid.shotTile(map, blocks, tx, ty); }
+const isVoid = (x, y) => Grid.isVoid(map, x, y);
+function circleTouchesVoid(o, m) { return Grid.circleTouchesVoid(map, o, m); }
+function walkLine(ax, ay, bx, by) { return Grid.walkLine(map, ax, ay, bx, by); }
+function los(ax, ay, bx, by) { return Grid.los(map, blocks, ax, ay, bx, by); }
 
 /* ---------- Champ de distances (Dijkstra) ---------- */
 const NB = [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]];
