@@ -1,6 +1,6 @@
 // Enchaînement des écrans : titre, partie, pause, choix de carte, fin de partie.
 import { audio, sfx } from '../audio/sfx.js';
-import { RAR, STORAGE_BEST } from '../config.js';
+import { CONSTITUTION_HP, RAR, STORAGE_BEST } from '../config.js';
 import { pad } from '../input/gamepad.js';
 import { releaseFire } from '../input/keyboard.js';
 import { paintFloor } from '../render/floor.js';
@@ -58,7 +58,7 @@ export function choosePick(i) {
   const m = pickChoices[i];
   if (!m || world.state !== 'pick') return;
   S.mods[m.id] = mod(m.id) + 1;
-  if (m.id === 'constitution') { player.maxHp += 25; player.hp = Math.min(player.maxHp, player.hp + 25); }
+  if (m.id === 'constitution') { player.maxHp += CONSTITUTION_HP; player.hp = Math.min(player.maxHp, player.hp + CONSTITUTION_HP); }
   if (m.id === 'double') player.rollCharges = Math.min(rollMax(), player.rollCharges + 1);
   $('pickScreen').hidden = true; world.state = 'play'; sfx('unlock');
   banner(m.name, m.rar === 'p' ? 'Pacte scellé' : mod(m.id) > 1 ? `Niveau ${mod(m.id)}` : 'Carte obtenue');

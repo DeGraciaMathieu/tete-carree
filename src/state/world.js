@@ -1,6 +1,6 @@
 // État de la partie en cours (session, joueur, collections d'entités), création d'une nouvelle partie
 // et accès aux modificateurs et au combo de la session.
-import { BOX_FIRST, FIRST_BREAK, PLAYER_HP, STORAGE_BEST, T, W } from '../config.js';
+import { BOX_FIRST, FIRST_BREAK, PLAYER_HP, PLAYER_RADIUS, STORAGE_BEST, T, W } from '../config.js';
 import * as Mods from '../rules/modifiers.js';
 import { createRng } from '../rules/rng.js';
 import * as Waves from '../rules/waves.js';
@@ -49,7 +49,7 @@ export function resetWorld() {
   rng = createRng(Math.random() * 4294967296);
   buildMap();
   S = { score: 0, wave: 0, waveActive: false, breakT: FIRST_BREAK, queue: [], spawnT: 0, combo: 0, comboT: 0, bestCombo: 0, kills: 0, time: 0, boxT: BOX_FIRST, fieldT: 0, overT: 0, mods: {}, wallCount: 0, souffleUsed: false, pickT: 0 };
-  player = { x: 22 * T, y: 15 * T + 4, r: 9, hp: PLAYER_HP, fx: 0, fy: 1, cd: 0, weapon: 0, hurtT: 0, flash: 0, walk: 0, moving: false, muzzle: 0, lastHurt: -9, dead: false, roll: null, rollCd: 0, rollReady: 0, maxHp: PLAYER_HP, rollCharges: 1, invuln: 0 };
+  player = { x: 22 * T, y: 15 * T + 4, r: PLAYER_RADIUS, hp: PLAYER_HP, fx: 0, fy: 1, cd: 0, weapon: 0, hurtT: 0, flash: 0, walk: 0, moving: false, muzzle: 0, lastHurt: -9, dead: false, roll: null, rollCd: 0, rollReady: 0, maxHp: PLAYER_HP, rollCharges: 1, invuln: 0 };
   world.enemies = []; world.projs = []; world.grenades = []; world.rockets = []; world.parts = []; world.tracers = []; world.pops = []; world.booms = []; world.pickups = []; world.pending = []; world.bursts = []; world.fires = []; world.fallers = []; world.globs = []; world.puddles = [];
   blocks = new Map();
   unlocked = W.map(w => w.unlock === 0);

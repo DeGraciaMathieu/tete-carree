@@ -1,6 +1,6 @@
 // Déplacement du joueur et roulade (avec ses cartes : onde de choc, munitions, traînée de feu).
 import { sfx } from '../audio/sfx.js';
-import { ROLL, ROLLAMMO_SHARE, ROLLBOOM_DAMAGE, ROLLBOOM_DAMAGE_LVL, ROLLBOOM_RADIUS, ROLLBOOM_RADIUS_LVL, W } from '../config.js';
+import { FIRETRAIL_DAMAGE, FIRETRAIL_LIFE, FIRETRAIL_RADIUS, FIRETRAIL_TICK, ROLL, ROLLAMMO_SHARE, ROLLBOOM_DAMAGE, ROLLBOOM_DAMAGE_LVL, ROLLBOOM_RADIUS, ROLLBOOM_RADIUS_LVL, W } from '../config.js';
 import { hurtEnemy, shockwave } from './combat.js';
 import { pad, rumble } from '../input/gamepad.js';
 import { keys } from '../input/keyboard.js';
@@ -64,7 +64,7 @@ export function updateRoll(dt) {
     }
     if (mod('firetrail')) {
       r.fireT -= dt;
-      if (r.fireT <= 0) { r.fireT = .035; world.fires.push({ x: player.x, y: player.y, t: 2.4, max: 2.4, tick: 0 }); }
+      if (r.fireT <= 0) { r.fireT = .035; world.fires.push({ x: player.x, y: player.y, t: FIRETRAIL_LIFE, max: FIRETRAIL_LIFE, tick: 0 }); }
     }
   } else if (r.t >= ROLL.B) {
     if (!r.landed) { r.landed = true; dust(player.x, player.y, 6); sfx('land'); r.trail.length = 0; }
@@ -80,12 +80,12 @@ export function updateRoll(dt) {
 }
 export function updateFires(dt) {
   if (!world.fires.length) return;
-  const dmg = 8 * Math.max(1, mod('firetrail'));
+  const dmg = FIRETRAIL_DAMAGE * Math.max(1, mod('firetrail'));
   for (const f of world.fires) {
     f.t -= dt; f.tick -= dt;
     if (f.tick <= 0) {
-      f.tick = .2;
-      for (const e of world.enemies) if (!e.dead && (e.x - f.x) ** 2 + (e.y - f.y) ** 2 < 400) hurtEnemy(e, dmg, 0, 0, 0);
+      f.tick = FIRETRAIL_TICK;
+      for (const e of world.enemies) if (!e.dead && (e.x - f.x) ** 2 + (e.y - f.y) ** 2 < FIRETRAIL_RADIUS ** 2) hurtEnemy(e, dmg, 0, 0, 0);
     }
     if (Math.random() < dt * 5) addPart({ t: 'fire', x: f.x + rnd(6), y: f.y + rnd(4), z: 2, vx: rnd(10), vy: rnd(10), vz: 30 + Math.random() * 30, life: .4, max: .4, size: 3 + Math.random() * 2 });
   }

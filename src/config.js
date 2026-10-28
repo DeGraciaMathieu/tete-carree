@@ -20,6 +20,7 @@ export const W = [
 export const COMBO_T = 2.6;
 export const TENACE_BONUS = 1.4; // secondes de combo en plus par niveau de Combo tenace
 export const KILLS_PER_MULTIPLIER = 5;
+export const COMBO_HIT_DRAIN = .6; // secondes de combo perdues à chaque coup encaissé
 export const FRENZY_MULTIPLIER = 5; // Frénésie s'active à partir de ×5
 export const SOIF_MULTIPLIER = 3;   // Soif de sang soigne à partir de ×3
 
@@ -61,7 +62,10 @@ export const SECOND_WIND_INVULN = 1.6;
 export const CARDS_PER_PICK = 3;
 
 /* ---------- Joueur ---------- */
-export const PLAYER_HP = 100;
+export const PLAYER_HP = 100, PLAYER_RADIUS = 9;
+export const CONSTITUTION_HP = 25; // Constitution : vie max et soin par niveau
+export const EMPTY_SWAP_CD = .2;   // délai après un tir à vide (retour au pistolet)
+export const PLACE_FAIL_CD = .15;  // délai après une pose de construction impossible
 export const PLAYER_SPEED = 140;
 export const FRENZY_SPEED_MUL = 1.25;
 export const ACID_SPEED_MUL = 0.55;
@@ -73,13 +77,22 @@ export const ROLL = { A: .06, B: .36, D: .46, CD: .7, V: 430, R: 10.5 };
 // Roulade explosive : rayon et dégâts de l'onde de choc = base + niveau × par niveau
 export const ROLLBOOM_RADIUS = 50, ROLLBOOM_RADIUS_LVL = 22, ROLLBOOM_DAMAGE = 20, ROLLBOOM_DAMAGE_LVL = 20;
 export const ROLLAMMO_SHARE = .25; // Roulade tactique : part d'une recharge rendue par niveau
-export const SECOND_WIND_SHOCK_RADIUS = 110, SECOND_WIND_SHOCK_DAMAGE = 80;
+export const SECOND_WIND_SHOCK_RADIUS = 110, SECOND_WIND_SHOCK_DAMAGE = 80, SECOND_WIND_SHOCK_KNOCK = 340;
+// Traînée de feu : durée d'une flamme au sol, dégâts par niveau (au moins 1), cadence et rayon de brûlure
+export const FIRETRAIL_LIFE = 2.4, FIRETRAIL_DAMAGE = 8, FIRETRAIL_TICK = .2, FIRETRAIL_RADIUS = 20;
 
 /* ---------- Constructions ---------- */
 export const WALL_HP = 170, TURRET_WALL_HP = 240, BARREL_HP = 45;
 export const TURRET_EVERY = 3; // une barricade sur trois porte une tourelle
 export const TURRET_RANGE = 290, TURRET_CD = .45, TURRET_IDLE_CD = .15, TURRET_DAMAGE = 22, TURRET_KNOCK = 40;
 export const BARREL_RADIUS = 80, BARREL_DAMAGE = 120;
+export const BARREL_CHAIN_DELAY = .13; // un baril touché par une explosion saute après ce délai (s)
+export const TURRET_FIRST_CD = .3;
+// Explosions : dégâts et recul baissent jusqu'à -60 % au bord du rayon ; le joueur prend 26 % des dégâts
+// (moitié moins au bord) s'il est à moins de 90 % du rayon ; les constructions prennent 55 % des dégâts.
+export const BLAST_FALLOFF = .6, BLAST_KNOCK = 280;
+export const BLAST_SELF_RANGE = .9, BLAST_SELF_DAMAGE = .26, BLAST_SELF_FALLOFF = .5;
+export const BLAST_BLOCK_REACH = 12, BLAST_BLOCK_DAMAGE = .55;
 export const GROSBARIL_RADIUS_MUL = 1.4; // Gros barils : rayon × 1,4 par niveau
 
 /* ---------- Armes : tirs et explosifs ---------- */
@@ -90,8 +103,8 @@ export const SHOTS = {
   shotgun: { pellets: 8, spread: .3, speed: 220, speedRand: 30, damage: 24, knock: 95 },
   rail: { speed: 760, damage: 260, knock: 140 },
 };
-export const GRENADE_RADIUS = 88, GRENADE_DAMAGE = 150;
-export const ROCKET_RADIUS = 72, ROCKET_DAMAGE = 160;
+export const GRENADE_RADIUS = 88, GRENADE_DAMAGE = 150, GRENADE_SPEED = 250, GRENADE_FUSE = 1.15;
+export const ROCKET_RADIUS = 72, ROCKET_DAMAGE = 160, ROCKET_SPEED = 540, ROCKET_LIFE = 1.4;
 export const UNLOCK_REFILLS = 2; // une arme débloquée arrive avec deux recharges de munitions
 
 /* ---------- Ennemis ---------- */
@@ -110,6 +123,8 @@ export const ENEMY_STATS = {
   r: { r: 8, hp: 24, hpWave: 1.5, sp: 112, spCap: 22, spWave: 1.5, spRand: 8 },
   d: { r: 10, hp: 140, hpWave: 12, sp: 62, spCap: 22, spWave: 1.6, spRand: 6, fire: 1.6, fireRand: 2 },
 };
+// Marges de contact ajoutées aux rayons (px)
+export const MELEE_REACH = 6, BLOATER_TRIGGER_REACH = 14, FIREBALL_HIT_REACH = 6, ROCKET_HIT_REACH = 6;
 export const ENEMY_FIRST_ATTACK = .6;                          // délai avant le premier coup (s)
 export const ENEMY_MELEE_DAMAGE = { z: 8, r: 5, s: 6, a: 12, d: 14 };
 export const ENEMY_ATTACK_CD = { z: .9, r: .55, s: .9, a: 1.1, d: .9 };
@@ -160,6 +175,7 @@ export const WAVE_UNITS = {
 export const PACK_BASE = 3, PACK_RAND = 3, PACK_WAVES_PER_RUNNER = 4, PACK_WAVE_MAX = 3;
 // Apparitions : deux par deux après la vague 6, délai qui raccourcit à chaque vague.
 export const SPAWN_DOUBLE_AFTER = 6, SPAWN_BURST = 2;
+export const WAVE_FIRST_SPAWN = .4; // délai avant le premier ennemi d'une vague (s)
 export const SPAWN_GAP_START = .85, SPAWN_GAP_STEP = .05, SPAWN_GAP_MIN = .16;
 
 /* ---------- Caisses de ravitaillement ---------- */

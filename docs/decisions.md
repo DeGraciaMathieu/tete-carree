@@ -98,6 +98,8 @@ Ouvrir `index.html` par double-clic ne fonctionne plus (ESM natif non servi en `
   ainsi que les constantes internes d'algorithmes (coût diagonal 1,414 et décalage 1000 des zones
   coupées dans `pathfield.js`).
 - Les textes des cartes (`MODS[].desc`) gardent leurs nombres en clair : ce sont des libellés.
+- Le plan de l'arène (murs, caisses, crevasses, portes dans `buildMap`) et la position de départ du
+  joueur restent dans `state/arena.js` et `state/world.js` : ce sont des données de niveau, pas des réglages.
 
 ## Vérification de non-régression
 

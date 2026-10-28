@@ -1,6 +1,6 @@
 // Pas de simulation : fait avancer la partie de `dt` secondes.
 import { sfx } from '../audio/sfx.js';
-import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, ACID_TICK_RESET, AIMANT_RANGE, AIMANT_SPEED, AMMO_NO_WEAPON_BONUS, AMMO_REFILL_WEAPONS, ARMOR_SHOVE, BARBELES_DAMAGE, BLOATER_FUSE, BLOATER_FUSE_SPEED, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_MIN_DIST, BOX_PERIOD_MIN, BOX_PERIOD_RAND, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MH, MW, PICKUP_RADIUS, PICK_DELAY, PLAYER_SPEED, REGEN_DELAY, REGEN_RATE, ROCKET_DAMAGE, ROCKET_RADIUS, ROLL, SPITTER_BACKOFF, SPITTER_HOLD, SPITTER_HOLD_SPEED, SPITTER_MIN_RANGE, SPITTER_SIGHT, SPITTER_TOO_CLOSE, SPITTER_WINDUP, T, W, WAVE_BONUS, WAVE_BREAK } from '../config.js';
+import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, ACID_TICK_RESET, AIMANT_RANGE, AIMANT_SPEED, AMMO_NO_WEAPON_BONUS, AMMO_REFILL_WEAPONS, ARMOR_SHOVE, BARBELES_DAMAGE, BLOATER_FUSE, BLOATER_FUSE_SPEED, BLOATER_TRIGGER_REACH, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_MIN_DIST, BOX_PERIOD_MIN, BOX_PERIOD_RAND, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_HIT_REACH, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MELEE_REACH, MH, MW, PICKUP_RADIUS, PICK_DELAY, PLAYER_SPEED, REGEN_DELAY, REGEN_RATE, ROCKET_DAMAGE, ROCKET_HIT_REACH, ROCKET_RADIUS, ROLL, SPITTER_BACKOFF, SPITTER_HOLD, SPITTER_HOLD_SPEED, SPITTER_MIN_RANGE, SPITTER_SIGHT, SPITTER_TOO_CLOSE, SPITTER_WINDUP, T, W, WAVE_BONUS, WAVE_BREAK } from '../config.js';
 import { explosion, hurtEnemy, hurtPlayer, killEnemy, toxicBurst } from '../game/combat.js';
 import { spawnEnemy, spit, startWave, updateGlobs } from '../game/enemies.js';
 import { gameOver, openPick } from '../game/flow.js';
@@ -150,13 +150,13 @@ export function update(dt) {
       else if (e.spitCd <= 0 && e.see && dp > SPITTER_MIN_RANGE) { e.wind = SPITTER_WINDUP; sfx('gurgle', 150); }
     }
     if (e.type === 'b') {
-      if (e.fuse === undefined && !player.dead && playing && dp < e.r + player.r + 14 && walkLine(e.x, e.y, player.x, player.y)) { e.fuse = BLOATER_FUSE; sfx('fuse'); }
+      if (e.fuse === undefined && !player.dead && playing && dp < e.r + player.r + BLOATER_TRIGGER_REACH && walkLine(e.x, e.y, player.x, player.y)) { e.fuse = BLOATER_FUSE; sfx('fuse'); }
       if (e.fuse !== undefined) {
         e.fuse -= dt;
         if (e.fuse <= 0) { e.dead = true; gibs(e.x, e.y, 8, ['#c9b86a', '#8fd14f', '#7a4a6a']); world.bursts.push({ x: e.x, y: e.y, t: 0 }); continue; }
       }
       if (playing && Math.random() < dt * .15) sfx('gloop', 400);
-    } else if (!player.dead && dp < e.r + player.r + 6 && e.atk <= 0 && playing) {
+    } else if (!player.dead && dp < e.r + player.r + MELEE_REACH && e.atk <= 0 && playing) {
       hurtPlayer(ENEMY_MELEE_DAMAGE[e.type]); e.atk = ENEMY_ATTACK_CD[e.type];
       if (e.type === 'a' && !player.roll) { moveCircle(player, dxp / dp * ARMOR_SHOVE, 0); moveCircle(player, 0, dyp / dp * ARMOR_SHOVE); sfx('clang'); }
       e.vx += dxp / dp * 60; e.vy += dyp / dp * 60;
@@ -207,7 +207,7 @@ export function update(dt) {
     if (Math.random() < .6) addPart({ t: 'fire', x: p.x, y: p.y, z: 14, vx: rnd(20), vy: rnd(20), vz: 20, life: .25, max: .25, size: 4 });
     const tx = Math.floor(p.x / T), ty = Math.floor(p.y / T), s = shotTile(tx, ty);
     if (s) { if (s === 2) damageBlock(blocks.get(ty * MW + tx), FIREBALL_BLOCK_DAMAGE); sparks(p.x, p.y, 5, '#ff8a3a'); p.life = 0; continue; }
-    if (!player.dead && Math.hypot(p.x - player.x, p.y - player.y) < player.r + 6) { hurtPlayer(FIREBALL_DAMAGE); sparks(p.x, p.y, 6, '#ff8a3a'); p.life = 0; }
+    if (!player.dead && Math.hypot(p.x - player.x, p.y - player.y) < player.r + FIREBALL_HIT_REACH) { hurtPlayer(FIREBALL_DAMAGE); sparks(p.x, p.y, 6, '#ff8a3a'); p.life = 0; }
   }
   world.projs = world.projs.filter(p => p.life > 0);
 
@@ -229,7 +229,7 @@ export function update(dt) {
     const nx = r.x + r.vx * dt, ny = r.y + r.vy * dt;
     addPart({ t: 'smoke', x: r.x, y: r.y, z: 14, vx: rnd(15), vy: rnd(15), vz: 8, life: .5, max: .5, size: 4, color: 'rgba(200,196,188,' });
     let hit = shotTile(Math.floor(nx / T), Math.floor(ny / T)) !== 0;
-    if (!hit) for (const e of world.enemies) if (Math.hypot(e.x - nx, e.y - ny) < e.r + 6) { hit = true; break; }
+    if (!hit) for (const e of world.enemies) if (Math.hypot(e.x - nx, e.y - ny) < e.r + ROCKET_HIT_REACH) { hit = true; break; }
     if (hit || r.life <= 0) {
       const tx = Math.floor(nx / T), ty = Math.floor(ny / T);
       const b = blocks.get(ty * MW + tx); if (b && b.kind === 'barrel') explodeBarrel(b);

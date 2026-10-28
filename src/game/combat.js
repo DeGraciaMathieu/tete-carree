@@ -1,6 +1,6 @@
 // Dégâts infligés et subis, mort des ennemis, explosions et ondes de choc.
 import { sfx } from '../audio/sfx.js';
-import { BLOATER_DAMAGE, BLOATER_RADIUS, CHAIR_RADIUS_MUL, SECOND_WIND_SHOCK_DAMAGE, SECOND_WIND_SHOCK_RADIUS, T } from '../config.js';
+import { BARREL_CHAIN_DELAY, BLAST_BLOCK_REACH, BLAST_FALLOFF, BLAST_KNOCK, BLAST_SELF_DAMAGE, BLAST_SELF_FALLOFF, BLAST_SELF_RANGE, BLOATER_DAMAGE, BLOATER_RADIUS, CHAIR_RADIUS_MUL, COMBO_HIT_DRAIN, SECOND_WIND_SHOCK_DAMAGE, SECOND_WIND_SHOCK_KNOCK, SECOND_WIND_SHOCK_RADIUS, T } from '../config.js';
 import { addScore } from './score.js';
 import { damageBlock } from './weapons.js';
 import { rumble } from '../input/gamepad.js';
@@ -60,7 +60,7 @@ export function hurtPlayer(dmg, soft) {
   if (player.dead || world.state !== 'play') return;
   if (playerProtected(player)) return;
   player.hp -= dmg; player.hurtT = .35; player.flash = .08; player.lastHurt = S.time;
-  if (!soft) { world.shake = Math.min(16, world.shake + 4); S.comboT = Math.max(0, S.comboT - .6); }
+  if (!soft) { world.shake = Math.min(16, world.shake + 4); S.comboT = Math.max(0, S.comboT - COMBO_HIT_DRAIN); }
   blood(player.x, player.y, 4);
   sfx('hurt', 120);
   if (soft) rumble(0, .15, 50); else rumble(.6, .4, 140);
@@ -81,7 +81,7 @@ export function shockwave(x, y, R, dmg) {
   for (const e of world.enemies) {
     if (e.dead) continue;
     const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy) || 1;
-    if (d < R + e.r) hurtEnemy(e, dmg, dx / d, dy / d, 340, 'blast');
+    if (d < R + e.r) hurtEnemy(e, dmg, dx / d, dy / d, SECOND_WIND_SHOCK_KNOCK, 'blast');
   }
   world.booms.push({ x, y, R, t: 0, max: .38, ring: true });
   dust(x, y, 8); world.shake = Math.min(16, world.shake + 4); sfx('shock', 60);
@@ -91,15 +91,15 @@ export function explosion(x, y, R, dmg) {
   for (const e of world.enemies) {
     if (e.dead) continue;
     const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy) || 1;
-    if (d < R + e.r) { const f = 1 - Math.max(0, d - e.r) / R * .6; hurtEnemy(e, dmg * f, dx / d, dy / d, 280 * f, 'blast'); }
+    if (d < R + e.r) { const f = 1 - Math.max(0, d - e.r) / R * BLAST_FALLOFF; hurtEnemy(e, dmg * f, dx / d, dy / d, BLAST_KNOCK * f, 'blast'); }
   }
   const pd = Math.hypot(player.x - x, player.y - y);
-  if (pd < R * .9) hurtPlayer(dmg * .26 * (1 - pd / R * .5));
+  if (pd < R * BLAST_SELF_RANGE) hurtPlayer(dmg * BLAST_SELF_DAMAGE * (1 - pd / R * BLAST_SELF_FALLOFF));
   for (const b of blocks.values()) {
     const bx = b.tx * T + T / 2, by = b.ty * T + T / 2, d = Math.hypot(bx - x, by - y);
-    if (d < R + 12 && d > 1) {
-      if (b.kind === 'barrel') { if (!b.pend) { b.pend = true; world.pending.push({ b, t: .13 }); } }
-      else damageBlock(b, dmg * .55);
+    if (d < R + BLAST_BLOCK_REACH && d > 1) {
+      if (b.kind === 'barrel') { if (!b.pend) { b.pend = true; world.pending.push({ b, t: BARREL_CHAIN_DELAY }); } }
+      else damageBlock(b, dmg * BLAST_BLOCK_DAMAGE);
     }
   }
   world.booms.push({ x, y, R, t: 0, max: .5 });

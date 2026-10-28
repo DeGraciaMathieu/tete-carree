@@ -1,6 +1,6 @@
 // Tirs, armes, constructions posées (barricades, barils) et tourelles.
 import { sfx } from '../audio/sfx.js';
-import { BARREL_DAMAGE, BARREL_HP, BARREL_RADIUS, GROSBARIL_RADIUS_MUL, MH, MW, SHOTS, T, TURRET_CD, TURRET_DAMAGE, TURRET_EVERY, TURRET_IDLE_CD, TURRET_KNOCK, TURRET_RANGE, TURRET_WALL_HP, W, WALL_HP } from '../config.js';
+import { BARREL_DAMAGE, BARREL_HP, BARREL_RADIUS, EMPTY_SWAP_CD, GRENADE_FUSE, GRENADE_SPEED, GROSBARIL_RADIUS_MUL, MH, MW, PLACE_FAIL_CD, ROCKET_LIFE, ROCKET_SPEED, SHOTS, T, TURRET_CD, TURRET_DAMAGE, TURRET_EVERY, TURRET_FIRST_CD, TURRET_IDLE_CD, TURRET_KNOCK, TURRET_RANGE, TURRET_WALL_HP, W, WALL_HP } from '../config.js';
 import { explosion, hurtEnemy } from './combat.js';
 import { rumble } from '../input/gamepad.js';
 import { casing, dust, gibs, sparks } from '../render/effects.js';
@@ -59,7 +59,7 @@ function placeBlock(kind) {
   const blk = { kind, i, tx, ty, hp, max: hp, flash: 0, drop: 1 };
   if (kind === 'wall') {
     S.wallCount++;
-    if (mod('tourelle') && S.wallCount % TURRET_EVERY === 0) { blk.turret = { cd: .3, ang: Math.atan2(player.fy, player.fx), flash: 0 }; blk.hp = blk.max = TURRET_WALL_HP; }
+    if (mod('tourelle') && S.wallCount % TURRET_EVERY === 0) { blk.turret = { cd: TURRET_FIRST_CD, ang: Math.atan2(player.fy, player.fx), flash: 0 }; blk.hp = blk.max = TURRET_WALL_HP; }
   }
   blocks.set(i, blk);
   world.fieldDirty = true;
@@ -83,7 +83,7 @@ export function explodeBarrel(b) {
 }
 export function fireWeapon() {
   const wi = player.weapon, w = W[wi];
-  if (ammo[wi] <= 0) { sfx('click'); player.weapon = 0; player.cd = .2; return; }
+  if (ammo[wi] <= 0) { sfx('click'); player.weapon = 0; player.cd = EMPTY_SWAP_CD; return; }
   const ang = Math.atan2(player.fy, player.fx);
   let ok = true;
   switch (w.id) {
@@ -100,17 +100,17 @@ export function fireWeapon() {
     case 'wall': ok = placeBlock('wall'); if (!ok) sfx('click'); break;
     case 'barrel': ok = placeBlock('barrel'); if (!ok) sfx('click'); break;
     case 'grenade':
-      world.grenades.push({ x: player.x + player.fx * 10, y: player.y + player.fy * 10, z: 18, vx: player.fx * 250, vy: player.fy * 250, vz: 170, t: 1.15 });
+      world.grenades.push({ x: player.x + player.fx * 10, y: player.y + player.fy * 10, z: 18, vx: player.fx * GRENADE_SPEED, vy: player.fy * GRENADE_SPEED, vz: 170, t: GRENADE_FUSE });
       sfx('toss'); break;
     case 'rocket':
-      world.rockets.push({ x: player.x + player.fx * 16, y: player.y + player.fy * 16, vx: player.fx * 540, vy: player.fy * 540, life: 1.4 });
+      world.rockets.push({ x: player.x + player.fx * 16, y: player.y + player.fy * 16, vx: player.fx * ROCKET_SPEED, vy: player.fy * ROCKET_SPEED, life: ROCKET_LIFE });
       player.muzzle = .06; world.shake = Math.min(16, world.shake + 3); sfx('launch'); rumble(.25, .2, 90); break;
     case 'rail':
       shoot(ang, SHOTS.rail.speed, SHOTS.rail.damage, Infinity, SHOTS.rail.knock, { t: .35, w: 4, c: '120,230,255' });
       player.muzzle = .1; world.shake = Math.min(16, world.shake + 7); sfx('rail'); rumble(.45, .35, 120); break;
   }
   if (ok && ammo[wi] !== Infinity) ammo[wi]--;
-  player.cd = ok ? w.cd * fireMul() : .15;
+  player.cd = ok ? w.cd * fireMul() : PLACE_FAIL_CD;
 }
 export function selectWeapon(i) {
   if (i < 0 || i >= W.length || !unlocked[i] || ammo[i] <= 0 || player.weapon === i) return;
