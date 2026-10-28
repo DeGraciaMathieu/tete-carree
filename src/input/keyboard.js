@@ -22,8 +22,8 @@ addEventListener('keydown', e => {
   if (e.ctrlKey) e.preventDefault();
   if ((e.code === 'Space' || e.code === 'ControlLeft' || e.code === 'ControlRight') && !e.repeat) tryRoll();
   if (e.code === 'Enter' && !S.waveActive && S.wave > 0) S.breakT = 0;
-  if (/^Digit[1-8]$/.test(e.code)) selectWeapon(+e.code.slice(5) - 1);
-  if (/^Numpad[1-8]$/.test(e.code)) selectWeapon(+e.code.slice(6) - 1);
+  if (/^Digit[1-9]$/.test(e.code)) selectWeapon(+e.code.slice(5) - 1);
+  if (/^Numpad[1-9]$/.test(e.code)) selectWeapon(+e.code.slice(6) - 1);
   if (e.code === 'KeyE') cycleWeapon(1);
   if (e.code === 'KeyQ') cycleWeapon(-1);
 });

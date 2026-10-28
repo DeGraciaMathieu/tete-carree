@@ -376,12 +376,13 @@ function drawPlayerBody() {
 }
 
 /* Joueur : survivant en veste bleue, gilet tactique, sac à dos et bandana rouge */
-export const GUNS = { pistol: 8, uzi: 12, shotgun: 18, wall: 0, barrel: 0, grenade: 4, rocket: 16, rail: 18 };
+export const GUNS = { pistol: 8, uzi: 12, rifle: 17, shotgun: 18, wall: 0, barrel: 0, grenade: 4, rocket: 16, rail: 18 };
 function drawGun(id, C) {
   const R = (c, x, y, w, h) => { ctx.fillStyle = C(c); ctx.fillRect(x, y, w, h); };
   switch (id) {
     case 'pistol': R('#1c1e21', -1, -2, 9, 3.5); R('#3a3f45', 0, -2, 7, 1); R('#1c1e21', 0, 1, 3, 3.5); break;
     case 'uzi': R('#23262a', -2, -2, 11, 4); R('#3a3f45', -2, -2, 11, 1); R('#17191b', 2, 1.5, 3, 5); R('#23262a', 9, -1, 3, 2); break;
+    case 'rifle': R('#5a4632', -6, -1.5, 6, 3.5); R('#23262a', 0, -2, 11, 4); R('#3a3f45', 0, -2, 11, 1); R('#17191b', 3, 1.5, 2.5, 5); R('#23262a', 11, -1, 6, 2); break;
     case 'shotgun': R('#6b4a2e', -7, -1.5, 7, 3.5); R('#23262a', 0, -2, 8, 3.5); R('#3a3e43', 8, -1.5, 10, 2); R('#7d5734', 9, .5, 5, 2); break;
     case 'rocket': R('#4f5a3a', -7, -3, 23, 6); R('#64714a', -7, -3, 23, 1.5); R('#2f3524', -8, -3.5, 2, 7); R('#2f3524', 14, -3.5, 2, 7); R('#1c1e21', 2, -5.5, 3, 2.5); R('#1c1e21', 1, 3, 2, 3); break;
     case 'rail': R('#2b3038', -4, -2.5, 19, 5); R('#3d444f', -4, -2.5, 19, 1.2); for (const x of [3, 7, 11]) R('#59d4ff', x, -3, 2, 6); R('#9be8ff', 15, -1.5, 3, 3); break;

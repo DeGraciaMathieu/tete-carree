@@ -8,6 +8,7 @@ export const ZOOM_MIN = 0.72, ZOOM_MAX = 1.7;
 export const W = [
   { id: 'pistol',  name: 'Pistolet',  short: 'Pistolet',  unlock: 0,     cd: .26, refill: 0 },
   { id: 'uzi',     name: 'Uzi',       short: 'Uzi',       unlock: 1000,  cd: .07, refill: 120 },
+  { id: 'rifle',   name: 'Fusil d\'assaut', short: 'Assaut', unlock: 2000, cd: .14, refill: 60 },
   { id: 'shotgun', name: 'Fusil à pompe', short: 'Pompe', unlock: 3500,  cd: .62, refill: 22 },
   { id: 'wall',    name: 'Barricade', short: 'Barricade', unlock: 7000,  cd: .22, refill: 6 },
   { id: 'barrel',  name: 'Baril',     short: 'Baril',     unlock: 11000, cd: .22, refill: 5 },
@@ -28,7 +29,7 @@ export const SOIF_MULTIPLIER = 3;   // Soif de sang soigne à partir de ×3
 export const RAR = { c: { name: 'Commune', w: 55 }, r: { name: 'Rare', w: 28 }, l: { name: 'Légendaire', w: 9 }, p: { name: 'Pacte', w: 12 } };
 const pct = x => Math.round(x * 100) + ' %';
 export const MODS = [
-  { id: 'perce', rar: 'c', max: 3, name: 'Balles perforantes', short: 'Perforantes', desc: n => `Les balles du pistolet et de l'Uzi traversent ${n} ennemi${n > 1 ? 's' : ''} de plus.` },
+  { id: 'perce', rar: 'c', max: 3, name: 'Balles perforantes', short: 'Perforantes', desc: n => `Les balles du pistolet, de l'Uzi et du fusil d'assaut traversent ${n} ennemi${n > 1 ? 's' : ''} de plus.` },
   { id: 'ricochet', rar: 'r', max: 2, name: 'Ricochet', short: 'Ricochet', desc: n => `Balles et plombs rebondissent ${n > 1 ? n + ' fois' : 'une fois'} sur les murs.` },
   { id: 'cadence', rar: 'c', max: 3, name: 'Gâchette nerveuse', short: 'Cadence', desc: n => `Toutes les armes tirent plus vite : +${pct(Math.pow(1.25, n) - 1)} de cadence au total.` },
   { id: 'calibre', rar: 'c', max: 2, name: 'Gros calibre', short: 'Gros calibre', desc: n => `Le fusil à pompe repousse les ennemis ${n > 1 ? 'trois' : 'deux'} fois plus loin.` },
@@ -112,6 +113,7 @@ export const GROSBARIL_RADIUS_MUL = 1.4; // Gros barils : rayon × 1,4 par nivea
 export const SHOTS = {
   pistol: { spread: .03, speed: 420, damage: 34, knock: 70 },
   uzi: { spread: .09, speed: 380, damage: 20, knock: 34 },
+  rifle: { spread: .035, speed: 540, damage: 34, knock: 55 },
   shotgun: { pellets: 8, spread: .3, speed: 220, speedRand: 30, damage: 24, knock: 95 },
   rail: { speed: 760, damage: 260, knock: 140 },
 };

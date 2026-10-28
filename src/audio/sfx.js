@@ -36,6 +36,7 @@ export function sfx(name, gap = 0) {
 const SFX = {
   pistol() { nz(.09, 2200, .8, .4); tn(230, 70, .07, .12); },
   uzi() { nz(.05, 2700, .9, .26); tn(280, 90, .04, .06); },
+  rifle() { nz(.08, 2000, .8, .36); tn(200, 60, .06, .1); },
   shotgun() { nz(.24, 900, .6, .75, 'lowpass'); tn(150, 40, .16, .25); },
   rail() { tn(2200, 120, .4, .14, 'sawtooth'); nz(.25, 4200, 2, .2, 'highpass'); },
   boom() { nz(.9, 520, .5, 1, 'lowpass'); tn(95, 25, .6, .4, 'sine'); },

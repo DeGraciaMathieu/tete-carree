@@ -98,6 +98,9 @@ export function fireWeapon() {
     case 'uzi':
       shoot(ang + jitter(SHOTS.uzi.spread), SHOTS.uzi.speed, SHOTS.uzi.damage, 1 + mod('perce'), SHOTS.uzi.knock, { t: .05, w: 1.3, c: '255,226,150' }, mod('ricochet'));
       player.muzzle = .04; world.shake = Math.min(16, world.shake + .5); sfx('uzi'); casing(); rumble(0, .12, 30); break;
+    case 'rifle':
+      shoot(ang + jitter(SHOTS.rifle.spread), SHOTS.rifle.speed, SHOTS.rifle.damage, 1 + mod('perce'), SHOTS.rifle.knock, { t: .06, w: 1.5, c: '255,232,160' }, mod('ricochet'));
+      player.muzzle = .05; world.shake = Math.min(16, world.shake + .9); sfx('rifle'); casing(); rumble(0, .16, 40); break;
     case 'shotgun':
       for (let k = 0; k < SHOTS.shotgun.pellets; k++) shoot(ang + jitter(SHOTS.shotgun.spread), SHOTS.shotgun.speed + rng() * SHOTS.shotgun.speedRand, SHOTS.shotgun.damage, 1, SHOTS.shotgun.knock * (1 + mod('calibre')), { t: .08, w: 1.2, c: '255,214,140' }, mod('ricochet'));
       player.muzzle = .08; world.shake = Math.min(16, world.shake + 5); sfx('shotgun'); rumble(.35, .25, 90);

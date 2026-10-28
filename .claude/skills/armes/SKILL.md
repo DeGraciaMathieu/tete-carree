@@ -8,13 +8,14 @@ auto_invoke: true
 
 ## Armes
 
-L'arsenal est le tableau `W` de `src/config.js`. **L'index d'une arme est sa touche** (1 à 8) et
+L'arsenal est le tableau `W` de `src/config.js`. **L'index d'une arme est sa touche** (1 à 9) et
 son ordre d'affichage dans le HUD : ne réordonne pas `W` sans le vouloir.
 
 | `id` | Nom | Type | Implémentation (`fireWeapon`, `src/game/weapons.js`) |
 | --- | --- | --- | --- |
 | `pistol` | Pistolet | tir instantané, munitions infinies | `shoot(…)` avec `SHOTS.pistol`, perforation `1 + mod('perce')`, ricochets `mod('ricochet')` |
 | `uzi` | Uzi | tir instantané rapide | `shoot(…)` avec `SHOTS.uzi` |
+| `rifle` | Fusil d'assaut | tir instantané précis, longue portée | `shoot(…)` avec `SHOTS.rifle`, Perforantes et Ricochet comme l'Uzi |
 | `shotgun` | Fusil à pompe | `pellets` plombs | boucle de `shoot(…)` avec `SHOTS.shotgun`, recul du joueur, Gros calibre sur le recul infligé |
 | `wall` | Barricade | construction | `placeBlock('wall')` ; une sur `TURRET_EVERY` porte une tourelle avec la carte Tourelle |
 | `barrel` | Baril | construction explosive | `placeBlock('barrel')` ; explose par `explodeBarrel` |
@@ -40,13 +41,13 @@ Champs d'une arme dans `W` : `id`, `name` (bannières, HUD « Prochaine »), `sh
 | Tourelle | `updateTurret(b, dt)` (`TURRET_*`), appelée depuis `update` (section « blocs ») |
 | Déblocage au score | `addScore` (`game/score.js`) → `weaponsToUnlock`, `ammoOnUnlock` (`rules/unlock.js`, `UNLOCK_REFILLS`) |
 | Caisse de munitions | section « ramassage » de `update` : `AMMO_REFILL_WEAPONS` armes tirées au sort, `+W[i].refill` |
-| Changement d'arme | `selectWeapon(i)`, `cycleWeapon(dir)` ; clavier `Digit1`–`Digit8`, molette, `E`/`Q` ; manette LB/RB ; tactile ARME ; clic sur une case (`render/hud.js`) |
+| Changement d'arme | `selectWeapon(i)`, `cycleWeapon(dir)` ; clavier `Digit1`–`Digit9`, molette, `E`/`Q` ; manette LB/RB ; tactile ARME ; clic sur une case (`render/hud.js`) |
 | Aspect | `GUNS` (longueur du canon) et `drawGun(id)` dans `render/sprites.js` ; sons `SFX` de `audio/sfx.js` |
 
 ## Ajouter une arme
 
 1. Ajoute l'entrée dans `W` (`src/config.js`) à la place voulue — son index devient sa touche ; si
-   tu dépasses 8 armes, la regex `Digit[1-8]` de `src/input/keyboard.js` et l'aide de l'écran titre
+   tu dépasses 9 armes, la regex `Digit[1-9]` de `src/input/keyboard.js` et l'aide de l'écran titre
    doivent suivre. Ses réglages de tir vont dans `SHOTS` ou dans des constantes dédiées.
 2. Ajoute son `case` dans `fireWeapon` (`src/game/weapons.js`) : tir via `shoot`, projectile dans une
    collection de `world`, ou pose via `placeBlock`. Garde la décrémentation des munitions commune.
@@ -59,7 +60,7 @@ Champs d'une arme dans `W` : `id`, `name` (bannières, HUD « Prochaine »), `sh
 5. Son : une entrée dans `SFX` (`src/audio/sfx.js`).
 6. Tests : seuil de déblocage dans `tests/unlock.test.js` ; toute règle de dégâts nouvelle dans
    `src/rules/damage.js` + `tests/damage.test.js`.
-7. Si une carte cite l'arme (Balles perforantes : « pistolet et Uzi »), mets son texte à jour.
+7. Si une carte cite l'arme (Balles perforantes : « pistolet, Uzi et fusil d'assaut »), mets son texte à jour.
 
 ## Modifier l'équilibrage
 
