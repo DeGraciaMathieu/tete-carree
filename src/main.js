@@ -11,6 +11,7 @@ import * as Mods from './rules/modifiers.js';
 import { weaponsToUnlock, ammoOnUnlock } from './rules/unlock.js';
 import * as Grid from './rules/map.js';
 import * as Field from './rules/pathfield.js';
+import { rollCards } from './rules/cards.js';
 
 (() => {
 'use strict';
@@ -693,18 +694,8 @@ function renderMods() {
   $('pauseMods').innerHTML = html || `<span class="none">Aucune carte pour l'instant</span>`;
 }
 let pickChoices = [];
-function rollCards() {
-  const pool = MODS.filter(m => mod(m.id) < m.max), out = [];
-  while (out.length < 3 && pool.length) {
-    const tot = pool.reduce((a, m) => a + RAR[m.rar].w, 0);
-    let x = rng() * tot, k = 0;
-    for (; k < pool.length - 1; k++) { x -= RAR[pool[k].rar].w; if (x <= 0) break; }
-    out.push(pool.splice(k, 1)[0]);
-  }
-  return out;
-}
 function openPick() {
-  pickChoices = rollCards();
+  pickChoices = rollCards(S.mods, rng);
   if (!pickChoices.length) return;
   state = 'pick'; mouseFire = false;
   $('pickWave').textContent = `Vague ${S.wave} terminée`;
