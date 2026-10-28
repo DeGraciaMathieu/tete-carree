@@ -56,6 +56,6 @@ export function resetWorld() {
   ammo = W.map(w => w.unlock === 0 ? Infinity : 0);
   cam = { x: player.x, y: player.y }; world.shake = 0; world.fieldDirty = true;
 }
-export function multiplier() { return Mods.multiplier(S.combo); }
+export function multiplier() { return Mods.multiplier(S.combo, S.mods); }
 
 export function queueCount() { return Waves.queueCount(S.queue); }

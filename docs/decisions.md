@@ -190,3 +190,6 @@ Decisions the code does not settle and that were not made. Never resolved by gue
   construire à partir des constantes d'effet (`TENACE_BONUS`, `BARBELES_DAMAGE`, `CONSTITUTION_HP`…) :
   faut-il les dériver des constantes ? En attendant, le hook Stop de synchronisation de la
   documentation (`.claude/settings.json`) surveille leur cohérence.
+- Combo tenace annonce « le combo tient X s au lieu de Y s » sans tenir compte de Fièvre, qui divise
+  cette fenêtre par deux : `desc(n)` ne reçoit que le niveau, pas les autres cartes prises. Faut-il
+  passer `S.mods` aux textes des cartes, ou rester sur une formulation relative (« +1,4 s ») ?

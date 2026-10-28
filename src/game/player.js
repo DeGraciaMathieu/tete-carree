@@ -1,12 +1,12 @@
-// Déplacement du joueur et roulade (avec ses cartes : onde de choc, munitions, traînée de feu).
+// Déplacement du joueur et roulade (avec ses cartes : onde de choc, munitions, traînée de feu, coup d'épaule).
 import { sfx } from '../audio/sfx.js';
-import { FIRETRAIL_DAMAGE, FIRETRAIL_LIFE, FIRETRAIL_RADIUS, FIRETRAIL_TICK, ROLL, ROLLBOOM_DAMAGE, ROLLBOOM_DAMAGE_LVL, ROLLBOOM_RADIUS, ROLLBOOM_RADIUS_LVL, W } from '../config.js';
+import { EPAULE_DAMAGE, EPAULE_REACH, FIRETRAIL_DAMAGE, FIRETRAIL_LIFE, FIRETRAIL_RADIUS, FIRETRAIL_TICK, ROLL, ROLLBOOM_DAMAGE, ROLLBOOM_DAMAGE_LVL, ROLLBOOM_RADIUS, ROLLBOOM_RADIUS_LVL, W } from '../config.js';
 import { hurtEnemy, shockwave } from './combat.js';
 import { pad, rumble } from '../input/gamepad.js';
 import { keys } from '../input/keyboard.js';
 import { stick } from '../input/touch.js';
 import { addPart, dust, pop } from '../render/effects.js';
-import { rollAmmo } from '../rules/modifiers.js';
+import { rollAmmo, shoveKnock } from '../rules/modifiers.js';
 import { circleTouchesVoid, moveCircle, unstick } from '../state/arena.js';
 import { S, ammo, mod, player, rollMax, world } from '../state/world.js';
 import { rnd } from '../util.js';
@@ -36,7 +36,7 @@ export function tryRoll() {
   if (l < .2) { mx = player.fx; my = player.fy; l = Math.hypot(mx, my) || 1; }
   const dx = mx / l, dy = my / l;
   const sgn = Math.abs(dx) > .2 ? Math.sign(dx) : (player.fx >= 0 ? 1 : -1);
-  player.roll = { t: 0, dx, dy, sgn, dist: 0, trail: [], trailT: 0, fireT: 0, landed: false, started: false, fly: rollClears(dx, dy) };
+  player.roll = { t: 0, dx, dy, sgn, dist: 0, trail: [], trailT: 0, fireT: 0, shoved: new Set(), landed: false, started: false, fly: rollClears(dx, dy) };
   player.rollCharges--;
   player.moving = false;
 }
@@ -45,6 +45,14 @@ function rollPerks() {
   if (lb) shockwave(player.x, player.y, ROLLBOOM_RADIUS + ROLLBOOM_RADIUS_LVL * lb, ROLLBOOM_DAMAGE + ROLLBOOM_DAMAGE_LVL * lb);
   const wi = player.weapon, w = W[wi], n = rollAmmo(S.mods, w.refill, ammo[wi]);
   if (n) { ammo[wi] += n; pop(player.x, player.y - 46, `+${n} ${w.short}`, '#f2c230'); }
+}
+// Coup d'épaule : chaque ennemi traversé est bousculé une fois par roulade, loin du joueur
+function shove(r, knock) {
+  for (const e of world.enemies) {
+    if (e.dead || r.shoved.has(e)) continue;
+    const dx = e.x - player.x, dy = e.y - player.y, d = Math.hypot(dx, dy) || 1;
+    if (d < player.r + e.r + EPAULE_REACH) { r.shoved.add(e); hurtEnemy(e, EPAULE_DAMAGE, dx / d, dy / d, knock, 'blast'); }
+  }
 }
 export function updateRoll(dt) {
   const r = player.roll;
@@ -60,6 +68,8 @@ export function updateRoll(dt) {
       r.trail.push({ x: player.x, y: player.y, h: Math.sin(q * Math.PI) * (r.fly ? 13 : 5) });
       if (r.trail.length > 5) r.trail.shift();
     }
+    const kn = shoveKnock(S.mods);
+    if (kn) shove(r, kn);
     if (mod('firetrail')) {
       r.fireT -= dt;
       if (r.fireT <= 0) { r.fireT = .035; world.fires.push({ x: player.x, y: player.y, t: FIRETRAIL_LIFE, max: FIRETRAIL_LIFE, tick: 0 }); }

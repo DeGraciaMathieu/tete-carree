@@ -6,7 +6,7 @@ import { releaseFire } from '../input/keyboard.js';
 import { paintFloor } from '../render/floor.js';
 import { banner, buildSlots, resetHud } from '../render/hud.js';
 import { rollCards } from '../rules/cards.js';
-import { S, mod, player, resetWorld, rng, rollMax, world } from '../state/world.js';
+import { S, comboTime, mod, player, resetWorld, rng, rollMax, world } from '../state/world.js';
 import { $, clamp, fmt } from '../util.js';
 
 export function newGame() {
@@ -60,6 +60,7 @@ export function choosePick(i) {
   S.mods[m.id] = mod(m.id) + 1;
   if (m.id === 'constitution') { player.maxHp += CONSTITUTION_HP; player.hp = Math.min(player.maxHp, player.hp + CONSTITUTION_HP); }
   if (m.id === 'double') player.rollCharges = Math.min(rollMax(), player.rollCharges + 1);
+  if (m.id === 'fievre') S.comboT = Math.min(S.comboT, comboTime());
   $('pickScreen').hidden = true; world.state = 'play'; sfx('unlock');
   banner(m.name, m.rar === 'p' ? 'Pacte scellé' : mod(m.id) > 1 ? `Niveau ${mod(m.id)}` : 'Carte obtenue');
 }

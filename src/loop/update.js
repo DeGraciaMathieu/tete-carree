@@ -6,7 +6,7 @@ import { spawnEnemy, spit, startWave, updateGlobs } from '../game/enemies.js';
 import { gameOver, openPick } from '../game/flow.js';
 import { moveInput, updateFires, updateRoll } from '../game/player.js';
 import { addScore } from '../game/score.js';
-import { damageBlock, explodeBarrel, fireWeapon, updateTurret } from '../game/weapons.js';
+import { damageBlock, explodeBarrel, fireWeapon, fragments, updateTurret } from '../game/weapons.js';
 import { pad } from '../input/gamepad.js';
 import { keys, mouseFire } from '../input/keyboard.js';
 import { aim } from '../input/touch.js';
@@ -14,6 +14,7 @@ import { VH, VW, zoom } from '../render/canvas.js';
 import { addPart, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood } from '../render/floor.js';
 import { banner } from '../render/hud.js';
+import { blastRadius, fragShards } from '../rules/modifiers.js';
 import * as Waves from '../rules/waves.js';
 import { computeField, dist, isVoid, los, moveCircle, nextStep, openT, passable, shotTile, unstick, walkLine } from '../state/arena.js';
 import { S, ammo, blocks, cam, frenzy, jitter, mod, player, rng, rollMax, unlocked, world } from '../state/world.js';
@@ -219,7 +220,10 @@ export function update(dt) {
     const nx = g.x + g.vx * dt; if (shotTile(Math.floor(nx / T), Math.floor(g.y / T))) g.vx *= -.5; else g.x = nx;
     const ny = g.y + g.vy * dt; if (shotTile(Math.floor(g.x / T), Math.floor(ny / T))) g.vy *= -.5; else g.y = ny;
     if (g.z === 0 && isVoid(g.x, g.y)) { g.t = 0; g.fell = true; sfx('toss'); }
-    if (g.t <= 0 && !g.fell) explosion(g.x, g.y, GRENADE_RADIUS, GRENADE_DAMAGE);
+    if (g.t <= 0 && !g.fell) {
+      explosion(g.x, g.y, blastRadius(S.mods, GRENADE_RADIUS), GRENADE_DAMAGE);
+      const n = fragShards(S.mods); if (n) fragments(g.x, g.y, n);
+    }
   }
   world.grenades = world.grenades.filter(g => g.t > 0);
 
@@ -233,7 +237,7 @@ export function update(dt) {
     if (hit || r.life <= 0) {
       const tx = Math.floor(nx / T), ty = Math.floor(ny / T);
       const b = blocks.get(ty * MW + tx); if (b && b.kind === 'barrel') explodeBarrel(b);
-      explosion(r.x, r.y, ROCKET_RADIUS, ROCKET_DAMAGE); r.life = 0; continue;
+      explosion(r.x, r.y, blastRadius(S.mods, ROCKET_RADIUS), ROCKET_DAMAGE); r.life = 0; continue;
     }
     r.x = nx; r.y = ny;
   }

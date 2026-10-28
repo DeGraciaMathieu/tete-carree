@@ -48,6 +48,10 @@ export const MODS = [
   { id: 'prime', rar: 'p', max: 2, name: 'Prime de risque', short: 'Prime de risque', plus: n => `+${pct(Math.pow(PRIME_POINTS_MUL, n) - 1)} de points sur chaque kill${n > 1 ? ' au total' : ''}`, minus: n => `Les meutes de coureurs comptent ${PRIME_PACK_BONUS * n} coureurs de plus` },
   { id: 'chair', rar: 'p', max: 2, name: 'Chair à canon', short: 'Chair à canon', plus: n => `Les Gonflés rapportent ${{ 2: 'deux', 4: 'quatre' }[Math.pow(CHAIR_POINTS_MUL, n)] || Math.pow(CHAIR_POINTS_MUL, n)} fois plus de points`, minus: n => `Leur explosion est ${pct(Math.pow(CHAIR_RADIUS_MUL, n) - 1)} plus large` },
   { id: 'sansarmure', rar: 'p', max: 1, name: 'Sans armure', short: 'Sans armure', plus: () => `Cadence de tir doublée`, minus: () => `Plus aucune régénération de santé` },
+  { id: 'epaule', rar: 'r', max: 2, name: "Coup d'épaule", short: "Coup d'épaule", desc: n => n > 1 ? `La roulade projette les ennemis traversés encore plus loin.` : `La roulade bouscule les ennemis traversés : poussés dans une crevasse, ils y tombent.` },
+  { id: 'frag', rar: 'r', max: 2, name: 'Fragmentation', short: 'Fragmentation', desc: n => `Chaque grenade projette ${FRAG_SHARDS * n} éclats en explosant.` },
+  { id: 'artificier', rar: 'c', max: 2, name: 'Artificier', short: 'Artificier', desc: n => `Rayon d'explosion des grenades et des roquettes +${pct(Math.pow(ARTIFICIER_RADIUS_MUL, n) - 1)}.` },
+  { id: 'fievre', rar: 'p', max: 1, name: 'Fièvre', short: 'Fièvre', plus: () => `Un cran de multiplicateur tous les ${FIEVRE_KILLS_PER_MULTIPLIER} kills au lieu de ${KILLS_PER_MULTIPLIER}`, minus: () => `La fenêtre de combo est réduite de ${pct(1 - FIEVRE_COMBO_MUL)}` },
 ];
 
 /* ---------- Effets des cartes ---------- */
@@ -59,6 +63,13 @@ export const CHAIR_POINTS_MUL = 2;    // Chair à canon : points des Gonflés ×
 export const PRIME_PACK_BONUS = 2;    // Prime de risque : coureurs en plus par meute et par niveau
 export const SECOND_WIND_HP = .4;     // Second souffle : fraction de la vie max rendue
 export const SECOND_WIND_INVULN = 1.6;
+export const ARTIFICIER_RADIUS_MUL = 1.25; // Artificier : rayon des grenades et roquettes × 1,25 par niveau
+// Fragmentation : éclats par niveau, projetés en étoile depuis l'explosion d'une grenade
+export const FRAG_SHARDS = 4, FRAG_DAMAGE = 30, FRAG_RANGE = 150, FRAG_KNOCK = 60;
+export const FIEVRE_KILLS_PER_MULTIPLIER = 3; // Fièvre : kills par cran de multiplicateur
+export const FIEVRE_COMBO_MUL = .5;           // Fièvre : fenêtre de combo × 0,5
+// Coup d'épaule : dégâts et recul infligés aux ennemis traversés par la roulade (recul + par niveau au-delà du premier)
+export const EPAULE_DAMAGE = 10, EPAULE_KNOCK = 200, EPAULE_KNOCK_LVL = 80, EPAULE_REACH = 4;
 export const CARDS_PER_PICK = 3;
 
 /* ---------- Joueur ---------- */

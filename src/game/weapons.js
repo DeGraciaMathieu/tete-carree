@@ -1,6 +1,6 @@
 // Tirs, armes, constructions posées (barricades, barils) et tourelles.
 import { sfx } from '../audio/sfx.js';
-import { BARREL_DAMAGE, BARREL_HP, BARREL_RADIUS, EMPTY_SWAP_CD, GRENADE_FUSE, GRENADE_SPEED, GROSBARIL_RADIUS_MUL, MH, MW, PLACE_FAIL_CD, ROCKET_LIFE, ROCKET_SPEED, SHOTS, T, TURRET_CD, TURRET_DAMAGE, TURRET_EVERY, TURRET_FIRST_CD, TURRET_IDLE_CD, TURRET_KNOCK, TURRET_RANGE, TURRET_WALL_HP, W, WALL_HP } from '../config.js';
+import { BARREL_DAMAGE, BARREL_HP, BARREL_RADIUS, EMPTY_SWAP_CD, FRAG_DAMAGE, FRAG_KNOCK, FRAG_RANGE, GRENADE_FUSE, GRENADE_SPEED, GROSBARIL_RADIUS_MUL, MH, MW, PLACE_FAIL_CD, ROCKET_LIFE, ROCKET_SPEED, SHOTS, T, TURRET_CD, TURRET_DAMAGE, TURRET_EVERY, TURRET_FIRST_CD, TURRET_IDLE_CD, TURRET_KNOCK, TURRET_RANGE, TURRET_WALL_HP, W, WALL_HP } from '../config.js';
 import { explosion, hurtEnemy } from './combat.js';
 import { rumble } from '../input/gamepad.js';
 import { casing, dust, gibs, sparks } from '../render/effects.js';
@@ -46,6 +46,11 @@ function shoot(ang, range, dmg, pierce, knock, look, bounce = 0, from = null) {
     const back = Math.max(0, endT - 4);
     shoot(Math.atan2(rdy, rdx), range - endT, dmg, pierce, knock, look, bounce - 1, [ox + dx * back, oy + dy * back]);
   }
+}
+// Fragmentation : n éclats en étoile depuis le point d'explosion d'une grenade
+export function fragments(x, y, n) {
+  const a0 = rng() * Math.PI * 2;
+  for (let k = 0; k < n; k++) shoot(a0 + k / n * Math.PI * 2, FRAG_RANGE, FRAG_DAMAGE, 1, FRAG_KNOCK, { t: .06, w: 1.2, c: '255,200,120' }, 0, [x, y]);
 }
 function placeBlock(kind) {
   const [tx, ty] = frontTile();

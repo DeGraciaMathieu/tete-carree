@@ -26,11 +26,15 @@ Les cartes sont le tableau `MODS` de `src/config.js`. Entre deux vagues, `openPi
 | `perce`, `ricochet`, `calibre` | `fireWeapon` (`game/weapons.js`) |
 | `cadence`, `frenesie`, `sansarmure` (cadence) | `fireMul` (`rules/modifiers.js`) ; vitesse de Frénésie : `FRENZY_SPEED_MUL` dans `update` ; pas de régénération sous Sans armure : `update` |
 | `tenace` | `comboTime` (`rules/modifiers.js`, `TENACE_BONUS`) |
+| `fievre` (pacte) | `multiplier` et `comboTime` (`FIEVRE_KILLS_PER_MULTIPLIER`, `FIEVRE_COMBO_MUL`) ; fenêtre en cours raccourcie dans `choosePick` |
 | `double` | `rollMax` (`rules/modifiers.js`) ; charge immédiate dans `choosePick` |
 | `rollboom`, `rollammo`, `firetrail` | `tryRoll` / `updateFires` (`game/player.js`) |
+| `epaule` | `shove` dans `updateRoll` (`game/player.js`), recul `shoveKnock` (`EPAULE_*`) |
 | `soif` | `soifHeal` (`rules/scoring.js`) |
 | `barbeles` | section « ennemis » de `update` (`BARBELES_DAMAGE`) ; aspect dans `render/scene.js` |
 | `grosbaril` | `explodeBarrel` (`GROSBARIL_RADIUS_MUL`) |
+| `artificier` | `blastRadius` (`ARTIFICIER_RADIUS_MUL`), appelé pour grenades et roquettes dans `update` |
+| `frag` | `fragShards` (`FRAG_SHARDS`) et `fragments` (`game/weapons.js`, `FRAG_*`), à l'explosion d'une grenade dans `update` |
 | `tourelle` | `placeBlock` (`TURRET_EVERY`) |
 | `constitution` | `choosePick` (`CONSTITUTION_HP`) |
 | `aimant` | section « ramassage » de `update` (`AIMANT_*`) |
@@ -43,7 +47,7 @@ Les cartes sont le tableau `MODS` de `src/config.js`. Entre deux vagues, `openPi
 | Concept | Implémentation |
 | --- | --- |
 | Combo | `S.combo` (+1 par kill dans `killEnemy`), `S.comboT` remis à `comboTime()` ; décroît dans `update`, retombe à 0 à expiration ; un coup encaissé retire `COMBO_HIT_DRAIN` s (`hurtPlayer`) |
-| Multiplicateur | `multiplier(combo) = 1 + floor(combo / KILLS_PER_MULTIPLIER)` (`rules/modifiers.js`) |
+| Multiplicateur | `multiplier(combo, mods) = 1 + floor(combo / KILLS_PER_MULTIPLIER)` (`rules/modifiers.js`), `FIEVRE_KILLS_PER_MULTIPLIER` sous Fièvre |
 | Frénésie | active si la carte est prise et `multiplier ≥ FRENZY_MULTIPLIER` |
 | Points d'un kill | `killPoints(type, mods, multiplier)` (`rules/scoring.js`, `KILL_POINTS`) |
 | Ajout au score | `addScore(n)` (`game/score.js`) : seul point d'entrée, déclenche les déblocages d'armes |
@@ -64,6 +68,8 @@ Les cartes sont le tableau `MODS` de `src/config.js`. Entre deux vagues, `openPi
 5. État propre à la carte (comme `S.souffleUsed`) : initialisé dans `resetWorld` (`src/state/world.js`).
 6. Vérifie `tests/cards.test.js` : le tirage reste valide, mais une graine donnée propose
    désormais d'autres cartes (le pool a changé).
+
+Réserve d'idées de cartes non implémentées : `docs/idees-cartes.md`.
 
 ## Pièges
 
