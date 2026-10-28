@@ -51,8 +51,20 @@ function renderMods() {
   $('mods').innerHTML = html;
   $('pauseMods').innerHTML = html || `<span class="none">Aucune carte pour l'instant</span>`;
 }
+// Santé : la traînée claire reste sur la vie perdue puis fond (transition CSS) ; un soin la recale aussitôt.
+function renderHp() {
+  const pct = Math.max(0, player.hp) / player.maxHp * 100, width = pct.toFixed(1) + '%';
+  const prev = hudCache.hpPct ?? Infinity;
+  hudCache.hpPct = pct;
+  if (pct !== prev) $('hpGhost').classList.toggle('snap', pct > prev);
+  setStyle('hpGhost', 'width', width);
+  setStyle('hpFill', 'width', width);
+  const tick = (25 / player.maxHp * 100).toFixed(2) + '%'; // un repère tous les 25 PV
+  if (hudCache.hpTick !== tick) { hudCache.hpTick = tick; $('hpTicks').style.setProperty('--tick', tick); }
+  setText('hpNum', String(Math.ceil(Math.max(0, player.hp))));
+}
 export function updateHud() {
-  setStyle('hpFill', 'width', (Math.max(0, player.hp) / player.maxHp * 100).toFixed(1) + '%');
+  renderHp();
   renderMods();
   const fz = frenzy();
   if (hudCache.fz !== fz) { hudCache.fz = fz; document.querySelector('.combo').classList.toggle('frenzy', fz); }
