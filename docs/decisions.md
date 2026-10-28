@@ -5,6 +5,123 @@ this toolchain, what was deliberately not touched, what is still undecided.
 
 Read by `/scaffold-claude` so it does not have to re-deduce any of it.
 
+## Deployment target
+
+**Cible itch.io, base relative, zip de dist/.**
+
+- Le jeu est publié sur itch.io comme jeu HTML jouable dans le navigateur, servi dans une iframe
+  depuis un sous-dossier du CDN d'itch : tous les chemins doivent être relatifs.
+- `vite.config.js` fixe `base: './'` ; `npm run build` produit `dist/` avec `index.html` à sa racine.
+- `npm run package` zippe le **contenu** de `dist/` (pas le dossier) dans `tete-carree-itch.zip`,
+  le fichier à téléverser sur itch.io. Le script utilise la commande système `zip` (macOS, Linux).
+- Seule ressource externe : les deux polices Google Fonts (liens absolus `https://`, conservés tels quels).
+- Le compteur de FPS est masqué par défaut dans la version publiée : `SHOW_FPS_BY_DEFAULT = false`
+  dans `src/config.js`. C'est le **seul changement de comportement voulu** du refactor. Un réglage
+  déjà enregistré par le joueur (`tete-carree-fps`) reste prioritaire.
+- Clés `localStorage` conservées à l'identique pour que les joueurs gardent record et réglages :
+  `tete-carree-best`, `tete-carree-fps`, `tete-carree-outline` (constantes `STORAGE_*` de `config.js`).
+- Comportements navigateur conservés tels quels : son démarré au premier geste, pause sur `blur`
+  et `visibilitychange`, `navigator.getGamepads` protégé par `try/catch`, contrôles tactiles,
+  meta viewport et `env(safe-area-inset-*)`, liens Google Fonts.
+
+## Archetype
+
+Selected: `real-time canvas`
+Why: boucle `requestAnimationFrame` à `dt` variable plafonné à 1/30 s, entités en tableaux
+d'objets simples, collisions, apparitions, score et combo.
+Does not fit:
+- Une **grille de tuiles avec champ de Dijkstra** (crevasses, constructions posées) : morceau
+  d'archétype « grille », d'où `state/arena.js`, `rules/map.js` et `rules/pathfield.js`.
+- Une **phase de choix de cartes** au tour par tour (`world.state === 'pick'`) au milieu du temps réel.
+- Un **HUD en DOM**, pas sur le canvas : `render/hud.js` est séparé de la scène.
+- Un **sol peint hors écran et mutable** (sang, brûlures tamponnés en jeu) : `render/floor.js`.
+- Une **passe de contour** qui remplace temporairement `ctx` par un proxy (`OLP`) : le contexte
+  et la passe vivent dans le même module, `render/canvas.js`, et les autres modules lisent `ctx`
+  par liaison vivante ES.
+- Beaucoup de logique de jeu est entremêlée d'effets (sons, particules, bannières). Elle vit dans
+  `src/game/` (orchestration règle → état → effets), un dossier ajouté à l'arborescence de l'archétype.
+
+## Toolchain
+
+Branch: `vite`
+Triggering signal: plus de 2 000 lignes de JavaScript (environ 2 300) et réécriture du chemin de
+base pour le déploiement (itch.io, `base: './'`).
+Node: 22
+Test runner: `vitest` (seules dépendances de dev : `vite`, `vitest` ; aucune dépendance runtime)
+
+Ouvrir `index.html` par double-clic ne fonctionne plus (ESM natif non servi en `file://`) :
+`npm run dev`, ou `npm run build` puis servir `dist/`.
+
+## Layout
+
+| Module | Responsibility | Came from (sections du prototype) |
+| --- | --- | --- |
+| `index.html` | Structure des écrans, HUD, contrôles tactiles, meta viewport, polices | HTML d'origine |
+| `src/style.css` | Styles, safe-area, mise en page mobile | `<style>` d'origine |
+| `src/config.js` | Constantes : arène, armes, cartes, raretés, équilibrage, clés de stockage, `SHOW_FPS_BY_DEFAULT` | constantes et valeurs magiques |
+| `src/util.js` | `$`, `rnd` (cosmétique), `clamp`, `fmt` | en-tête du script |
+| `src/rules/` | Décisions pures (voir ci-dessous) | extraites une à une à l'étape 5 |
+| `src/state/world.js` | Session `S`, `player`, collections, objet `world`, RNG à graine, `resetWorld` | État, Score |
+| `src/state/arena.js` | Grille, construction de l'arène, collisions, champ de la horde | Carte, Collisions & grille, Champ de distances |
+| `src/game/*.js` | Orchestration du gameplay : combat, armes, ennemis, joueur et roulade, score, écrans | Joueur, Tirs, Ennemis, Vagues, Roulade, Écrans |
+| `src/render/*.js` | Canvas et contour, sol, effets, sprites, scène, HUD, FPS | Rendu, Sol, Effets, Bannière, HUD, Lisibilité, Compteur de FPS |
+| `src/audio/sfx.js` | Sons synthétisés Web Audio | Audio synthétisé |
+| `src/input/*.js` | Clavier/souris (et pause auto), tactile, boutons, manette | Entrées, Écrans (boutons), Manette |
+| `src/loop/update.js` | Pas de simulation `update(dt)` | Mise à jour |
+| `src/loop/frame.js` | Boucle rAF | Boucle |
+| `src/main.js` | Point d'entrée : import des modules d'entrée, démarrage | fin du script |
+
+### Écarts assumés avec le tableau de couches
+
+- **`world`** (`state/world.js`) : un module ES ne peut pas réaffecter une liaison importée.
+  Les valeurs réaffectées depuis plusieurs modules (`state` de l'écran, `best`, `shake`,
+  `fieldDirty` et les 15 collections filtrées par `update`) sont donc des propriétés de l'objet
+  `world`. Les autres (`S`, `player`, `blocks`, `unlocked`, `ammo`, `cam`) restent des liaisons
+  exportées, réaffectées uniquement par `resetWorld`.
+- **Les modules `input/` appellent directement des actions de `game/`** (rouler, changer d'arme,
+  choisir une carte), comme le prototype. Les remplacer par une file d'intentions aurait changé le
+  moment où l'action s'applique dans l'image.
+- **`render/hud.js` câble les clics sur les emplacements d'armes** (`selectWeapon`) et joue le
+  son de la bannière ; `render/effects.js` ajoute des particules à `world.parts`.
+- **Les règles s'importent entre elles** (`waves`, `cards`, `scoring`, `damage` → `modifiers` ;
+  `pathfield` → `map`). Elles restent pures.
+- Les modules d'entrée posent leurs écouteurs à l'import ; `main.js` les importe explicitement.
+
+## Rules extracted
+
+| Rule | Module | Test | Notes |
+| --- | --- | --- | --- |
+| Multiplicateur, Frénésie, cadence, durée du combo, charges de roulade | `rules/modifiers.js` | `tests/modifiers.test.js` | lit `S.mods` et `S.combo` passés en paramètre |
+| Déblocage des armes au score | `rules/unlock.js` | `tests/unlock.test.js` | |
+| Tuiles, crevasses, ligne de vue, marche en ligne droite | `rules/map.js` | `tests/map.test.js` | lit `map` et `blocks` par référence, sans copie (chemin chaud) |
+| Champ de distances de la horde, pas suivant | `rules/pathfield.js` | `tests/pathfield.test.js` | renvoie un nouveau `Float32Array` (≈ 5 fois/s) ; bug connu, voir plus bas |
+| Tirage des trois cartes | `rules/cards.js` | `tests/cards.test.js` | `rng` injecté |
+| Composition des vagues, restants, cadence d'apparition | `rules/waves.js` | `tests/waves.test.js` | `rng` injecté |
+| Points d'un kill, Soif de sang, caisse lâchée | `rules/scoring.js` | `tests/scoring.test.js` | `rollDrop` reçoit `onVoid` pour garder l'ordre exact des tirages |
+| Bouclier du blindé, protection du joueur, Second souffle | `rules/damage.js` | `tests/damage.test.js` | |
+| Générateur à graine | `rules/rng.js` | (via les tests ci-dessus) | LCG |
+
+## Randomness and time
+
+| Call site | Classification | Handling |
+| --- | --- | --- |
+| `spawnEnemy` : porte, répartition des meutes, jitter de vitesse/cadence, position d'apparition | rule-bearing | seeded rng (`rng`, `jitter`) |
+| `startWave` → `waveQueue` : ordre de la file, taille des meutes | rule-bearing | seeded rng |
+| `fireWeapon` : dispersion du pistolet, de l'Uzi, des plombs et leur vitesse | rule-bearing | seeded rng (`jitter`) |
+| `killEnemy` → `rollDrop` : chance et type de caisse | rule-bearing | seeded rng |
+| `update` : délai, position et type des caisses de ravitaillement | rule-bearing | seeded rng |
+| `update` : munitions rendues par une caisse (tirage des armes) | rule-bearing | seeded rng |
+| `rollCards` | rule-bearing | seeded rng |
+| Diable : délai de tir et imprécision ; cracheur : recharge et anticipation | rule-bearing | seeded rng |
+| `paintFloor`, `stampBlood`, `toxicBurst` (taches) | cosmetic | `Math.random` dans `render/` |
+| Particules (sang, débris, étincelles, fumée, feu, poussière), nombre de gouttes par coup | cosmetic | `Math.random` / `rnd` |
+| Phases d'animation (`walk`, `ph`), flash de canon, gonflement visuel du gonflé, tremblement d'écran | cosmetic | `Math.random` / `rnd` |
+| Sons : buffer de bruit, offset de lecture, hauteur des grognements, grognement et glouglou ambiants | cosmetic | `Math.random` |
+| Temps de simulation | — | `dt` mesuré par `loop/frame.js`, plafonné à 1/30 s, passé à `update` |
+| `performance.now` : anti-répétition des sons, vibrations, molette, animation de la bannière | cosmetic | hors règles, inchangé |
+
+Seed: tirée de `Math.random` à chaque nouvelle partie (`resetWorld`). Les tests passent une graine fixe.
+
 ## Deliberately left alone
 
 Behaviour that looks wrong but was preserved, because the refactor must not change the
@@ -19,3 +136,24 @@ game. Each entry: what it is, where, and why it was not fixed.
   du joueur. Un ennemi sur une telle tuile n'obtient pas de `nextStep`. Comportement identique
   au prototype (vérifié tuile à tuile sur 140 positions du joueur). Documenté par un
   `test.fails` dans `tests/pathfield.test.js`.
+- **Double balise `<meta name="viewport">`** dans `index.html` : la première n'a pas
+  `user-scalable=no`, la seconde l'a. Le navigateur retient en général la première.
+- **`KeyQ` change d'arme (précédente)** mais n'est pas mentionnée dans les contrôles de l'écran titre.
+- **`sfx('toss')` rejoué quand une grenade tombe dans une crevasse**, alors que `sfx('fall')` existe.
+- **`tickFps` calcule la moyenne et met à jour le texte même quand le compteur est masqué** ;
+  seul l'histogramme est conditionné par `fpsOn`.
+- **`S.time` avance aussi sur l'écran titre et l'écran de fin**, pas seulement en partie.
+- **La variable locale `best` de `unstick()`** masque le nom du record (désormais `world.best`).
+- **Au premier chargement, `setFps`/`setOutline` écrivent leur valeur par défaut dans
+  `localStorage`** : un joueur qui a lancé la version publiée sans toucher au réglage garde `'0'`
+  même si `SHOW_FPS_BY_DEFAULT` change plus tard.
+
+## Open questions
+
+Decisions the code does not settle and that were not made. Never resolved by guessing.
+
+- Corriger ou non le bug d'arrondi du champ de distances : le corriger change le déplacement de la horde.
+- `npm run package` s'appuie sur la commande `zip` du système : faut-il un script multiplateforme
+  (Windows sans WSL) ? Cela demanderait une dépendance de dev.
+- Garder la double balise viewport, ou n'en garder qu'une (laquelle : avec ou sans `user-scalable=no`) ?
+- Faut-il un favicon ? Le navigateur demande `/favicon.ico`, absent depuis l'origine (404 bénin).
