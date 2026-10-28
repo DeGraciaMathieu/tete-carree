@@ -1,17 +1,25 @@
 // Composition des vagues et cadence d'apparition de la horde.
 // File d'attente : 'z' zombie, 'd' diable, 'b' gonflé, 's' cracheur, 'a' blindé, 'pN' meute de N coureurs.
 // Les ennemis sortent par la fin du tableau (pop).
+import {
+  WAVE_ZOMBIES_BASE, WAVE_ZOMBIES_PER_WAVE, WAVE_UNITS, PACK_BASE, PACK_RAND, PACK_WAVES_PER_RUNNER, PACK_WAVE_MAX,
+  PRIME_PACK_BONUS, SPAWN_DOUBLE_AFTER, SPAWN_GAP_START, SPAWN_GAP_STEP, SPAWN_GAP_MIN,
+} from '../config.js';
 import { modLevel } from './modifiers.js';
 
+const unitCount = (u, n) => n >= u.from ? Math.floor((n - u.offset) * u.scale) : 0;
+const queueKey = (u, rng) => u.key[0] + rng() * u.key[1];
+
 export function waveQueue(n, mods, rng) {
-  const z = 8 + n * 5, d = n >= 3 ? Math.floor((n - 1) * 1.4) : 0, bl = n >= 2 ? Math.floor(n * .7) : 0, pk = n >= 4 ? Math.floor((n - 2) * .6) : 0, sc = n >= 5 ? Math.floor((n - 3) * .7) : 0, ar = n >= 6 ? Math.floor((n - 4) * .5) : 0;
+  const U = WAVE_UNITS;
+  const z = WAVE_ZOMBIES_BASE + n * WAVE_ZOMBIES_PER_WAVE, d = unitCount(U.d, n), bl = unitCount(U.b, n), pk = unitCount(U.p, n), sc = unitCount(U.s, n), ar = unitCount(U.a, n);
   const q = [];
-  for (let i = 0; i < z; i++) q.push(['z', rng()]);
-  for (let i = 0; i < d; i++) q.push(['d', rng() * .7]);
-  for (let i = 0; i < bl; i++) q.push(['b', .2 + rng() * .8]);
-  for (let i = 0; i < sc; i++) q.push(['s', .1 + rng() * .8]);
-  for (let i = 0; i < ar; i++) q.push(['a', .3 + rng() * .7]);
-  for (let i = 0; i < pk; i++) q.push(['p' + (3 + (rng() * 3 | 0) + Math.min(3, n / 4 | 0) + 2 * modLevel(mods, 'prime')), .1 + rng() * .9]);
+  for (let i = 0; i < z; i++) q.push(['z', queueKey(U.z, rng)]);
+  for (let i = 0; i < d; i++) q.push(['d', queueKey(U.d, rng)]);
+  for (let i = 0; i < bl; i++) q.push(['b', queueKey(U.b, rng)]);
+  for (let i = 0; i < sc; i++) q.push(['s', queueKey(U.s, rng)]);
+  for (let i = 0; i < ar; i++) q.push(['a', queueKey(U.a, rng)]);
+  for (let i = 0; i < pk; i++) q.push(['p' + (PACK_BASE + (rng() * PACK_RAND | 0) + Math.min(PACK_WAVE_MAX, n / PACK_WAVES_PER_RUNNER | 0) + PRIME_PACK_BONUS * modLevel(mods, 'prime')), queueKey(U.p, rng)]);
   q.sort((a, b) => a[1] - b[1]);
   return q.map(a => a[0]);
 }
@@ -20,5 +28,5 @@ export function waveQueue(n, mods, rng) {
 export function queueCount(queue) { let c = 0; for (const t of queue) c += t[0] === 'p' ? +t.slice(1) : 1; return c; }
 
 // Ennemis libérés à chaque apparition, et délai avant la suivante.
-export function spawnBurst(wave) { return wave > 6 ? 2 : 1; }
-export function spawnGap(wave) { return Math.max(.16, .85 - wave * .05); }
+export function spawnBurst(wave) { return wave > SPAWN_DOUBLE_AFTER ? 2 : 1; }
+export function spawnGap(wave) { return Math.max(SPAWN_GAP_MIN, SPAWN_GAP_START - wave * SPAWN_GAP_STEP); }

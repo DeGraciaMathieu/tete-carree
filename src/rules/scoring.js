@@ -1,13 +1,13 @@
 // Ce que rapporte un ennemi abattu : points, soin de Soif de sang, caisse au sol.
-import { KILL_POINTS, DROP_CHANCE, SOIF_MULTIPLIER } from '../config.js';
+import { KILL_POINTS, DROP_CHANCE, DROP_HP_CHANCE, SOIF_MULTIPLIER, PRIME_POINTS_MUL, CHAIR_POINTS_MUL } from '../config.js';
 import { modLevel } from './modifiers.js';
 
 // Types d'ennemis : 'z' zombie, 'b' gonflé, 'r' coureur, 's' cracheur, 'a' blindé, 'd' diable.
 const byType = (table, type) => type in table ? table[type] : table.d;
 
 export function killPoints(type, mods, multiplier) {
-  const base = type === 'b' ? KILL_POINTS.b * Math.pow(2, modLevel(mods, 'chair')) : byType(KILL_POINTS, type);
-  return Math.round(base * multiplier * Math.pow(1.5, modLevel(mods, 'prime')));
+  const base = type === 'b' ? KILL_POINTS.b * Math.pow(CHAIR_POINTS_MUL, modLevel(mods, 'chair')) : byType(KILL_POINTS, type);
+  return Math.round(base * multiplier * Math.pow(PRIME_POINTS_MUL, modLevel(mods, 'prime')));
 }
 
 // Points de vie rendus par le kill (0 sans Soif de sang ou sous ×3).
@@ -19,5 +19,5 @@ export function soifHeal(mods, multiplier) {
 // Caisse lâchée par l'ennemi : 'hp', 'ammo' ou null. Rien ne tombe au-dessus d'une crevasse.
 export function rollDrop(type, onVoid, rng) {
   if (!(rng() < byType(DROP_CHANCE, type) && !onVoid)) return null;
-  return rng() < .5 ? 'hp' : 'ammo';
+  return rng() < DROP_HP_CHANCE ? 'hp' : 'ammo';
 }

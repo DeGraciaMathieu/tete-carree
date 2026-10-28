@@ -49,6 +49,17 @@ export const MODS = [
   { id: 'sansarmure', rar: 'p', max: 1, name: 'Sans armure', short: 'Sans armure', plus: () => `Cadence de tir doublée`, minus: () => `Plus aucune régénération de santé` },
 ];
 
+/* ---------- Effets des cartes ---------- */
+export const CADENCE_CD_MUL = .8;     // Gâchette nerveuse : délai de tir × 0,8 par niveau
+export const SANSARMURE_CD_MUL = .5;  // Sans armure : cadence doublée
+export const FRENZY_CD_MUL = .75;     // Frénésie : cadence +33 %
+export const PRIME_POINTS_MUL = 1.5;  // Prime de risque : +50 % de points par niveau
+export const CHAIR_POINTS_MUL = 2;    // Chair à canon : points des Gonflés × 2 par niveau
+export const PRIME_PACK_BONUS = 2;    // Prime de risque : coureurs en plus par meute et par niveau
+export const SECOND_WIND_HP = .4;     // Second souffle : fraction de la vie max rendue
+export const SECOND_WIND_INVULN = 1.6;
+export const CARDS_PER_PICK = 3;
+
 /* ---------- Joueur ---------- */
 export const PLAYER_HP = 100;
 export const PLAYER_SPEED = 140;
@@ -69,12 +80,33 @@ export const KILL_POINTS = { z: 50, b: 100, r: 75, s: 120, a: 200, d: 150 };
 export const DROP_CHANCE = { z: .05, b: .15, r: .04, s: .1, a: .25, d: .2 };
 export const BLOATER_RADIUS = 74, BLOATER_DAMAGE = 120;
 export const MAX_ENEMIES = 120;
+export const DROP_HP_CHANCE = .5; // caisse lâchée : santé ou munitions
+// Blindé : recul encaissé, bouclier qui arrête les coups venus de face.
+export const ARMOR_KNOCK_MUL = .2, ARMOR_BLAST_KNOCK_MUL = .45;
+export const SHIELD_FRONT_DOT = -.45;              // cosinus en dessous duquel le coup vient de face
+export const SHIELD_ABSORB = .85, SHIELD_LEAK = .15; // part pour le bouclier, part pour la chair
 
 /* ---------- Vagues ---------- */
 export const FIRST_BREAK = 1.6;
 export const WAVE_BREAK = 10;
 export const PICK_DELAY = 1.1;
 export const WAVE_BONUS = 250; // multiplié par le numéro de vague
+// Composition : 8 + 5n zombies ; chaque autre type entre à la vague `from`,
+// au nombre de floor((n - offset) × scale). `key` : fenêtre [min, min + span) de sa place dans la file.
+export const WAVE_ZOMBIES_BASE = 8, WAVE_ZOMBIES_PER_WAVE = 5;
+export const WAVE_UNITS = {
+  z: { key: [0, 1] },
+  d: { from: 3, offset: 1, scale: 1.4, key: [0, .7] },
+  b: { from: 2, offset: 0, scale: .7, key: [.2, .8] },
+  s: { from: 5, offset: 3, scale: .7, key: [.1, .8] },
+  a: { from: 6, offset: 4, scale: .5, key: [.3, .7] },
+  p: { from: 4, offset: 2, scale: .6, key: [.1, .9] },
+};
+// Meute de coureurs : 3 + tirage dans [0, 3) + 1 par tranche de 4 vagues (3 au plus).
+export const PACK_BASE = 3, PACK_RAND = 3, PACK_WAVES_PER_RUNNER = 4, PACK_WAVE_MAX = 3;
+// Apparitions : deux par deux après la vague 6, délai qui raccourcit à chaque vague.
+export const SPAWN_DOUBLE_AFTER = 6;
+export const SPAWN_GAP_START = .85, SPAWN_GAP_STEP = .05, SPAWN_GAP_MIN = .16;
 
 /* ---------- Caisses de ravitaillement ---------- */
 export const BOX_FIRST = 7;
@@ -85,6 +117,7 @@ export const BOX_HP_CHANCE = .35;
 /* ---------- Moteur ---------- */
 export const MAX_PARTS = 1600;
 export const FIELD_PERIOD = .22; // recalcul du champ de distances (s)
+export const MAX_DT = 1 / 30;     // pas de simulation maximal (s)
 
 /* ---------- Entrées ---------- */
 export const STICK_RADIUS = 48;
