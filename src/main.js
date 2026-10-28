@@ -12,6 +12,7 @@ import { weaponsToUnlock, ammoOnUnlock } from './rules/unlock.js';
 import * as Grid from './rules/map.js';
 import * as Field from './rules/pathfield.js';
 import { rollCards } from './rules/cards.js';
+import * as Waves from './rules/waves.js';
 
 (() => {
 'use strict';
@@ -312,7 +313,7 @@ function addScore(n) {
 function multiplier() { return Mods.multiplier(S.combo); }
 
 /* ---------- Ennemis ---------- */
-function queueCount() { let c = 0; for (const t of S.queue) c += t[0] === 'p' ? +t.slice(1) : 1; return c; }
+function queueCount() { return Waves.queueCount(S.queue); }
 function spawnEnemy(type, door) {
   if (type[0] === 'p') {
     // la meute se répartit sur les différents côtés de l'arène pour prendre le joueur en tenaille
@@ -565,16 +566,7 @@ function cycleWeapon(dir) {
 /* ---------- Vagues ---------- */
 function startWave() {
   S.wave++; const n = S.wave;
-  const z = 8 + n * 5, d = n >= 3 ? Math.floor((n - 1) * 1.4) : 0, bl = n >= 2 ? Math.floor(n * .7) : 0, pk = n >= 4 ? Math.floor((n - 2) * .6) : 0, sc = n >= 5 ? Math.floor((n - 3) * .7) : 0, ar = n >= 6 ? Math.floor((n - 4) * .5) : 0;
-  const q = [];
-  for (let i = 0; i < z; i++) q.push(['z', rng()]);
-  for (let i = 0; i < d; i++) q.push(['d', rng() * .7]);
-  for (let i = 0; i < bl; i++) q.push(['b', .2 + rng() * .8]);
-  for (let i = 0; i < sc; i++) q.push(['s', .1 + rng() * .8]);
-  for (let i = 0; i < ar; i++) q.push(['a', .3 + rng() * .7]);
-  for (let i = 0; i < pk; i++) q.push(['p' + (3 + (rng() * 3 | 0) + Math.min(3, n / 4 | 0) + 2 * mod('prime')), .1 + rng() * .9]);
-  q.sort((a, b) => a[1] - b[1]);
-  S.queue = q.map(a => a[0]);
+  S.queue = Waves.waveQueue(n, S.mods, rng);
   S.waveActive = true; S.spawnT = .4;
   shake = Math.min(16, shake + 6);
   banner(`Vague ${n}`, n === 2 ? 'Les Gonflés arrivent : ils explosent' : n === 3 ? 'Les diables arrivent' : n === 4 ? 'Des coureurs arrivent en meute' : n === 5 ? 'Des cracheurs arrivent : sors de l\'acide' : n === 6 ? 'Des blindés arrivent : prends-les à revers' : `${queueCount()} ennemis`, 'start');
@@ -812,9 +804,9 @@ function update(dt) {
     else {
       S.spawnT -= dt;
       if (S.queue.length && S.spawnT <= 0 && enemies.length < MAX_ENEMIES) {
-        const burst = S.wave > 6 ? 2 : 1;
+        const burst = Waves.spawnBurst(S.wave);
         for (let k = 0; k < burst && S.queue.length; k++) spawnEnemy(S.queue.pop());
-        S.spawnT = Math.max(.16, .85 - S.wave * .05);
+        S.spawnT = Waves.spawnGap(S.wave);
       }
       if (!S.queue.length && enemies.length === 0) {
         S.waveActive = false; S.breakT = WAVE_BREAK; S.pickT = PICK_DELAY;

@@ -1,0 +1,36 @@
+import { test } from 'vitest';
+import assert from 'node:assert/strict';
+import { createRng } from '../src/rules/rng.js';
+import { waveQueue, queueCount, spawnBurst, spawnGap } from '../src/rules/waves.js';
+
+const tally = q => q.reduce((t, k) => ({ ...t, [k[0]]: (t[k[0]] || 0) + 1 }), {});
+
+test('la première vague ne contient que 13 zombies', () => {
+  assert.deepEqual(tally(waveQueue(1, {}, createRng(1))), { z: 13 });
+});
+
+test('chaque nouveau type d\'ennemi entre à sa vague annoncée', () => {
+  assert.ok(tally(waveQueue(2, {}, createRng(1))).b, 'Gonflés en vague 2');
+  assert.ok(tally(waveQueue(3, {}, createRng(1))).d, 'diables en vague 3');
+  assert.ok(tally(waveQueue(4, {}, createRng(1))).p, 'meutes de coureurs en vague 4');
+  assert.ok(tally(waveQueue(5, {}, createRng(1))).s, 'cracheurs en vague 5');
+  assert.ok(tally(waveQueue(6, {}, createRng(1))).a, 'blindés en vague 6');
+  assert.equal(tally(waveQueue(5, {}, createRng(1))).a, undefined);
+});
+
+test('Prime de risque grossit chaque meute de deux coureurs', () => {
+  const plain = waveQueue(8, {}, createRng(3)).filter(k => k[0] === 'p');
+  const risky = waveQueue(8, { prime: 1 }, createRng(3)).filter(k => k[0] === 'p');
+  assert.deepEqual(risky.map(k => +k.slice(1)), plain.map(k => +k.slice(1) + 2));
+});
+
+test('le compteur de restants compte chaque coureur d\'une meute', () => {
+  assert.equal(queueCount(['z', 'p4', 'b']), 6);
+});
+
+test('à partir de la vague 7, la horde sort deux par deux, de plus en plus vite', () => {
+  assert.equal(spawnBurst(6), 1);
+  assert.equal(spawnBurst(7), 2);
+  assert.ok(spawnGap(2) > spawnGap(10));
+  assert.equal(spawnGap(30), .16);
+});
