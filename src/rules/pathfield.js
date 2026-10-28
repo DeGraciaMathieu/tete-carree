@@ -1,6 +1,6 @@
 // Champ de distances (Dijkstra) qui guide la horde vers le joueur, et pas suivant d'un ennemi.
 // Les constructions se traversent mais coûtent cher : la horde les contourne ou les défonce.
-import { T, MW, MH } from '../config.js';
+import { MH, MW, PATH_BLOCK_COST, T } from '../config.js';
 import { passable, openT } from './map.js';
 
 export const UNREACHABLE = 1e9;
@@ -44,7 +44,7 @@ function relax(map, blocks, heap, D, viaVoid) {
         const a = y * MW + nx, b = ny * MW + x;
         if (!walkable(map, a, viaVoid) || blocks.has(a) || !walkable(map, b, viaVoid) || blocks.has(b)) continue;
       }
-      const c = (dx && dy ? 1.414 : 1) + (blocks.has(ni) ? 9 : 0);
+      const c = (dx && dy ? 1.414 : 1) + (blocks.has(ni) ? PATH_BLOCK_COST : 0);
       if (d + c < D[ni]) { D[ni] = d + c; heap.push(ni, d + c); }
     }
   }

@@ -87,6 +87,33 @@ Ouvrir `index.html` par double-clic ne fonctionne plus (ESM natif non servi en `
   `pathfield` → `map`). Elles restent pures.
 - Les modules d'entrée posent leurs écouteurs à l'import ; `main.js` les importe explicitement.
 
+## Constantes : ce qui va dans `config.js`
+
+- **Dans `config.js`** : tout ce qui règle l'équilibrage du jeu — PV, dégâts, rayons d'explosion,
+  cadences et délais de jeu, portées, vitesses de projectiles, statistiques par type d'ennemi
+  (`ENEMY_STATS`, `ENEMY_MELEE_DAMAGE`…), tirs par arme (`SHOTS`), composition des vagues, effets
+  des cartes, clés de stockage, `SHOW_FPS_BY_DEFAULT`.
+- **Laissé en place** : ce qui ne règle que l'aspect ou la sensation — couleurs et palettes,
+  traçantes, tremblement d'écran, vibrations, hauteur et rebond des trajectoires, particules, sons —
+  ainsi que les constantes internes d'algorithmes (coût diagonal 1,414 et décalage 1000 des zones
+  coupées dans `pathfield.js`).
+- Les textes des cartes (`MODS[].desc`) gardent leurs nombres en clair : ce sont des libellés.
+
+## Vérification de non-régression
+
+- Chaque règle extraite : test macro + équivalence avec l'original (champ de distances comparé
+  tuile à tuile sur 140 positions du joueur ; sorties de toutes les règles comparées octet à octet
+  avant/après le déplacement des constantes, sur un large échantillon de graines).
+- Rejeu déterministe image par image (banc hors dépôt) : `Math.random` à graine, horloge virtuelle
+  (rAF et `performance.now` pilotés), mêmes entrées aux mêmes images, sur l'original (`f0f7763`)
+  et sur une variante jetable du refactor où `rng = Math.random` (même flux aléatoire). Une partie
+  complète en vague 1 — déplacements, tirs, roulades, kills, combo, pause, mort, écran de fin — donne
+  un canvas et un HUD identiques au pixel aux 9 points de contrôle. Les vagues suivantes (autres
+  ennemis, cartes, déblocages) ne sont couvertes que par les tests de règles et la relecture.
+- Simulation itch.io : contenu du zip servi depuis un sous-dossier, dans une iframe cross-origin —
+  chargement sans erreur, toutes les ressources en 200, polices chargées, partie jouable,
+  `localStorage` fonctionnel, pause quand l'iframe perd le focus.
+
 ## Rules extracted
 
 | Rule | Module | Test | Notes |

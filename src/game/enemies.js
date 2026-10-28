@@ -1,6 +1,6 @@
 // Apparition des ennemis, lancement des vagues, crachats d'acide.
 import { sfx } from '../audio/sfx.js';
-import { MH, MW, T } from '../config.js';
+import { ACID_SPLASH_DAMAGE, ENEMY_FIRST_ATTACK, ENEMY_STATS, MH, MW, SPIT_CD, SPIT_CD_RAND, T } from '../config.js';
 import { hurtPlayer } from './combat.js';
 import { moveInput } from './player.js';
 import { addPart } from '../render/effects.js';
@@ -23,18 +23,12 @@ export function spawnEnemy(type, door) {
   }
   const [dx, dy] = door || doors[rng() * doors.length | 0];
   const n = S.wave;
-  const e = type === 'z'
-    ? { type, r: 9, hp: 55 + n * 6, sp: 44 + Math.min(32, n * 2.6) + rng() * 10 }
-    : type === 'b'
-    ? { type, r: 12, hp: 110 + n * 9, sp: 34 + Math.min(14, n) + rng() * 6 }
-    : type === 'a'
-    ? { type, r: 11, hp: 200 + n * 14, sp: 34 + Math.min(10, n) + rng() * 4, shield: 320 + n * 22 }
-    : type === 's'
-    ? { type, r: 9, hp: 70 + n * 6, sp: 46 + Math.min(12, n) + rng() * 6, spitCd: 1.2 + rng() * 1.5, wind: 0 }
-    : type === 'r'
-    ? { type, r: 8, hp: 24 + n * 1.5, sp: 112 + Math.min(22, n * 1.5) + rng() * 8 }
-    : { type, r: 10, hp: 140 + n * 12, sp: 62 + Math.min(22, n * 1.6) + rng() * 6, fire: 1.6 + rng() * 2 };
-  Object.assign(e, { x: dx * T + T / 2 + jitter(6), y: dy * T + T / 2 + jitter(6), vx: 0, vy: 0, fx: 0, fy: 1, flash: 0, atk: .6, walk: Math.random() * 6, moving: true, bump: -1, dead: false });
+  const s = ENEMY_STATS[type] || ENEMY_STATS.d;
+  const e = { type, r: s.r, hp: s.hp + n * s.hpWave, sp: s.sp + Math.min(s.spCap, n * s.spWave) + rng() * s.spRand };
+  if (type === 'a') e.shield = s.shield + n * s.shieldWave;
+  else if (type === 's') { e.spitCd = s.spitCd + rng() * s.spitCdRand; e.wind = 0; }
+  else if (s === ENEMY_STATS.d) e.fire = s.fire + rng() * s.fireRand;
+  Object.assign(e, { x: dx * T + T / 2 + jitter(6), y: dy * T + T / 2 + jitter(6), vx: 0, vy: 0, fx: 0, fy: 1, flash: 0, atk: ENEMY_FIRST_ATTACK, walk: Math.random() * 6, moving: true, bump: -1, dead: false });
   e.shieldMax = e.shield || 0;
   e.x = clamp(e.x, e.r + 1, MW * T - e.r - 1); e.y = clamp(e.y, e.r + 1, MH * T - e.r - 1);
   world.enemies.push(e);
@@ -51,7 +45,7 @@ export function startWave() {
 /* Coureur : zombie maigre en survêtement, penché en avant */
 /* Cracheur : zombie voûté en blouse d'hôpital, poche à acide sous la gorge */
 export function spit(e) {
-  e.spitCd = 2.8 + rng() * .9;
+  e.spitCd = SPIT_CD + rng() * SPIT_CD_RAND;
   const [mx, my] = moveInput(), ml = Math.hypot(mx, my);
   const d = Math.hypot(player.x - e.x, player.y - e.y), fl = clamp(d / 260, .45, .9);
   const lead = ml > .2 && !player.roll ? 140 * fl * (.4 + rng() * .4) / ml : 0;
@@ -75,5 +69,5 @@ function splashAcid(x, y) {
   if (isVoid(x, y) || tileAt(Math.floor(x / T), Math.floor(y / T))) return;
   world.puddles.push({ x, y, t: 4, max: 4, r: 26 });
   fctx.fillStyle = 'rgba(110,140,40,.16)'; fctx.beginPath(); fctx.ellipse(x, y, 22, 13, 0, 0, 7); fctx.fill();
-  if (Math.hypot(player.x - x, (player.y - y) * 1.4) < 24) hurtPlayer(10);
+  if (Math.hypot(player.x - x, (player.y - y) * 1.4) < 24) hurtPlayer(ACID_SPLASH_DAMAGE);
 }

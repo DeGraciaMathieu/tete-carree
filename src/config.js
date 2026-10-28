@@ -70,15 +70,59 @@ export const REGEN_RATE = 3;  // points de vie par seconde
 export const LOW_HP = 30;
 export const MEDKIT_HP = 35;
 export const ROLL = { A: .06, B: .36, D: .46, CD: .7, V: 430, R: 10.5 };
+// Roulade explosive : rayon et dégâts de l'onde de choc = base + niveau × par niveau
+export const ROLLBOOM_RADIUS = 50, ROLLBOOM_RADIUS_LVL = 22, ROLLBOOM_DAMAGE = 20, ROLLBOOM_DAMAGE_LVL = 20;
+export const ROLLAMMO_SHARE = .25; // Roulade tactique : part d'une recharge rendue par niveau
+export const SECOND_WIND_SHOCK_RADIUS = 110, SECOND_WIND_SHOCK_DAMAGE = 80;
 
 /* ---------- Constructions ---------- */
 export const WALL_HP = 170, TURRET_WALL_HP = 240, BARREL_HP = 45;
 export const TURRET_EVERY = 3; // une barricade sur trois porte une tourelle
+export const TURRET_RANGE = 290, TURRET_CD = .45, TURRET_IDLE_CD = .15, TURRET_DAMAGE = 22, TURRET_KNOCK = 40;
+export const BARREL_RADIUS = 80, BARREL_DAMAGE = 120;
+export const GROSBARIL_RADIUS_MUL = 1.4; // Gros barils : rayon × 1,4 par niveau
+
+/* ---------- Armes : tirs et explosifs ---------- */
+// spread : dispersion (rad), speed : vitesse (px/s), damage, knock : recul infligé
+export const SHOTS = {
+  pistol: { spread: .03, speed: 420, damage: 34, knock: 70 },
+  uzi: { spread: .09, speed: 380, damage: 20, knock: 34 },
+  shotgun: { pellets: 8, spread: .3, speed: 220, speedRand: 30, damage: 24, knock: 95 },
+  rail: { speed: 760, damage: 260, knock: 140 },
+};
+export const GRENADE_RADIUS = 88, GRENADE_DAMAGE = 150;
+export const ROCKET_RADIUS = 72, ROCKET_DAMAGE = 160;
+export const UNLOCK_REFILLS = 2; // une arme débloquée arrive avec deux recharges de munitions
 
 /* ---------- Ennemis ---------- */
 export const KILL_POINTS = { z: 50, b: 100, r: 75, s: 120, a: 200, d: 150 };
 export const DROP_CHANCE = { z: .05, b: .15, r: .04, s: .1, a: .25, d: .2 };
 export const BLOATER_RADIUS = 74, BLOATER_DAMAGE = 120;
+export const CHAIR_RADIUS_MUL = 1.4; // Chair à canon : rayon d'explosion des Gonflés × 1,4 par niveau
+export const BLOATER_FUSE = .7;      // délai entre l'amorçage et l'explosion du Gonflé (s)
+// Statistiques par type : rayon, PV = hp + vague × hpWave,
+// vitesse = sp + min(spCap, vague × spWave) + tirage × spRand.
+export const ENEMY_STATS = {
+  z: { r: 9, hp: 55, hpWave: 6, sp: 44, spCap: 32, spWave: 2.6, spRand: 10 },
+  b: { r: 12, hp: 110, hpWave: 9, sp: 34, spCap: 14, spWave: 1, spRand: 6 },
+  a: { r: 11, hp: 200, hpWave: 14, sp: 34, spCap: 10, spWave: 1, spRand: 4, shield: 320, shieldWave: 22 },
+  s: { r: 9, hp: 70, hpWave: 6, sp: 46, spCap: 12, spWave: 1, spRand: 6, spitCd: 1.2, spitCdRand: 1.5 },
+  r: { r: 8, hp: 24, hpWave: 1.5, sp: 112, spCap: 22, spWave: 1.5, spRand: 8 },
+  d: { r: 10, hp: 140, hpWave: 12, sp: 62, spCap: 22, spWave: 1.6, spRand: 6, fire: 1.6, fireRand: 2 },
+};
+export const ENEMY_FIRST_ATTACK = .6;                          // délai avant le premier coup (s)
+export const ENEMY_MELEE_DAMAGE = { z: 8, r: 5, s: 6, a: 12, d: 14 };
+export const ENEMY_ATTACK_CD = { z: .9, r: .55, s: .9, a: 1.1, d: .9 };
+export const ENEMY_BLOCK_DAMAGE = { z: 12, b: 16, r: 6, s: 10, a: 30, d: 22 }; // coups portés aux constructions
+export const BLOCK_ATTACK_CD = .85;
+export const BARBELES_DAMAGE = 14; // par niveau de Barbelés, à chaque coup porté à une barricade
+// Diable : tir de boule de feu
+export const DEVIL_FIRE_CD = 2.1, DEVIL_FIRE_RAND = 1.6, DEVIL_RANGE = 340, DEVIL_SPREAD = .06;
+export const FIREBALL_SPEED = 230, FIREBALL_LIFE = 3, FIREBALL_DAMAGE = 15, FIREBALL_BLOCK_DAMAGE = 25;
+// Cracheur et acide
+export const SPIT_CD = 2.8, SPIT_CD_RAND = .9;
+export const ACID_SPLASH_DAMAGE = 10;
+export const ACID_TICK = .45, ACID_DAMAGE = 4;
 export const MAX_ENEMIES = 120;
 export const DROP_HP_CHANCE = .5; // caisse lâchée : santé ou munitions
 // Blindé : recul encaissé, bouclier qui arrête les coups venus de face.
@@ -105,7 +149,7 @@ export const WAVE_UNITS = {
 // Meute de coureurs : 3 + tirage dans [0, 3) + 1 par tranche de 4 vagues (3 au plus).
 export const PACK_BASE = 3, PACK_RAND = 3, PACK_WAVES_PER_RUNNER = 4, PACK_WAVE_MAX = 3;
 // Apparitions : deux par deux après la vague 6, délai qui raccourcit à chaque vague.
-export const SPAWN_DOUBLE_AFTER = 6;
+export const SPAWN_DOUBLE_AFTER = 6, SPAWN_BURST = 2;
 export const SPAWN_GAP_START = .85, SPAWN_GAP_STEP = .05, SPAWN_GAP_MIN = .16;
 
 /* ---------- Caisses de ravitaillement ---------- */
@@ -117,6 +161,7 @@ export const BOX_HP_CHANCE = .35;
 /* ---------- Moteur ---------- */
 export const MAX_PARTS = 1600;
 export const FIELD_PERIOD = .22; // recalcul du champ de distances (s)
+export const PATH_BLOCK_COST = 9; // surcoût d'une construction pour la horde : elle préfère contourner
 export const MAX_DT = 1 / 30;     // pas de simulation maximal (s)
 
 /* ---------- Entrées ---------- */

@@ -1,5 +1,5 @@
 // Déblocage des armes au fil du score.
-import { W } from '../config.js';
+import { UNLOCK_REFILLS, W } from '../config.js';
 
 // Index des armes encore verrouillées dont le seuil est atteint, dans l'ordre de l'arsenal.
 export function weaponsToUnlock(score, unlocked) {
@@ -7,4 +7,4 @@ export function weaponsToUnlock(score, unlocked) {
 }
 
 // Une arme débloquée arrive avec deux recharges de munitions.
-export function ammoOnUnlock(i) { return W[i].refill * 2; }
+export function ammoOnUnlock(i) { return W[i].refill * UNLOCK_REFILLS; }

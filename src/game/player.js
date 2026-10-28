@@ -1,6 +1,6 @@
 // Déplacement du joueur et roulade (avec ses cartes : onde de choc, munitions, traînée de feu).
 import { sfx } from '../audio/sfx.js';
-import { ROLL, W } from '../config.js';
+import { ROLL, ROLLAMMO_SHARE, ROLLBOOM_DAMAGE, ROLLBOOM_DAMAGE_LVL, ROLLBOOM_RADIUS, ROLLBOOM_RADIUS_LVL, W } from '../config.js';
 import { hurtEnemy, shockwave } from './combat.js';
 import { pad, rumble } from '../input/gamepad.js';
 import { keys } from '../input/keyboard.js';
@@ -41,10 +41,10 @@ export function tryRoll() {
 }
 function rollPerks() {
   const lb = mod('rollboom');
-  if (lb) shockwave(player.x, player.y, 50 + 22 * lb, 20 + 20 * lb);
+  if (lb) shockwave(player.x, player.y, ROLLBOOM_RADIUS + ROLLBOOM_RADIUS_LVL * lb, ROLLBOOM_DAMAGE + ROLLBOOM_DAMAGE_LVL * lb);
   const la = mod('rollammo'), wi = player.weapon, w = W[wi];
   if (la && w.refill && ammo[wi] !== Infinity) {
-    const n = Math.ceil(w.refill * .25 * la);
+    const n = Math.ceil(w.refill * ROLLAMMO_SHARE * la);
     ammo[wi] += n; pop(player.x, player.y - 46, `+${n} ${w.short}`, '#f2c230');
   }
 }

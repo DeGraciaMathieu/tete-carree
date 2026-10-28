@@ -1,6 +1,6 @@
 // Dégâts infligés et subis, mort des ennemis, explosions et ondes de choc.
 import { sfx } from '../audio/sfx.js';
-import { BLOATER_DAMAGE, BLOATER_RADIUS, T } from '../config.js';
+import { BLOATER_DAMAGE, BLOATER_RADIUS, CHAIR_RADIUS_MUL, SECOND_WIND_SHOCK_DAMAGE, SECOND_WIND_SHOCK_RADIUS, T } from '../config.js';
 import { addScore } from './score.js';
 import { damageBlock } from './weapons.js';
 import { rumble } from '../input/gamepad.js';
@@ -67,7 +67,7 @@ export function hurtPlayer(dmg, soft) {
   const revive = secondWind(player.hp, player.maxHp, S.mods, S.souffleUsed);
   if (revive) {
     S.souffleUsed = true; player.hp = revive.hp; player.invuln = revive.invuln;
-    shockwave(player.x, player.y, 110, 80);
+    shockwave(player.x, player.y, SECOND_WIND_SHOCK_RADIUS, SECOND_WIND_SHOCK_DAMAGE);
     banner('Second souffle', 'Tu te relèves'); sfx('unlock');
     return;
   }
@@ -112,7 +112,7 @@ export function explosion(x, y, R, dmg) {
 }
 /* Gonflé : zombie boursouflé qui explose */
 export function toxicBurst(x, y) {
-  explosion(x, y, BLOATER_RADIUS * Math.pow(1.4, mod('chair')), BLOATER_DAMAGE);
+  explosion(x, y, BLOATER_RADIUS * Math.pow(CHAIR_RADIUS_MUL, mod('chair')), BLOATER_DAMAGE);
   for (let k = 0; k < 18; k++) addPart({ t: 'smoke', x: x + rnd(24), y: y + rnd(24), z: 6 + Math.random() * 12, vx: rnd(60), vy: rnd(60), vz: 14 + Math.random() * 24, life: 1.6, max: 1.6, size: 7 + Math.random() * 8, color: 'rgba(150,200,70,' });
   for (let k = 0; k < 14; k++) addPart({ t: 'blood', x, y, z: 16, vx: rnd(190), vy: rnd(190), vz: 60 + Math.random() * 140, life: 2, size: 2 + Math.random() * 2.5, color: '#8fb03c' });
   for (let k = 0; k < 6; k++) {

@@ -1,6 +1,6 @@
 // Tirs, armes, constructions posées (barricades, barils) et tourelles.
 import { sfx } from '../audio/sfx.js';
-import { BARREL_HP, MH, MW, T, TURRET_EVERY, TURRET_WALL_HP, W, WALL_HP } from '../config.js';
+import { BARREL_DAMAGE, BARREL_HP, BARREL_RADIUS, GROSBARIL_RADIUS_MUL, MH, MW, SHOTS, T, TURRET_CD, TURRET_DAMAGE, TURRET_EVERY, TURRET_IDLE_CD, TURRET_KNOCK, TURRET_RANGE, TURRET_WALL_HP, W, WALL_HP } from '../config.js';
 import { explosion, hurtEnemy } from './combat.js';
 import { rumble } from '../input/gamepad.js';
 import { casing, dust, gibs, sparks } from '../render/effects.js';
@@ -79,7 +79,7 @@ export function damageBlock(b, dmg) {
 export function explodeBarrel(b) {
   if (!blocks.has(b.i)) return;
   blocks.delete(b.i); world.fieldDirty = true;
-  explosion(b.tx * T + T / 2, b.ty * T + T / 2, 80 * Math.pow(1.4, mod('grosbaril')), 120);
+  explosion(b.tx * T + T / 2, b.ty * T + T / 2, BARREL_RADIUS * Math.pow(GROSBARIL_RADIUS_MUL, mod('grosbaril')), BARREL_DAMAGE);
 }
 export function fireWeapon() {
   const wi = player.weapon, w = W[wi];
@@ -88,13 +88,13 @@ export function fireWeapon() {
   let ok = true;
   switch (w.id) {
     case 'pistol':
-      shoot(ang + jitter(.03), 420, 34, 1 + mod('perce'), 70, { t: .07, w: 1.6, c: '255,236,170' }, mod('ricochet'));
+      shoot(ang + jitter(SHOTS.pistol.spread), SHOTS.pistol.speed, SHOTS.pistol.damage, 1 + mod('perce'), SHOTS.pistol.knock, { t: .07, w: 1.6, c: '255,236,170' }, mod('ricochet'));
       player.muzzle = .05; world.shake = Math.min(16, world.shake + .8); sfx('pistol'); casing(); rumble(0, .14, 35); break;
     case 'uzi':
-      shoot(ang + jitter(.09), 380, 20, 1 + mod('perce'), 34, { t: .05, w: 1.3, c: '255,226,150' }, mod('ricochet'));
+      shoot(ang + jitter(SHOTS.uzi.spread), SHOTS.uzi.speed, SHOTS.uzi.damage, 1 + mod('perce'), SHOTS.uzi.knock, { t: .05, w: 1.3, c: '255,226,150' }, mod('ricochet'));
       player.muzzle = .04; world.shake = Math.min(16, world.shake + .5); sfx('uzi'); casing(); rumble(0, .12, 30); break;
     case 'shotgun':
-      for (let k = 0; k < 8; k++) shoot(ang + jitter(.3), 220 + rng() * 30, 24, 1, 95 * (1 + mod('calibre')), { t: .08, w: 1.2, c: '255,214,140' }, mod('ricochet'));
+      for (let k = 0; k < SHOTS.shotgun.pellets; k++) shoot(ang + jitter(SHOTS.shotgun.spread), SHOTS.shotgun.speed + rng() * SHOTS.shotgun.speedRand, SHOTS.shotgun.damage, 1, SHOTS.shotgun.knock * (1 + mod('calibre')), { t: .08, w: 1.2, c: '255,214,140' }, mod('ricochet'));
       player.muzzle = .08; world.shake = Math.min(16, world.shake + 5); sfx('shotgun'); rumble(.35, .25, 90);
       moveCircle(player, -player.fx * 4, -player.fy * 4); break;
     case 'wall': ok = placeBlock('wall'); if (!ok) sfx('click'); break;
@@ -106,7 +106,7 @@ export function fireWeapon() {
       world.rockets.push({ x: player.x + player.fx * 16, y: player.y + player.fy * 16, vx: player.fx * 540, vy: player.fy * 540, life: 1.4 });
       player.muzzle = .06; world.shake = Math.min(16, world.shake + 3); sfx('launch'); rumble(.25, .2, 90); break;
     case 'rail':
-      shoot(ang, 760, 260, Infinity, 140, { t: .35, w: 4, c: '120,230,255' });
+      shoot(ang, SHOTS.rail.speed, SHOTS.rail.damage, Infinity, SHOTS.rail.knock, { t: .35, w: 4, c: '120,230,255' });
       player.muzzle = .1; world.shake = Math.min(16, world.shake + 7); sfx('rail'); rumble(.45, .35, 120); break;
   }
   if (ok && ammo[wi] !== Infinity) ammo[wi]--;
@@ -126,16 +126,16 @@ export function updateTurret(b, dt) {
   const tu = b.turret; tu.cd -= dt; tu.flash -= dt;
   if (tu.cd > 0) return;
   const cx = b.tx * T + T / 2, cy = b.ty * T + T / 2;
-  let best = null, bd = 290 * 290;
+  let best = null, bd = TURRET_RANGE * TURRET_RANGE;
   for (const e of world.enemies) {
     if (e.dead) continue;
     const d = (e.x - cx) ** 2 + (e.y - cy) ** 2;
     if (d < bd && clearShot(cx, cy, e.x, e.y, b.i)) { bd = d; best = e; }
   }
-  if (!best) { tu.cd = .15; return; }
+  if (!best) { tu.cd = TURRET_IDLE_CD; return; }
   const d = Math.sqrt(bd) || 1, a = Math.atan2(best.y - cy, best.x - cx);
-  tu.ang = a; tu.cd = .45; tu.flash = .06;
-  hurtEnemy(best, 22, (best.x - cx) / d, (best.y - cy) / d, 40);
+  tu.ang = a; tu.cd = TURRET_CD; tu.flash = .06;
+  hurtEnemy(best, TURRET_DAMAGE, (best.x - cx) / d, (best.y - cy) / d, TURRET_KNOCK);
   const top = b.ty * T - 6;
   world.tracers.push({ x1: cx + Math.cos(a) * 16, y1: top + Math.sin(a) * .55 * 16 + 16, x2: best.x, y2: best.y, t: .06, max: .06, w: 1.4, c: '255,226,150' });
   sfx('uzi', 70);

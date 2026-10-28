@@ -1,6 +1,6 @@
 // Pas de simulation : fait avancer la partie de `dt` secondes.
 import { sfx } from '../audio/sfx.js';
-import { ACID_SPEED_MUL, BOX_HP_CHANCE, BOX_PERIOD_MIN, BOX_PERIOD_RAND, FIELD_PERIOD, FRENZY_SPEED_MUL, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MH, MW, PICK_DELAY, PLAYER_SPEED, REGEN_DELAY, REGEN_RATE, ROLL, T, W, WAVE_BONUS, WAVE_BREAK } from '../config.js';
+import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, BARBELES_DAMAGE, BLOATER_FUSE, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_PERIOD_MIN, BOX_PERIOD_RAND, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MH, MW, PICK_DELAY, PLAYER_SPEED, REGEN_DELAY, REGEN_RATE, ROCKET_DAMAGE, ROCKET_RADIUS, ROLL, T, W, WAVE_BONUS, WAVE_BREAK } from '../config.js';
 import { explosion, hurtEnemy, hurtPlayer, killEnemy, toxicBurst } from '../game/combat.js';
 import { spawnEnemy, spit, startWave, updateGlobs } from '../game/enemies.js';
 import { gameOver, openPick } from '../game/flow.js';
@@ -29,7 +29,7 @@ export function update(dt) {
   world.puddles = world.puddles.filter(p => p.t > 0);
   if (player.inAcid && !player.roll && playing) {
     player.acidT = (player.acidT || 0) - dt;
-    if (player.acidT <= 0) { player.acidT = .45; hurtPlayer(4, true); }
+    if (player.acidT <= 0) { player.acidT = ACID_TICK; hurtPlayer(ACID_DAMAGE, true); }
     if (Math.random() < dt * 12) addPart({ t: 'smoke', x: player.x + rnd(8), y: player.y + rnd(3), z: 2, vx: rnd(10), vy: rnd(6), vz: 18, life: .5, max: .5, size: 3, color: 'rgba(182,224,74,' });
   } else player.acidT = Math.min(player.acidT || 0, .12);
   updateGlobs(dt);
@@ -150,28 +150,28 @@ export function update(dt) {
       else if (e.spitCd <= 0 && e.see && dp > 70) { e.wind = .6; sfx('gurgle', 150); }
     }
     if (e.type === 'b') {
-      if (e.fuse === undefined && !player.dead && playing && dp < e.r + player.r + 14 && walkLine(e.x, e.y, player.x, player.y)) { e.fuse = .7; sfx('fuse'); }
+      if (e.fuse === undefined && !player.dead && playing && dp < e.r + player.r + 14 && walkLine(e.x, e.y, player.x, player.y)) { e.fuse = BLOATER_FUSE; sfx('fuse'); }
       if (e.fuse !== undefined) {
         e.fuse -= dt;
         if (e.fuse <= 0) { e.dead = true; gibs(e.x, e.y, 8, ['#c9b86a', '#8fd14f', '#7a4a6a']); world.bursts.push({ x: e.x, y: e.y, t: 0 }); continue; }
       }
       if (playing && Math.random() < dt * .15) sfx('gloop', 400);
     } else if (!player.dead && dp < e.r + player.r + 6 && e.atk <= 0 && playing) {
-      hurtPlayer(e.type === 'z' ? 8 : e.type === 'r' ? 5 : e.type === 's' ? 6 : e.type === 'a' ? 12 : 14); e.atk = e.type === 'r' ? .55 : e.type === 'a' ? 1.1 : .9;
+      hurtPlayer(ENEMY_MELEE_DAMAGE[e.type]); e.atk = ENEMY_ATTACK_CD[e.type];
       if (e.type === 'a' && !player.roll) { moveCircle(player, dxp / dp * 12, 0); moveCircle(player, 0, dyp / dp * 12); sfx('clang'); }
       e.vx += dxp / dp * 60; e.vy += dyp / dp * 60;
     }
     if (e.bump >= 0 && e.atk <= 0) {
       const b = blocks.get(e.bump);
-      if (b) { damageBlock(b, e.type === 'z' ? 12 : e.type === 'b' ? 16 : e.type === 'r' ? 6 : e.type === 's' ? 10 : e.type === 'a' ? 30 : 22); e.atk = .85; if (b.kind === 'wall' && mod('barbeles')) hurtEnemy(e, 14 * mod('barbeles'), 0, 0, 0); dust(b.tx * T + T / 2, b.ty * T + T / 2, 2); }
+      if (b) { damageBlock(b, ENEMY_BLOCK_DAMAGE[e.type]); e.atk = BLOCK_ATTACK_CD; if (b.kind === 'wall' && mod('barbeles')) hurtEnemy(e, BARBELES_DAMAGE * mod('barbeles'), 0, 0, 0); dust(b.tx * T + T / 2, b.ty * T + T / 2, 2); }
     }
     if (e.type === 'd' && playing && !player.dead) {
       e.fire -= dt;
       if (e.fire <= 0) {
-        e.fire = 2.1 + rng() * 1.6;
-        if (dp < 340 && los(e.x, e.y, player.x, player.y)) {
-          const a = Math.atan2(dyp, dxp) + jitter(.06);
-          world.projs.push({ x: e.x + Math.cos(a) * 12, y: e.y + Math.sin(a) * 12, vx: Math.cos(a) * 230, vy: Math.sin(a) * 230, life: 3 });
+        e.fire = DEVIL_FIRE_CD + rng() * DEVIL_FIRE_RAND;
+        if (dp < DEVIL_RANGE && los(e.x, e.y, player.x, player.y)) {
+          const a = Math.atan2(dyp, dxp) + jitter(DEVIL_SPREAD);
+          world.projs.push({ x: e.x + Math.cos(a) * 12, y: e.y + Math.sin(a) * 12, vx: Math.cos(a) * FIREBALL_SPEED, vy: Math.sin(a) * FIREBALL_SPEED, life: FIREBALL_LIFE });
           sfx('fire', 80);
         }
       }
@@ -206,8 +206,8 @@ export function update(dt) {
     p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt;
     if (Math.random() < .6) addPart({ t: 'fire', x: p.x, y: p.y, z: 14, vx: rnd(20), vy: rnd(20), vz: 20, life: .25, max: .25, size: 4 });
     const tx = Math.floor(p.x / T), ty = Math.floor(p.y / T), s = shotTile(tx, ty);
-    if (s) { if (s === 2) damageBlock(blocks.get(ty * MW + tx), 25); sparks(p.x, p.y, 5, '#ff8a3a'); p.life = 0; continue; }
-    if (!player.dead && Math.hypot(p.x - player.x, p.y - player.y) < player.r + 6) { hurtPlayer(15); sparks(p.x, p.y, 6, '#ff8a3a'); p.life = 0; }
+    if (s) { if (s === 2) damageBlock(blocks.get(ty * MW + tx), FIREBALL_BLOCK_DAMAGE); sparks(p.x, p.y, 5, '#ff8a3a'); p.life = 0; continue; }
+    if (!player.dead && Math.hypot(p.x - player.x, p.y - player.y) < player.r + 6) { hurtPlayer(FIREBALL_DAMAGE); sparks(p.x, p.y, 6, '#ff8a3a'); p.life = 0; }
   }
   world.projs = world.projs.filter(p => p.life > 0);
 
@@ -219,7 +219,7 @@ export function update(dt) {
     const nx = g.x + g.vx * dt; if (shotTile(Math.floor(nx / T), Math.floor(g.y / T))) g.vx *= -.5; else g.x = nx;
     const ny = g.y + g.vy * dt; if (shotTile(Math.floor(g.x / T), Math.floor(ny / T))) g.vy *= -.5; else g.y = ny;
     if (g.z === 0 && isVoid(g.x, g.y)) { g.t = 0; g.fell = true; sfx('toss'); }
-    if (g.t <= 0 && !g.fell) explosion(g.x, g.y, 88, 150);
+    if (g.t <= 0 && !g.fell) explosion(g.x, g.y, GRENADE_RADIUS, GRENADE_DAMAGE);
   }
   world.grenades = world.grenades.filter(g => g.t > 0);
 
@@ -233,7 +233,7 @@ export function update(dt) {
     if (hit || r.life <= 0) {
       const tx = Math.floor(nx / T), ty = Math.floor(ny / T);
       const b = blocks.get(ty * MW + tx); if (b && b.kind === 'barrel') explodeBarrel(b);
-      explosion(r.x, r.y, 72, 160); r.life = 0; continue;
+      explosion(r.x, r.y, ROCKET_RADIUS, ROCKET_DAMAGE); r.life = 0; continue;
     }
     r.x = nx; r.y = ny;
   }

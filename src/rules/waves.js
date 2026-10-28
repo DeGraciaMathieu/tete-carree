@@ -3,7 +3,7 @@
 // Les ennemis sortent par la fin du tableau (pop).
 import {
   WAVE_ZOMBIES_BASE, WAVE_ZOMBIES_PER_WAVE, WAVE_UNITS, PACK_BASE, PACK_RAND, PACK_WAVES_PER_RUNNER, PACK_WAVE_MAX,
-  PRIME_PACK_BONUS, SPAWN_DOUBLE_AFTER, SPAWN_GAP_START, SPAWN_GAP_STEP, SPAWN_GAP_MIN,
+  PRIME_PACK_BONUS, SPAWN_DOUBLE_AFTER, SPAWN_BURST, SPAWN_GAP_START, SPAWN_GAP_STEP, SPAWN_GAP_MIN,
 } from '../config.js';
 import { modLevel } from './modifiers.js';
 
@@ -28,5 +28,5 @@ export function waveQueue(n, mods, rng) {
 export function queueCount(queue) { let c = 0; for (const t of queue) c += t[0] === 'p' ? +t.slice(1) : 1; return c; }
 
 // Ennemis libérés à chaque apparition, et délai avant la suivante.
-export function spawnBurst(wave) { return wave > SPAWN_DOUBLE_AFTER ? 2 : 1; }
+export function spawnBurst(wave) { return wave > SPAWN_DOUBLE_AFTER ? SPAWN_BURST : 1; }
 export function spawnGap(wave) { return Math.max(SPAWN_GAP_MIN, SPAWN_GAP_START - wave * SPAWN_GAP_STEP); }
