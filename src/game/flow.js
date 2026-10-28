@@ -1,12 +1,13 @@
 // Enchaînement des écrans : titre, partie, pause, choix de carte, fin de partie.
 import { audio, sfx } from '../audio/sfx.js';
-import { CONSTITUTION_HP, RAR, STORAGE_BEST } from '../config.js';
+import { CONSTITUTION_HP, DIABLE_HP, RAR, STORAGE_BEST, VERRE_HP } from '../config.js';
 import { pad } from '../input/gamepad.js';
 import { releaseFire } from '../input/keyboard.js';
 import { cardIcon } from '../render/cardIcons.js';
 import { paintFloor } from '../render/floor.js';
 import { banner, buildSlots, resetHud } from '../render/hud.js';
 import { rollCards } from '../rules/cards.js';
+import { waveBreak } from '../rules/modifiers.js';
 import { S, comboTime, mod, player, resetWorld, rng, rollMax, world } from '../state/world.js';
 import { $, clamp, fmt } from '../util.js';
 
@@ -60,8 +61,9 @@ function dealCards(slots) {
   });
 }
 export function openPick() {
-  pickChoices = rollCards(S.mods, rng);
+  pickChoices = rollCards(S.mods, rng, S.legendNext);
   if (!pickChoices.length) return;
+  S.legendNext = false;
   world.state = 'pick'; releaseFire();
   pickTimers.forEach(clearTimeout); pickTimers = []; pickLocked = false;
   $('pickWave').textContent = `Vague ${S.wave} terminée`;
@@ -89,6 +91,11 @@ export function choosePick(i) {
   if (m.id === 'constitution') { player.maxHp += CONSTITUTION_HP; player.hp = Math.min(player.maxHp, player.hp + CONSTITUTION_HP); }
   if (m.id === 'double') player.rollCharges = Math.min(rollMax(), player.rollCharges + 1);
   if (m.id === 'fievre') S.comboT = Math.min(S.comboT, comboTime());
+  if (m.id === 'repit') S.breakT = Math.min(S.breakT, waveBreak(S.mods));
+  if (m.id === 'diable') S.legendNext = true;
+  // Marché du diable, Canon de verre : la vie max baisse, la vie suit sans tomber sous 1
+  const lost = m.id === 'diable' ? DIABLE_HP : m.id === 'verre' ? VERRE_HP : 0;
+  if (lost) { player.maxHp -= lost; player.hp = Math.max(1, Math.min(player.hp, player.maxHp)); }
   for (let k = 0; k < slots.length; k++) slots[k].classList.add(k === i ? 'chosen' : 'away');
   sfx('unlock');
   const sub = m.rar === 'p' ? 'Pacte scellé' : mod(m.id) > 1 ? `Niveau ${mod(m.id)}` : 'Carte obtenue';

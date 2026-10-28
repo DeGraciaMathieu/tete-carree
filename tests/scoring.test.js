@@ -30,3 +30,12 @@ test('un blindé lâche une caisse une fois sur quatre, jamais au-dessus d\'une 
   assert.equal(rollDrop('a', false, fixed(.26)), null);
   assert.equal(rollDrop('a', true, fixed(.01)), null);
 });
+
+test('Quitte ou double double les points de chaque kill', () => {
+  assert.equal(killPoints('z', { quitte: 1 }, 2), 200);
+});
+
+test('Vampire : chaque kill rend 1 PV, et Soif de sang agit dès ×1', () => {
+  assert.equal(soifHeal({ vampire: 1 }, 1), 1);
+  assert.equal(soifHeal({ vampire: 1, soif: 2 }, 1), 3);
+});

@@ -2,7 +2,7 @@
 import { ROLL, W } from '../config.js';
 import { ctx } from './canvas.js';
 import { isVoid } from '../state/arena.js';
-import { S, frenzy, player, rollMax, world } from '../state/world.js';
+import { S, frenzy, player, rollCooldown, rollMax, world } from '../state/world.js';
 import { rnd } from '../util.js';
 
 const PAL = {
@@ -332,7 +332,7 @@ function drawPlayerBody() {
   const x = player.x, y = player.y;
   // jauge de recharge de la roulade, au pied du perso
   if (player.rollCd > 0 && !player.roll) {
-    const k = 1 - player.rollCd / ROLL.CD;
+    const k = 1 - player.rollCd / rollCooldown();
     ctx.strokeStyle = 'rgba(255,255,255,.55)'; ctx.lineWidth = 1.6;
     ctx.beginPath(); ctx.ellipse(x, y + 1, 14, 6, 0, -Math.PI / 2, -Math.PI / 2 + Math.PI * 2 * k); ctx.stroke();
   } else if (player.rollReady > 0) {

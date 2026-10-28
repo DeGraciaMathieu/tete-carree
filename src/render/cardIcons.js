@@ -24,6 +24,17 @@ const PATHS = {
   frag: '<circle cx="11" cy="14" r="6"/><path d="M9 8h4V5H9z"/><path d="M13 5l4-1M19 11l3-1M19 16l3 1M17 20l2 2"/>',
   artificier: '<path d="M14 3c4 0 7 3 7 7l-9 9-7-7z"/><path d="M5 12l-2 4 3 1 1 3 4-2"/><circle cx="15" cy="9" r="2"/>',
   fievre: '<path d="M10 4a2 2 0 0 1 4 0v10a4 4 0 1 1-4 0z"/><path d="M12 9v8"/>',
+  quitte: '<path d="M4 8l6 8M10 8l-6 8"/><path d="M14 9.5a3 3 0 1 1 5 2.2L14 16h6"/>',
+  poudre: '<path d="M5 7h10v14H5z"/><path d="M5 11h10M5 17h10"/><path d="M15 7c1-3 3-4 5-2"/><path d="M21 2l-1 2M22 6h-2"/>',
+  portant: '<circle cx="16" cy="12" r="6"/><circle cx="16" cy="12" r="2"/><path d="M2 12h8M7 9l3 3-3 3"/>',
+  ravito: '<path d="M4 10a8 8 0 0 1 16 0z"/><path d="M4 10l5 7M20 10l-5 7M12 10v7"/><path d="M9 17h6v5H9z"/>',
+  repit: '<path d="M6 2h12M6 22h12"/><path d="M7 2v3l5 7 5-7V2M7 22v-3l5-7 5 7v3"/>',
+  fidele: '<path d="M3 7h16v5H9l-1 8H4l1-8H3z"/><path d="M19 9h2"/>',
+  vampire: '<path d="M3 6c3 3 15 3 18 0"/><path d="M7 8l2 7 2-6M13 9l2 6 2-7"/>',
+  brulee: '<path d="M4 14a8 8 0 1 0 3-8"/><path d="M4 3v4h4"/><path d="M12 9c-2 3-3 4-3 6a3 3 0 0 0 6 0c0-2-1-3-3-6z"/>',
+  racine: '<path d="M12 2v12"/><path d="M8 6h8"/><path d="M12 14l-6 6M12 14l6 6M12 14v8M9 17l-5 1M15 17l5 1"/>',
+  diable: '<path d="M12 22V6"/><path d="M6 3v4a6 6 0 0 0 12 0V3"/><path d="M12 2v2"/>',
+  verre: '<path d="M7 3h10l-1 7a4 4 0 0 1-8 0z"/><path d="M12 14v6M8 21h8"/><path d="M11 4l1 3-2 2"/>',
 };
 export function cardIcon(id) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${PATHS[id] || ''}</svg>`;

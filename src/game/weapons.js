@@ -7,10 +7,12 @@ import { casing, dust, gibs, sparks } from '../render/effects.js';
 import { GUNS } from '../render/sprites.js';
 import { clearShot, doorSet, frontTile, map, moveCircle, shotTile } from '../state/arena.js';
 import { S, ammo, blocks, fireMul, jitter, mod, player, rng, unlocked, world } from '../state/world.js';
+import { shotDamageMul } from '../rules/modifiers.js';
 import { clamp } from '../util.js';
 
 // pierce : nombre d'ennemis que le tir peut toucher (Infinity pour le railgun) ; bounce : rebonds restants
-function shoot(ang, range, dmg, pierce, knock, look, bounce = 0, from = null) {
+// pact : les pactes sur les dégâts des tirs s'appliquent (pas aux éclats de Fragmentation)
+function shoot(ang, range, dmg, pierce, knock, look, bounce = 0, from = null, pact = true) {
   const dx = Math.cos(ang), dy = Math.sin(ang), ox = from ? from[0] : player.x, oy = from ? from[1] : player.y;
   let endT = range, hitB = null, wallHit = false, ptx = Math.floor(ox / T), pty = Math.floor(oy / T), htx = 0, hty = 0;
   for (let t = 4; t < range; t += 4) {
@@ -29,8 +31,10 @@ function shoot(ang, range, dmg, pierce, knock, look, bounce = 0, from = null) {
   }
   hits.sort((a, b) => a[0] - b[0]);
   if (hits.length >= pierce) { hits.length = pierce; endT = Math.max(0, hits[pierce - 1][0]); hitB = null; wallHit = false; }
+  const wid = W[player.weapon].id, still = !player.moving;
   for (let k = 0; k < hits.length; k++) {
-    if (hurtEnemy(hits[k][1], dmg, dx, dy, knock, pierce === Infinity ? 'ap' : 'bullet') === 'blocked') {
+    const e = hits[k][1], mul = pact ? shotDamageMul(S.mods, wid, Math.hypot(e.x - player.x, e.y - player.y), still) : 1;
+    if (hurtEnemy(e, dmg * mul, dx, dy, knock, pierce === Infinity ? 'ap' : 'bullet') === 'blocked') {
       endT = Math.max(0, hits[k][0] - 8); hitB = null; wallHit = false; break;
     }
   }
@@ -44,13 +48,13 @@ function shoot(ang, range, dmg, pierce, knock, look, bounce = 0, from = null) {
   if (wallHit && !hitB && bounce > 0 && range - endT > 30) {
     const rdx = htx !== ptx ? -dx : dx, rdy = hty !== pty ? -dy : dy;
     const back = Math.max(0, endT - 4);
-    shoot(Math.atan2(rdy, rdx), range - endT, dmg, pierce, knock, look, bounce - 1, [ox + dx * back, oy + dy * back]);
+    shoot(Math.atan2(rdy, rdx), range - endT, dmg, pierce, knock, look, bounce - 1, [ox + dx * back, oy + dy * back], pact);
   }
 }
 // Fragmentation : n éclats en étoile depuis le point d'explosion d'une grenade
 export function fragments(x, y, n) {
   const a0 = rng() * Math.PI * 2;
-  for (let k = 0; k < n; k++) shoot(a0 + k / n * Math.PI * 2, FRAG_RANGE, FRAG_DAMAGE, 1, FRAG_KNOCK, { t: .06, w: 1.2, c: '255,200,120' }, 0, [x, y]);
+  for (let k = 0; k < n; k++) shoot(a0 + k / n * Math.PI * 2, FRAG_RANGE, FRAG_DAMAGE, 1, FRAG_KNOCK, { t: .06, w: 1.2, c: '255,200,120' }, 0, [x, y], false);
 }
 function placeBlock(kind) {
   const [tx, ty] = frontTile();
@@ -84,7 +88,7 @@ export function damageBlock(b, dmg) {
 export function explodeBarrel(b) {
   if (!blocks.has(b.i)) return;
   blocks.delete(b.i); world.fieldDirty = true;
-  explosion(b.tx * T + T / 2, b.ty * T + T / 2, BARREL_RADIUS * Math.pow(GROSBARIL_RADIUS_MUL, mod('grosbaril')), BARREL_DAMAGE);
+  explosion(b.tx * T + T / 2, b.ty * T + T / 2, BARREL_RADIUS * Math.pow(GROSBARIL_RADIUS_MUL, mod('grosbaril')), BARREL_DAMAGE, true);
 }
 export function fireWeapon() {
   const wi = player.weapon, w = W[wi];

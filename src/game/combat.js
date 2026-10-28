@@ -1,6 +1,6 @@
 // Dégâts infligés et subis, mort des ennemis, explosions et ondes de choc.
 import { sfx } from '../audio/sfx.js';
-import { BARREL_CHAIN_DELAY, BLAST_BLOCK_DAMAGE, BLAST_BLOCK_REACH, BLAST_FALLOFF, BLAST_KNOCK, BLAST_SELF_DAMAGE, BLAST_SELF_FALLOFF, BLAST_SELF_RANGE, BLOATER_DAMAGE, BLOATER_RADIUS, CHAIR_RADIUS_MUL, COMBO_HIT_DRAIN, SECOND_WIND_SHOCK_DAMAGE, SECOND_WIND_SHOCK_KNOCK, SECOND_WIND_SHOCK_RADIUS, T } from '../config.js';
+import { BARREL_CHAIN_DELAY, BLAST_BLOCK_DAMAGE, BLAST_BLOCK_REACH, BLAST_FALLOFF, BLAST_KNOCK, BLAST_SELF_DAMAGE, BLAST_SELF_FALLOFF, BLAST_SELF_RANGE, BLOATER_DAMAGE, BLOATER_RADIUS, CHAIR_RADIUS_MUL, SECOND_WIND_SHOCK_DAMAGE, SECOND_WIND_SHOCK_KNOCK, SECOND_WIND_SHOCK_RADIUS, T } from '../config.js';
 import { addScore } from './score.js';
 import { damageBlock } from './weapons.js';
 import { rumble } from '../input/gamepad.js';
@@ -8,6 +8,7 @@ import { addPart, blood, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood, stampScorch } from '../render/floor.js';
 import { banner } from '../render/hud.js';
 import { playerProtected, resolveEnemyHit, secondWind } from '../rules/damage.js';
+import { comboAfterHit, ownBlastRadius, ownBlastSelfMul } from '../rules/modifiers.js';
 import { killPoints, rollDrop, soifHeal } from '../rules/scoring.js';
 import { isVoid } from '../state/arena.js';
 import { S, blocks, comboTime, mod, multiplier, player, rng, world } from '../state/world.js';
@@ -60,7 +61,7 @@ export function hurtPlayer(dmg, soft) {
   if (player.dead || world.state !== 'play') return;
   if (playerProtected(player)) return;
   player.hp -= dmg; player.hurtT = .35; player.flash = .08; player.lastHurt = S.time;
-  if (!soft) { world.shake = Math.min(16, world.shake + 4); S.comboT = Math.max(0, S.comboT - COMBO_HIT_DRAIN); }
+  if (!soft) { world.shake = Math.min(16, world.shake + 4); S.comboT = comboAfterHit(S.mods, S.comboT); }
   blood(player.x, player.y, 4);
   sfx('hurt', 120);
   if (soft) rumble(0, .15, 50); else rumble(.6, .4, 140);
@@ -86,7 +87,9 @@ export function shockwave(x, y, R, dmg) {
   world.booms.push({ x, y, R, t: 0, max: .38, ring: true });
   dust(x, y, 8); world.shake = Math.min(16, world.shake + 4); sfx('shock', 60);
 }
-export function explosion(x, y, R, dmg) {
+// own : explosion provoquée par le joueur (baril, grenade, roquette), soumise à Poudre noire
+export function explosion(x, y, R, dmg, own = false) {
+  if (own) R = ownBlastRadius(S.mods, R);
   { const pd = Math.hypot(player.x - x, player.y - y); if (pd < 420) rumble(.75 * (1 - pd / 420), .45 * (1 - pd / 420), 220); }
   for (const e of world.enemies) {
     if (e.dead) continue;
@@ -94,7 +97,7 @@ export function explosion(x, y, R, dmg) {
     if (d < R + e.r) { const f = 1 - Math.max(0, d - e.r) / R * BLAST_FALLOFF; hurtEnemy(e, dmg * f, dx / d, dy / d, BLAST_KNOCK * f, 'blast'); }
   }
   const pd = Math.hypot(player.x - x, player.y - y);
-  if (pd < R * BLAST_SELF_RANGE) hurtPlayer(dmg * BLAST_SELF_DAMAGE * (1 - pd / R * BLAST_SELF_FALLOFF));
+  if (pd < R * BLAST_SELF_RANGE) hurtPlayer(dmg * BLAST_SELF_DAMAGE * (1 - pd / R * BLAST_SELF_FALLOFF) * (own ? ownBlastSelfMul(S.mods) : 1));
   for (const b of blocks.values()) {
     const bx = b.tx * T + T / 2, by = b.ty * T + T / 2, d = Math.hypot(bx - x, by - y);
     if (d < R + BLAST_BLOCK_REACH && d > 1) {

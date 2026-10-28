@@ -1,6 +1,6 @@
 // Pas de simulation : fait avancer la partie de `dt` secondes.
 import { sfx } from '../audio/sfx.js';
-import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, ACID_TICK_RESET, AIMANT_RANGE, AIMANT_SPEED, AMMO_NO_WEAPON_BONUS, AMMO_REFILL_WEAPONS, ARMOR_SHOVE, BARBELES_DAMAGE, BLOATER_FUSE, BLOATER_FUSE_SPEED, BLOATER_TRIGGER_REACH, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_MIN_DIST, BOX_PERIOD_MIN, BOX_PERIOD_RAND, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_HIT_REACH, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MELEE_REACH, MH, MW, PICKUP_RADIUS, PICK_DELAY, PLAYER_SPEED, REGEN_DELAY, REGEN_RATE, ROCKET_DAMAGE, ROCKET_HIT_REACH, ROCKET_RADIUS, ROLL, SPITTER_BACKOFF, SPITTER_HOLD, SPITTER_HOLD_SPEED, SPITTER_MIN_RANGE, SPITTER_SIGHT, SPITTER_TOO_CLOSE, SPITTER_WINDUP, T, W, WAVE_BONUS, WAVE_BREAK } from '../config.js';
+import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, ACID_TICK_RESET, AIMANT_RANGE, AIMANT_SPEED, AMMO_NO_WEAPON_BONUS, AMMO_REFILL_WEAPONS, ARMOR_SHOVE, BARBELES_DAMAGE, BLOATER_FUSE, BLOATER_FUSE_SPEED, BLOATER_TRIGGER_REACH, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_MIN_DIST, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_HIT_REACH, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MELEE_REACH, MH, MW, PICKUP_RADIUS, PICK_DELAY, PLAYER_SPEED, RAVITO_ZOMBIES, ROCKET_DAMAGE, ROCKET_HIT_REACH, ROCKET_RADIUS, SPITTER_BACKOFF, SPITTER_HOLD, SPITTER_HOLD_SPEED, SPITTER_MIN_RANGE, SPITTER_SIGHT, SPITTER_TOO_CLOSE, SPITTER_WINDUP, T, W, WAVE_BONUS } from '../config.js';
 import { explosion, hurtEnemy, hurtPlayer, killEnemy, toxicBurst } from '../game/combat.js';
 import { spawnEnemy, spit, startWave, updateGlobs } from '../game/enemies.js';
 import { gameOver, openPick } from '../game/flow.js';
@@ -14,10 +14,10 @@ import { VH, VW, zoom } from '../render/canvas.js';
 import { addPart, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood } from '../render/floor.js';
 import { banner } from '../render/hud.js';
-import { blastRadius, fragShards } from '../rules/modifiers.js';
+import { blastRadius, boxPeriod, fragShards, hpRate, repitBonus, speedMul, waveBreak } from '../rules/modifiers.js';
 import * as Waves from '../rules/waves.js';
 import { computeField, dist, isVoid, los, moveCircle, nextStep, openT, passable, shotTile, unstick, walkLine } from '../state/arena.js';
-import { S, ammo, blocks, cam, frenzy, jitter, mod, player, rng, rollMax, unlocked, world } from '../state/world.js';
+import { S, ammo, blocks, cam, frenzy, jitter, mod, player, rng, rollCooldown, rollMax, unlocked, world } from '../state/world.js';
 import { clamp, rnd } from '../util.js';
 
 export function update(dt) {
@@ -36,7 +36,7 @@ export function update(dt) {
   updateGlobs(dt);
 
   // joueur
-  if (player.rollCd > 0) { player.rollCd -= dt; if (player.rollCd <= 0) { player.rollCharges = Math.min(rollMax(), player.rollCharges + 1); player.rollReady = .3; if (player.rollCharges < rollMax()) player.rollCd = ROLL.CD; } }
+  if (player.rollCd > 0) { player.rollCd -= dt; if (player.rollCd <= 0) { player.rollCharges = Math.min(rollMax(), player.rollCharges + 1); player.rollReady = .3; if (player.rollCharges < rollMax()) player.rollCd = rollCooldown(); } }
   player.rollReady -= dt;
   if (playing && !player.dead && player.roll) updateRoll(dt);
   else if (playing && !player.dead) {
@@ -56,13 +56,15 @@ export function update(dt) {
         player.fx = Math.round(Math.cos(a) * 1000) / 1000; player.fy = Math.round(Math.sin(a) * 1000) / 1000;
       }
       if (l > 1) { mx /= l; my /= l; l = 1; }
-      const v = PLAYER_SPEED * (frenzy() ? FRENZY_SPEED_MUL : 1) * (player.inAcid ? ACID_SPEED_MUL : 1);
+      const v = PLAYER_SPEED * speedMul(S.mods) * (frenzy() ? FRENZY_SPEED_MUL : 1) * (player.inAcid ? ACID_SPEED_MUL : 1);
       moveCircle(player, mx * v * dt, 0); moveCircle(player, 0, my * v * dt);
       player.walk += dt * 14;
     }
     player.cd -= dt;
     if ((aiming || mouseFire || pad.fire) && player.cd <= 0) fireWeapon();
-    if (!mod('sansarmure') && S.time - player.lastHurt > REGEN_DELAY && player.hp < player.maxHp) player.hp = Math.min(player.maxHp, player.hp + REGEN_RATE * dt);
+    const rate = hpRate(S.mods, S.combo, S.time - player.lastHurt);
+    if (rate > 0) player.hp = Math.min(player.maxHp, player.hp + rate * dt);
+    else if (rate < 0) player.hp = Math.max(Math.min(1, player.hp), player.hp + rate * dt); // Vampire ne prend jamais le dernier PV
   }
   player.flash -= dt; player.hurtT -= dt; player.muzzle -= dt; player.invuln -= dt;
   if (playing && !player.dead && frenzy() && Math.random() < dt * 14) addPart({ t: 'spark', x: player.x + rnd(10), y: player.y + rnd(4), z: 8 + Math.random() * 22, vx: rnd(20), vy: rnd(20), vz: 50, life: .35, size: 1.8, color: '#f2c230' });
@@ -82,7 +84,7 @@ export function update(dt) {
         S.spawnT = Waves.spawnGap(S.wave);
       }
       if (!S.queue.length && world.enemies.length === 0) {
-        S.waveActive = false; S.breakT = WAVE_BREAK; S.pickT = PICK_DELAY;
+        S.waveActive = false; S.breakT = waveBreak(S.mods); S.pickT = PICK_DELAY; S.repit = repitBonus(S.mods, S.repit);
         const bonus = WAVE_BONUS * S.wave; addScore(bonus);
         banner('Vague terminée', 'Bonus +', 'end', bonus);
       }
@@ -92,13 +94,14 @@ export function update(dt) {
     // caisses de ravitaillement
     S.boxT -= dt;
     if (S.boxT <= 0) {
-      S.boxT = BOX_PERIOD_MIN + rng() * BOX_PERIOD_RAND;
+      S.boxT = boxPeriod(S.mods, rng());
       if (world.pickups.length < MAX_PICKUPS) {
         for (let tries = 0; tries < 40; tries++) {
           const tx = 2 + rng() * (MW - 4) | 0, ty = 2 + rng() * (MH - 4) | 0;
           const x = tx * T + T / 2, y = ty * T + T / 2;
           if (!openT(tx, ty) || Math.hypot(x - player.x, y - player.y) < BOX_MIN_DIST || dist[ty * MW + tx] > 1e8) continue;
           world.pickups.push({ x, y, kind: rng() < BOX_HP_CHANCE ? 'hp' : 'ammo', ph: Math.random() * 6 });
+          if (mod('ravito')) for (let k = 0; k < RAVITO_ZOMBIES; k++) spawnEnemy('z');
           break;
         }
       }
@@ -221,7 +224,7 @@ export function update(dt) {
     const ny = g.y + g.vy * dt; if (shotTile(Math.floor(g.x / T), Math.floor(ny / T))) g.vy *= -.5; else g.y = ny;
     if (g.z === 0 && isVoid(g.x, g.y)) { g.t = 0; g.fell = true; sfx('toss'); }
     if (g.t <= 0 && !g.fell) {
-      explosion(g.x, g.y, blastRadius(S.mods, GRENADE_RADIUS), GRENADE_DAMAGE);
+      explosion(g.x, g.y, blastRadius(S.mods, GRENADE_RADIUS), GRENADE_DAMAGE, true);
       const n = fragShards(S.mods); if (n) fragments(g.x, g.y, n);
     }
   }
@@ -237,7 +240,7 @@ export function update(dt) {
     if (hit || r.life <= 0) {
       const tx = Math.floor(nx / T), ty = Math.floor(ny / T);
       const b = blocks.get(ty * MW + tx); if (b && b.kind === 'barrel') explodeBarrel(b);
-      explosion(r.x, r.y, blastRadius(S.mods, ROCKET_RADIUS), ROCKET_DAMAGE); r.life = 0; continue;
+      explosion(r.x, r.y, blastRadius(S.mods, ROCKET_RADIUS), ROCKET_DAMAGE, true); r.life = 0; continue;
     }
     r.x = nx; r.y = ny;
   }
@@ -260,7 +263,7 @@ export function update(dt) {
       p.taken = true; sfx('pickup');
       if (p.kind === 'hp') { player.hp = Math.min(player.maxHp, player.hp + MEDKIT_HP); pop(p.x, p.y - 30, `+${MEDKIT_HP} santé`, '#62c46e'); }
       else {
-        const pool = W.map((w, i) => i).filter(i => i > 0 && unlocked[i]);
+        const pool = mod('fidele') ? [] : W.map((w, i) => i).filter(i => i > 0 && unlocked[i]); // Fidélité : plus aucune recharge
         if (!pool.length) { addScore(AMMO_NO_WEAPON_BONUS); pop(p.x, p.y - 30, `+${AMMO_NO_WEAPON_BONUS}`, '#ffffff'); }
         else {
           const picks = pool.sort(() => rng() - .5).slice(0, AMMO_REFILL_WEAPONS);

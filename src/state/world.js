@@ -11,10 +11,11 @@ export let rng = Math.random;
 export const jitter = (a = 1) => (rng() * 2 - 1) * a;
 
 export const mod = id => Mods.modLevel(S && S.mods, id);
-export function frenzy() { return Mods.frenzy(S.mods, S.combo); }
-export function fireMul() { return Mods.fireMul(S.mods, S.combo); }
+export function frenzy() { return Mods.frenzy(S.mods, S.combo, S.repit); }
+export function fireMul() { return Mods.fireMul(S.mods, S.combo, S.repit); }
 export function comboTime() { return Mods.comboTime(S.mods); }
 export function rollMax() { return Mods.rollMax(S.mods); }
+export function rollCooldown() { return Mods.rollCooldown(S.mods); }
 
 // État de partie réaffecté depuis plusieurs modules : un module ES ne peut pas réaffecter
 // une liaison importée, ces valeurs vivent donc comme propriétés d'un objet partagé.
@@ -48,7 +49,7 @@ try { world.best = +localStorage.getItem(STORAGE_BEST) || 0; } catch (e) {}
 export function resetWorld() {
   rng = createRng(Math.random() * 4294967296);
   buildMap();
-  S = { score: 0, wave: 0, waveActive: false, breakT: FIRST_BREAK, queue: [], spawnT: 0, combo: 0, comboT: 0, bestCombo: 0, kills: 0, time: 0, boxT: BOX_FIRST, fieldT: 0, overT: 0, mods: {}, wallCount: 0, souffleUsed: false, pickT: 0 };
+  S = { score: 0, wave: 0, waveActive: false, breakT: FIRST_BREAK, queue: [], spawnT: 0, combo: 0, comboT: 0, bestCombo: 0, kills: 0, time: 0, boxT: BOX_FIRST, fieldT: 0, overT: 0, mods: {}, wallCount: 0, souffleUsed: false, pickT: 0, repit: 0, legendNext: false };
   player = { x: 22 * T, y: 15 * T + 4, r: PLAYER_RADIUS, hp: PLAYER_HP, fx: 0, fy: 1, cd: 0, weapon: 0, hurtT: 0, flash: 0, walk: 0, moving: false, muzzle: 0, lastHurt: -9, dead: false, roll: null, rollCd: 0, rollReady: 0, maxHp: PLAYER_HP, rollCharges: 1, invuln: 0 };
   world.enemies = []; world.projs = []; world.grenades = []; world.rockets = []; world.parts = []; world.tracers = []; world.pops = []; world.booms = []; world.pickups = []; world.pending = []; world.bursts = []; world.fires = []; world.fallers = []; world.globs = []; world.puddles = [];
   blocks = new Map();
@@ -56,6 +57,6 @@ export function resetWorld() {
   ammo = W.map(w => w.unlock === 0 ? Infinity : 0);
   cam = { x: player.x, y: player.y }; world.shake = 0; world.fieldDirty = true;
 }
-export function multiplier() { return Mods.multiplier(S.combo, S.mods); }
+export function multiplier() { return Mods.multiplier(S.combo, S.mods, S.repit); }
 
 export function queueCount() { return Waves.queueCount(S.queue); }

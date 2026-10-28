@@ -37,10 +37,19 @@ Coût d'implémentation : **S** une constante ou une ligne, **M** une branche da
 | Carte | Avantage | Contrepartie | Coût |
 | --- | --- | --- | --- |
 | ✅ **Fièvre** (`fievre`) | Un cran de multiplicateur tous les 3 kills au lieu de 5 | Fenêtre de combo réduite de 50 % | S : `multiplier`, `comboTime` |
-| **Vampire** | Chaque kill rend 1 PV, dès × 1 | −30 % de PV max | S |
-| **Terre brûlée** | Tes explosions laissent des flammes au sol | Elles te blessent deux fois plus | M : réutilise les flammes de Traînée de feu |
+| ✅ **Quitte ou double** (`quitte`) | Points × 2 sur chaque kill | Un coup encaissé remet le combo à zéro | S : `killPoints`, `comboAfterHit` |
+| ✅ **Poudre noire** (`poudre`) | Rayon des barils, grenades et roquettes +50 % | Leurs explosions te blessent deux fois plus | S : `explosion(…, own)` |
+| ✅ **Bout portant** (`portant`) | Tirs × 2 à moins de 3 cases | × 0,5 au-delà | S : `shotDamageMul` |
+| ✅ **Ravitaillement** (`ravito`) | Caisses de ravitaillement deux fois plus fréquentes | Chaque caisse larguée fait entrer un zombie | S : `boxPeriod`, section « caisses » de `update` |
+| ✅ **Sans répit** (`repit`) | +1 cran de multiplicateur par vague terminée, jusqu'à +5 | Pause entre les vagues réduite de 50 % | M : `S.repit`, `waveBreak` |
+| ✅ **Fidélité** (`fidele`) | Dégâts du pistolet × 3 | Les caisses ne rechargent plus les autres armes | S : `shotDamageMul`, ramassage |
+| ✅ **Vampire** (`vampire`) | Chaque kill rend 1 PV, Soif de sang dès × 1 | Sans combo, −1 PV/s au lieu de régénérer | S : `soifHeal`, `hpRate` |
+| ✅ **Terre brûlée** (`brulee`) | Roulade rechargée deux fois plus vite | Chaque roulade coûte 5 PV | S : `rollCooldown`, `rollHpCost` |
+| ✅ **Enraciné** (`racine`) | Tirs × 2 à l'arrêt | Déplacement −30 % | S : `shotDamageMul`, `speedMul` |
+| ✅ **Marché du diable** (`diable`) | Une Légendaire garantie au prochain choix | −25 PV max, définitivement | M : `rollCards(…, legend)` |
+| ✅ **Canon de verre** (`verre`) | Tirs × 1,5 | −40 PV max | S : `shotDamageMul`, `choosePick` |
+| **Napalm** | Tes explosions laissent des flammes au sol | Elles te blessent deux fois plus | M : réutilise les flammes de Traînée de feu |
 | **Pistolero** | Le pistolet tire 3 balles en éventail | Les ennemis ne lâchent plus de caisses de munitions | M |
-
 ## Effet sur le tirage
 
 Chaque carte pèse selon sa rareté (`RAR`) : en ajouter dilue les autres. Avec 4 communes de plus,

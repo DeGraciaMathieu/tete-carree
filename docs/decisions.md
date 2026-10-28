@@ -206,3 +206,14 @@ Decisions the code does not settle and that were not made. Never resolved by gue
 - Combo tenace annonce « le combo tient X s au lieu de Y s » sans tenir compte de Fièvre, qui divise
   cette fenêtre par deux : `desc(n)` ne reçoit que le niveau, pas les autres cartes prises. Faut-il
   passer `S.mods` aux textes des cartes, ou rester sur une formulation relative (« +1,4 s ») ?
+- Poids des pactes : avec 15 pactes au poids 12 (`RAR.p.w`), un pacte pèse environ 19 % du tirage au
+  lieu de 6 % avec 4 pactes. Faut-il baisser leur poids pour qu'ils restent rares ?
+- Cumuls de pactes laissés libres : Vampire + Sans armure (aucune régénération et perte de vie sans
+  combo), Quitte ou double + Fièvre (deux pactes sur le combo), Marché du diable + Canon de verre
+  (35 PV max sans Constitution). Faut-il interdire certains couples ?
+- Sans répit plafonné à +5 crans (`REPIT_MAX`), choix d'implémentation non demandé : faut-il un
+  autre plafond, ou aucun ?
+- Vampire et Terre brûlée ne prennent jamais le dernier PV (pas de mort hors d'un coup ennemi ou
+  d'une explosion) : choix d'implémentation, annoncé sur la carte.
+- Ravitaillement : le zombie entre aussi pendant la pause entre les vagues ; il ne compte pas dans
+  la file de la vague et prolonge celle en cours s'il arrive avant sa fin. À garder ?

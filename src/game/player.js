@@ -6,9 +6,9 @@ import { pad, rumble } from '../input/gamepad.js';
 import { keys } from '../input/keyboard.js';
 import { stick } from '../input/touch.js';
 import { addPart, dust, pop } from '../render/effects.js';
-import { rollAmmo, shoveKnock } from '../rules/modifiers.js';
+import { rollAmmo, rollHpCost, shoveKnock } from '../rules/modifiers.js';
 import { circleTouchesVoid, moveCircle, unstick } from '../state/arena.js';
-import { S, ammo, mod, player, rollMax, world } from '../state/world.js';
+import { S, ammo, mod, player, rollCooldown, rollMax, world } from '../state/world.js';
 import { rnd } from '../util.js';
 
 export function moveInput() {
@@ -39,6 +39,7 @@ export function tryRoll() {
   player.roll = { t: 0, dx, dy, sgn, dist: 0, trail: [], trailT: 0, fireT: 0, shoved: new Set(), landed: false, started: false, fly: rollClears(dx, dy) };
   player.rollCharges--;
   player.moving = false;
+  player.hp -= rollHpCost(S.mods, player.hp);
 }
 function rollPerks() {
   const lb = mod('rollboom');
@@ -84,7 +85,7 @@ export function updateRoll(dt) {
     r.dist += Math.hypot(player.x - ox, player.y - oy);
   }
   if (r.t >= ROLL.D && circleTouchesVoid(player, 0)) unstick(player);
-  if (r.t >= ROLL.D) { player.roll = null; if (player.rollCd <= 0 && player.rollCharges < rollMax()) player.rollCd = ROLL.CD; }
+  if (r.t >= ROLL.D) { player.roll = null; if (player.rollCd <= 0 && player.rollCharges < rollMax()) player.rollCd = rollCooldown(); }
 }
 export function updateFires(dt) {
   if (!world.fires.length) return;

@@ -28,6 +28,7 @@ export const SOIF_MULTIPLIER = 3;   // Soif de sang soigne à partir de ×3
 /* ---------- Cartes de modificateurs ---------- */
 export const RAR = { c: { name: 'Commune', w: 55 }, r: { name: 'Rare', w: 28 }, l: { name: 'Légendaire', w: 9 }, p: { name: 'Pacte', w: 12 } };
 const pct = x => Math.round(x * 100) + ' %';
+const num = x => String(x).replace('.', ',');
 export const MODS = [
   { id: 'perce', rar: 'c', max: 3, name: 'Balles perforantes', short: 'Perforantes', desc: n => `Les balles du pistolet, de l'Uzi et du fusil d'assaut traversent ${n} ennemi${n > 1 ? 's' : ''} de plus.` },
   { id: 'ricochet', rar: 'r', max: 2, name: 'Ricochet', short: 'Ricochet', desc: n => `Balles et plombs rebondissent ${n > 1 ? n + ' fois' : 'une fois'} sur les murs.` },
@@ -53,6 +54,17 @@ export const MODS = [
   { id: 'frag', rar: 'r', max: 2, name: 'Fragmentation', short: 'Fragmentation', desc: n => `Chaque grenade projette ${FRAG_SHARDS * n} éclats en explosant.` },
   { id: 'artificier', rar: 'c', max: 2, name: 'Artificier', short: 'Artificier', desc: n => `Rayon d'explosion des grenades et des roquettes +${pct(Math.pow(ARTIFICIER_RADIUS_MUL, n) - 1)}.` },
   { id: 'fievre', rar: 'p', max: 1, name: 'Fièvre', short: 'Fièvre', plus: () => `Un cran de multiplicateur tous les ${FIEVRE_KILLS_PER_MULTIPLIER} kills au lieu de ${KILLS_PER_MULTIPLIER}`, minus: () => `La fenêtre de combo est réduite de ${pct(1 - FIEVRE_COMBO_MUL)}` },
+  { id: 'quitte', rar: 'p', max: 1, name: 'Quitte ou double', short: 'Quitte ou double', plus: () => `Points ×${QUITTE_POINTS_MUL} sur chaque kill`, minus: () => `Un coup encaissé remet le combo à zéro` },
+  { id: 'poudre', rar: 'p', max: 1, name: 'Poudre noire', short: 'Poudre noire', plus: () => `Rayon d'explosion des barils, grenades et roquettes +${pct(POUDRE_RADIUS_MUL - 1)}`, minus: () => `Leurs explosions te blessent ${POUDRE_SELF_MUL === 2 ? 'deux' : POUDRE_SELF_MUL} fois plus` },
+  { id: 'portant', rar: 'p', max: 1, name: 'Bout portant', short: 'Bout portant', plus: () => `Tes tirs font ${num(PORTANT_NEAR_MUL)} fois plus de dégâts à moins de ${PORTANT_RANGE} cases`, minus: () => `Au-delà, ils n'en font plus que ${pct(PORTANT_FAR_MUL)}` },
+  { id: 'ravito', rar: 'p', max: 1, name: 'Ravitaillement', short: 'Ravitaillement', plus: () => `Les caisses de ravitaillement tombent deux fois plus souvent`, minus: () => `Chaque caisse larguée fait entrer ${RAVITO_ZOMBIES > 1 ? RAVITO_ZOMBIES + ' zombies' : 'un zombie'} dans l'arène` },
+  { id: 'repit', rar: 'p', max: 1, name: 'Sans répit', short: 'Sans répit', plus: () => `+1 cran de multiplicateur à chaque vague terminée, jusqu'à +${REPIT_MAX}`, minus: () => `Pause entre les vagues réduite de ${pct(1 - REPIT_BREAK_MUL)}` },
+  { id: 'fidele', rar: 'p', max: 1, name: 'Fidélité', short: 'Fidélité', plus: () => `Dégâts du pistolet ×${FIDELE_PISTOL_MUL}`, minus: () => `Les caisses de munitions ne rechargent plus les autres armes` },
+  { id: 'vampire', rar: 'p', max: 1, name: 'Vampire', short: 'Vampire', plus: () => `Chaque kill rend ${VAMPIRE_HEAL} PV, et Soif de sang agit dès ×1`, minus: () => `Sans combo, tu perds ${VAMPIRE_DRAIN} PV par seconde au lieu de régénérer (jamais le dernier)` },
+  { id: 'brulee', rar: 'p', max: 1, name: 'Terre brûlée', short: 'Terre brûlée', plus: () => `La roulade se recharge deux fois plus vite`, minus: () => `Chaque roulade coûte ${BRULEE_ROLL_HP} PV (jamais le dernier)` },
+  { id: 'racine', rar: 'p', max: 1, name: 'Enraciné', short: 'Enraciné', plus: () => `Tes tirs font ${num(RACINE_DAMAGE_MUL)} fois plus de dégâts quand tu es immobile`, minus: () => `Déplacement −${pct(1 - RACINE_SPEED_MUL)}` },
+  { id: 'diable', rar: 'p', max: 1, name: 'Marché du diable', short: 'Marché du diable', plus: () => `Une carte Légendaire garantie au prochain choix`, minus: () => `−${DIABLE_HP} PV max, définitivement` },
+  { id: 'verre', rar: 'p', max: 1, name: 'Canon de verre', short: 'Canon de verre', plus: () => `Tes tirs font ${num(VERRE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `−${VERRE_HP} PV max` },
 ];
 
 /* ---------- Effets des cartes ---------- */
@@ -71,6 +83,19 @@ export const FIEVRE_KILLS_PER_MULTIPLIER = 3; // Fièvre : kills par cran de mul
 export const FIEVRE_COMBO_MUL = .5;           // Fièvre : fenêtre de combo × 0,5
 // Coup d'épaule : dégâts et recul infligés aux ennemis traversés par la roulade (recul + par niveau au-delà du premier)
 export const EPAULE_DAMAGE = 10, EPAULE_KNOCK = 200, EPAULE_KNOCK_LVL = 80, EPAULE_REACH = 4;
+// Pactes : Quitte ou double, Poudre noire, Bout portant, Ravitaillement, Sans répit, Fidélité, Vampire,
+// Terre brûlée, Enraciné, Marché du diable, Canon de verre. « Tes tirs » : balles, plombs et railgun du joueur.
+export const QUITTE_POINTS_MUL = 2;
+export const POUDRE_RADIUS_MUL = 1.5, POUDRE_SELF_MUL = 2;
+export const PORTANT_RANGE = 3, PORTANT_NEAR_MUL = 2, PORTANT_FAR_MUL = .5; // portée en cases
+export const RAVITO_PERIOD_MUL = .5, RAVITO_ZOMBIES = 1;
+export const REPIT_MAX = 5, REPIT_BREAK_MUL = .5;
+export const FIDELE_PISTOL_MUL = 3;
+export const VAMPIRE_HEAL = 1, VAMPIRE_DRAIN = 1; // PV par kill ; PV perdus par seconde sans combo
+export const BRULEE_ROLL_CD_MUL = .5, BRULEE_ROLL_HP = 5;
+export const RACINE_DAMAGE_MUL = 2, RACINE_SPEED_MUL = .7;
+export const DIABLE_HP = 25;
+export const VERRE_DAMAGE_MUL = 1.5, VERRE_HP = 40;
 export const CARDS_PER_PICK = 3;
 
 /* ---------- Joueur ---------- */

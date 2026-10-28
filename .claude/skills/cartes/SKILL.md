@@ -44,13 +44,24 @@ large, elles se couchent.
 | `souffle` | `secondWind` (`rules/damage.js`) appelé par `hurtPlayer` ; `S.souffleUsed` ; marque dans le HUD |
 | `prime` (pacte) | `killPoints` (`PRIME_POINTS_MUL`) et `waveQueue` (`PRIME_PACK_BONUS`) |
 | `chair` (pacte) | `killPoints` (`CHAIR_POINTS_MUL`) et explosion du Gonflé (`CHAIR_RADIUS_MUL`, `game/combat.js`) ; rayon affiché dans `render/scene.js` |
+| `quitte` (pacte) | `killPoints` via `quittePoints` (`QUITTE_POINTS_MUL`) ; `comboAfterHit` appelé par `hurtPlayer` |
+| `poudre` (pacte) | `explosion(…, own)` (`game/combat.js`) : `ownBlastRadius`, `ownBlastSelfMul` ; `own` vrai pour barils, grenades, roquettes |
+| `portant`, `fidele`, `racine`, `verre` (pactes, dégâts) | `shotDamageMul` (`rules/modifiers.js`) appelé par `shoot` (`game/weapons.js`) pour chaque ennemi touché ; pas pour les éclats de Fragmentation ni la tourelle |
+| `fidele` (pacte, munitions) | section « ramassage » de `update` : plus d'arme à recharger, la caisse donne `AMMO_NO_WEAPON_BONUS` |
+| `racine` (pacte, vitesse) | `speedMul` dans `update` |
+| `ravito` (pacte) | `boxPeriod` et `spawnEnemy('z')` × `RAVITO_ZOMBIES` dans la section « caisses » de `update` |
+| `repit` (pacte) | `repitBonus` en fin de vague → `S.repit`, passé à `multiplier`/`frenzy`/`fireMul` ; `waveBreak` ; pause en cours raccourcie dans `choosePick` |
+| `vampire` (pacte) | `soifHeal` (`VAMPIRE_HEAL`) ; `hpRate` dans `update` (`VAMPIRE_DRAIN`, jamais le dernier PV) |
+| `brulee` (pacte) | `rollCooldown` (`update`, `updateRoll`, jauge de `render/sprites.js`) ; `rollHpCost` dans `tryRoll` |
+| `diable` (pacte) | `choosePick` : vie max −`DIABLE_HP`, `S.legendNext` ; `rollCards(mods, rng, legend)` tire une Légendaire en premier et retire le pacte quand il n'en reste plus |
+| `verre` (pacte, vie) | `choosePick` : vie max −`VERRE_HP` |
 
 ## Combo, multiplicateur, score
 
 | Concept | Implémentation |
 | --- | --- |
-| Combo | `S.combo` (+1 par kill dans `killEnemy`), `S.comboT` remis à `comboTime()` ; décroît dans `update`, retombe à 0 à expiration ; un coup encaissé retire `COMBO_HIT_DRAIN` s (`hurtPlayer`) |
-| Multiplicateur | `multiplier(combo, mods) = 1 + floor(combo / KILLS_PER_MULTIPLIER)` (`rules/modifiers.js`), `FIEVRE_KILLS_PER_MULTIPLIER` sous Fièvre |
+| Combo | `S.combo` (+1 par kill dans `killEnemy`), `S.comboT` remis à `comboTime()` ; décroît dans `update`, retombe à 0 à expiration ; un coup encaissé retire `COMBO_HIT_DRAIN` s, ou tout sous Quitte ou double (`comboAfterHit`, `hurtPlayer`) |
+| Multiplicateur | `multiplier(combo, mods, bonus) = 1 + bonus + floor(combo / KILLS_PER_MULTIPLIER)` (`rules/modifiers.js`), `FIEVRE_KILLS_PER_MULTIPLIER` sous Fièvre ; `bonus` = crans de Sans répit (`S.repit`) |
 | Frénésie | active si la carte est prise et `multiplier ≥ FRENZY_MULTIPLIER` |
 | Points d'un kill | `killPoints(type, mods, multiplier)` (`rules/scoring.js`, `KILL_POINTS`) |
 | Ajout au score | `addScore(n)` (`game/score.js`) : seul point d'entrée, déclenche les déblocages d'armes |

@@ -1,6 +1,9 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock } from '../src/rules/modifiers.js';
+import {
+  multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, repitBonus, waveBreak,
+  boxPeriod, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
+} from '../src/rules/modifiers.js';
 
 test('le multiplicateur gagne un cran tous les 5 kills enchaînés', () => {
   assert.equal(multiplier(0), 1);
@@ -72,4 +75,72 @@ test('Coup d\'épaule bouscule plus fort au niveau 2, pas du tout sans la carte'
   assert.equal(shoveKnock({}), 0);
   assert.equal(shoveKnock({ epaule: 1 }), 200);
   assert.equal(shoveKnock({ epaule: 2 }), 280);
+});
+
+test('Quitte ou double : un coup encaissé vide le combo au lieu de lui retirer 0,6 s', () => {
+  assert.ok(Math.abs(comboAfterHit({}, 2) - 1.4) < 1e-9);
+  assert.equal(comboAfterHit({ quitte: 1 }, 2), 0);
+});
+
+test('Sans répit : un cran de plus à chaque vague terminée, jusqu\'à +5, et une pause moitié plus courte', () => {
+  assert.equal(repitBonus({}, 0), 0);
+  assert.equal(repitBonus({ repit: 1 }, 0), 1);
+  assert.equal(repitBonus({ repit: 1 }, 5), 5);
+  assert.equal(multiplier(0, {}, 2), 3);
+  assert.equal(waveBreak({}), 10);
+  assert.equal(waveBreak({ repit: 1 }), 5);
+});
+
+test('les crans de Sans répit comptent pour entrer en Frénésie', () => {
+  assert.equal(frenzy({ frenesie: 1 }, 0, 3), false);
+  assert.equal(frenzy({ frenesie: 1 }, 5, 3), true);
+});
+
+test('Ravitaillement : les caisses tombent deux fois plus souvent', () => {
+  assert.equal(boxPeriod({}, 0), 9);
+  assert.equal(boxPeriod({ ravito: 1 }, 1), 7);
+});
+
+test('Vampire : sans combo, le joueur perd 1 PV par seconde au lieu de régénérer', () => {
+  assert.equal(hpRate({}, 0, 5), 3);
+  assert.equal(hpRate({}, 0, 2), 0);
+  assert.equal(hpRate({ sansarmure: 1 }, 0, 5), 0);
+  assert.equal(hpRate({ vampire: 1 }, 0, 5), -1);
+  assert.equal(hpRate({ vampire: 1 }, 4, 5), 3);
+});
+
+test('Terre brûlée : roulade rechargée deux fois plus vite, au prix de 5 PV, jamais le dernier', () => {
+  assert.equal(rollCooldown({}), .7);
+  assert.equal(rollCooldown({ brulee: 1 }), .35);
+  assert.equal(rollHpCost({}, 50), 0);
+  assert.equal(rollHpCost({ brulee: 1 }, 50), 5);
+  assert.equal(rollHpCost({ brulee: 1 }, 3), 2);
+  assert.equal(rollHpCost({ brulee: 1 }, 1), 0);
+});
+
+test('Enraciné : dégâts doublés à l\'arrêt, déplacement ralenti de 30 %', () => {
+  assert.equal(speedMul({}), 1);
+  assert.equal(speedMul({ racine: 1 }), .7);
+  assert.equal(shotDamageMul({ racine: 1 }, 'uzi', 200, true), 2);
+  assert.equal(shotDamageMul({ racine: 1 }, 'uzi', 200, false), 1);
+});
+
+test('Bout portant : dégâts doublés à moins de 3 cases, divisés par deux au-delà', () => {
+  assert.equal(shotDamageMul({ portant: 1 }, 'shotgun', 90, false), 2);
+  assert.equal(shotDamageMul({ portant: 1 }, 'rail', 100, false), .5);
+  assert.equal(shotDamageMul({}, 'rail', 100, false), 1);
+});
+
+test('Fidélité ne triple que les dégâts du pistolet, Canon de verre renforce tous les tirs', () => {
+  assert.equal(shotDamageMul({ fidele: 1 }, 'pistol', 200, false), 3);
+  assert.equal(shotDamageMul({ fidele: 1 }, 'uzi', 200, false), 1);
+  assert.equal(shotDamageMul({ verre: 1 }, 'rifle', 200, false), 1.5);
+  assert.equal(shotDamageMul({ fidele: 1, verre: 1, portant: 1, racine: 1 }, 'pistol', 50, true), 18);
+});
+
+test('Poudre noire : explosions du joueur 50 % plus larges, et deux fois plus douloureuses pour lui', () => {
+  assert.equal(ownBlastRadius({}, 80), 80);
+  assert.equal(ownBlastRadius({ poudre: 1 }, 80), 120);
+  assert.equal(ownBlastSelfMul({}), 1);
+  assert.equal(ownBlastSelfMul({ poudre: 1 }), 2);
 });
