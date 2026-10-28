@@ -22,7 +22,7 @@ L'aléa cosmétique (`Math.random`, `rnd`) y est permis ; jamais `rng`, qui fera
 | Sol | `floorC`/`fctx` (`render/floor.js`), repeint à chaque nouvelle partie par `paintFloor()` (`newGame`), puis tamponné en jeu (`stampBlood`, `stampScorch`) |
 | Particules | `addPart({ t, x, y, z, vx, vy, vz, life, size, color })` (`render/effects.js`), plafond `MAX_PARTS` ; aides `blood`, `gibs`, `sparks`, `dust`, `casing`, `pop` (texte flottant) ; physique dans `update` (section « particules ») |
 | Perspective 3/4 | hauteur `z` soustraite à `y` à l'affichage ; ellipses d'ombre aplaties |
-| HUD (DOM) | `render/hud.js` : `buildSlots`, `updateHud` (cache `setText`/`setStyle` pour n'écrire que ce qui change), `resetHud`, `banner(m, s, kind, count)` |
+| HUD (DOM) | `render/hud.js` : `buildSlots`, `updateHud` (cache `setText`/`setStyle` pour n'écrire que ce qui change), `resetHud`, `banner(m, s, kind, count)` ; portrait du héros `renderFace` (canvas `#face` de 13 × 13 : intact, blessé sous 60 % de la vie max, critique sous `LOW_HP`, mort ; redessiné seulement quand son apparence change, sursaut CSS `jolt` à chaque perte de vie) |
 | Compteur de FPS | `render/fps.js` : `fpsOn` = réglage enregistré (`STORAGE_FPS`) sinon `SHOW_FPS_BY_DEFAULT` (`false`) ; `setFps`, `tickFps` |
 | Écrans | éléments de `index.html` (`#titleScreen`, `#pickScreen`, `#pauseScreen`, `#overScreen`) montrés par `hidden`, pilotés par `game/flow.js` |
 

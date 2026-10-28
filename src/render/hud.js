@@ -51,12 +51,41 @@ function renderMods() {
   $('mods').innerHTML = html;
   $('pauseMods').innerHTML = html || `<span class="none">Aucune carte pour l'instant</span>`;
 }
+// Portrait : la tête carrée du héros, 13 × 13 pixels, encaisse avec lui. Quatre états : intact, blessé (sous 60 %
+// de la vie max : pansement, moue), critique (sous LOW_HP : yeux plissés, sang), mort (yeux en croix). Blanchit le temps
+// du flash d'un coup ; cligne des yeux de temps en temps. Redessiné seulement quand son apparence change.
+const FACE_HURT = .6, faceCtx = $('face').getContext('2d');
+function renderFace() {
+  const mood = player.dead || player.hp <= 0 ? 'dead' : player.hp < LOW_HP ? 'crit' : player.hp < player.maxHp * FACE_HURT ? 'hurt' : 'ok';
+  const flash = player.flash > 0, blink = (mood === 'ok' || mood === 'hurt') && S.time % 3.2 < .12;
+  const sig = mood + (flash ? 'f' : '') + (blink ? 'b' : '');
+  if (hudCache.face === sig) return;
+  hudCache.face = sig;
+  const c = faceCtx, P = (col, x, y, w = 1, h = 1) => { c.fillStyle = flash ? '#ffffff' : col; c.fillRect(x, y, w, h); };
+  c.clearRect(0, 0, 13, 13);
+  P('#1b1b1b', 1, 1, 11, 12); P('#e2b48a', 2, 2, 9, 10); P('#4f3322', 2, 1, 9, 2);
+  P('#c23a2e', 2, 3, 9, 1); P('#c23a2e', 0, 3, 2, 1); P('#c23a2e', 0, 4, 1, 1); // bandeau
+  if (mood === 'dead') {
+    for (const x of [3, 7]) { P('#1b1b1b', x, 5); P('#1b1b1b', x + 2, 5); P('#1b1b1b', x + 1, 6); P('#1b1b1b', x, 7); P('#1b1b1b', x + 2, 7); }
+    P('#1b1b1b', 4, 10, 5, 1);
+    return;
+  }
+  if (blink) { P('#1b1b1b', 3, 6, 2, 1); P('#1b1b1b', 8, 6, 2, 1); }
+  else if (mood === 'crit') { P('#1b1b1b', 3, 6, 2, 1); P('#1b1b1b', 8, 6, 2, 1); P('#1b1b1b', 3, 5); P('#1b1b1b', 9, 5); }
+  else { P('#1b1b1b', 4, 5, 1, 2); P('#1b1b1b', 8, 5, 1, 2); P('#ffffff', 3, 5); P('#ffffff', 7, 5); }
+  if (mood !== 'ok') { P('#d9cfb8', 8, 8, 3, 1); P('#d9cfb8', 9, 7, 1, 3); } // pansement
+  if (mood === 'crit') { P('#9c1a16', 3, 8, 1, 2); P('#9c1a16', 2, 10); P('#9c1a16', 6, 2, 1, 2); P('#5a2420', 4, 10, 5, 1); }
+  else if (mood === 'hurt') { P('#5a2420', 5, 10, 3, 1); P('#5a2420', 4, 9); P('#5a2420', 8, 9); }
+  else { P('#5a2420', 5, 10, 3, 1); P('#5a2420', 4, 9); }
+}
 // Santé : la traînée claire reste sur la vie perdue puis fond (transition CSS) ; un soin la recale aussitôt.
+// Le portrait sursaute à chaque perte de vie.
 function renderHp() {
   const pct = Math.max(0, player.hp) / player.maxHp * 100, width = pct.toFixed(1) + '%';
   const prev = hudCache.hpPct ?? Infinity;
   hudCache.hpPct = pct;
   if (pct !== prev) $('hpGhost').classList.toggle('snap', pct > prev);
+  if (pct < prev) { const f = $('face'); f.classList.remove('jolt'); void f.offsetWidth; f.classList.add('jolt'); }
   setStyle('hpGhost', 'width', width);
   setStyle('hpFill', 'width', width);
   const tick = (25 / player.maxHp * 100).toFixed(2) + '%'; // un repère tous les 25 PV
@@ -64,6 +93,7 @@ function renderHp() {
   setText('hpNum', String(Math.ceil(Math.max(0, player.hp))));
 }
 export function updateHud() {
+  renderFace();
   renderHp();
   renderMods();
   const fz = frenzy();

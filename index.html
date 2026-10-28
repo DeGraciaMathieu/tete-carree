@@ -11,8 +11,13 @@
 <div id="hud" hidden>
   <div class="top">
     <div class="panel vitals">
-      <div class="hpHead"><span class="label">Santé</span><span id="hpNum">100</span></div>
-      <div class="bar hp" id="hpBar"><i id="hpGhost"></i><i id="hpFill"></i><b id="hpTicks"></b></div>
+      <div class="hpRow">
+        <canvas id="face" width="13" height="13" aria-hidden="true"></canvas>
+        <div class="hpCol">
+          <div class="hpHead"><span class="label">Santé</span><span id="hpNum">100</span></div>
+          <div class="bar hp" id="hpBar"><i id="hpGhost"></i><i id="hpFill"></i><b id="hpTicks"></b></div>
+        </div>
+      </div>
       <div id="score">0</div>
       <div id="next"></div>
     </div>

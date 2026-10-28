@@ -32,6 +32,11 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .bar{height:8px;background:rgba(255,255,255,.08);margin:5px 0 6px;position:relative;overflow:hidden}
 .bar i{position:absolute;inset:0 auto 0 0;width:100%;background:var(--life);transition:width .12s linear}
 .bar.low i{background:var(--blood)}
+.hpRow{display:grid;grid-template-columns:auto 1fr;gap:8px;align-items:center}
+.hpCol{min-width:0}
+#face{width:36px;height:36px;display:block;image-rendering:pixelated;background:rgba(0,0,0,.35);border:1px solid var(--line)}
+#face.jolt{animation:jolt .2s}
+@keyframes jolt{25%{transform:translate(-3px,1px)}50%{transform:translate(2px,-2px)}75%{transform:translate(-1px,1px)}}
 .hpHead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 #hpNum{font-size:13px;font-variant-numeric:tabular-nums}
 .bar.hp{height:12px;border:1px solid rgba(0,0,0,.4)}
@@ -224,6 +229,7 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 @media (max-width:720px){
   .top{gap:6px}
   .panel{padding:6px 8px}
+  #face{width:28px;height:28px}
   #score{font-size:18px}
   #waveNum{font-size:20px}
   #comboNum{font-size:22px}
@@ -236,6 +242,7 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
   .slot .a{font-size:13px}
 }
 @media (prefers-reduced-motion:reduce){
+  #face.jolt{animation:none}
   #banner.on.start,#banner.on.end,#banner.on.info{animation-name:banfade}
   @keyframes banfade{0%,80%{opacity:1}100%{opacity:0}}
 }
