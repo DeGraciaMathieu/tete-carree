@@ -20,6 +20,20 @@ prendre explicitement, pas un effet de bord à accepter.
 
 Le hook Stop (`scripts/run-tests.sh`) lance `npm test` à chaque fin de tâche et bloque si la suite échoue.
 
+## Performance
+
+```sh
+npm run perf        # 20 s de partie, budget d'allocations JS
+npm run perf -- 8   # durée en secondes
+```
+
+`scripts/perf.mjs` lance Vite et Chrome sans interface (`CHROME=<chemin>` pour un autre Chromium),
+démarre une partie avec un joueur immobile rendu invulnérable, puis mesure les allocations avec le
+profil échantillonné de Chrome. Il affiche les Mo/s par fonction et échoue au-delà de `BUDGET_MB_S`
+(10 Mo/s ; environ 2 aujourd'hui). Il ne fait pas partie de `npm test` ni du hook Stop : il exige
+Chrome et dure une vingtaine de secondes. Lance-le après un changement dans un chemin chaud et avant
+chaque publication.
+
 ## Philosophie
 
 - **Tests macro** : chaque test énonce une règle que le joueur remarquerait, dans le vocabulaire du jeu

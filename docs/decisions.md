@@ -116,6 +116,19 @@ Ouvrir `index.html` par double-clic ne fonctionne plus (ESM natif non servi en `
   chargement sans erreur, toutes les ressources en 200, polices chargées, partie jouable,
   `localStorage` fonctionnel, pause quand l'iframe perd le focus.
 
+## Performance : budget d'allocations
+
+- Les baisses de fps ponctuelles venaient du ramasse-miettes, pas du rendu : le tas de priorité du
+  champ de distances (`rules/pathfield.js`) allouait ~140 Mo/s (échanges par déstructuration, tableau
+  renvoyé par `pop()`). Passé en tableaux typés sans allocation : ~2 Mo/s. Champs vérifiés identiques
+  au bit près (empreinte de 480 calculs sur 12 arènes), le bug d'arrondi Float32 est donc conservé.
+- `npm run perf` (`scripts/perf.mjs`) garde ce gain : 20 s de partie dans Chrome sans interface, joueur
+  immobile et invulnérable, profil d'allocations échantillonné, échec au-delà de 10 Mo/s. Hors de
+  `npm test` et du hook Stop parce qu'il exige Chrome et dure ~20 s ; un seuil d'allocations sous
+  Node serait trop instable pour bloquer.
+- Le rendu alloue ~0,2 Mo/s (liste de tri, fermetures de `outlined`, couleurs de particules) : laissé
+  tel quel, le gain serait invisible.
+
 ## Rules extracted
 
 | Rule | Module | Test | Notes |

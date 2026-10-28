@@ -15,6 +15,7 @@ cartes de modificateurs entre les vagues. Publié sur itch.io comme jeu HTML jou
 | `npm test` | suite Vitest (`tests/*.test.js`) |
 | `npm run build` | `dist/` avec `index.html` à la racine, chemins relatifs |
 | `npm run package` | build + zip du **contenu** de `dist/` dans `tete-carree-itch.zip` (commande `zip` du système) |
+| `npm run perf` | 20 s de partie dans Chrome sans interface ; échoue si les allocations JS dépassent le budget (10 Mo/s) |
 
 Pas de linter ni de formateur : n'en ajoute pas sans qu'on le demande.
 Ouvrir `index.html` par double-clic ne marche pas (ESM non servi en `file://`).
@@ -62,6 +63,11 @@ et les questions ouvertes : lis-le avant tout changement structurel.
   `docs/decisions.md` (bug d'arrondi du champ de distances, etc.) : c'est une décision à part.
 - En dessin, n'utilise dans une fonction passée à `outlined()` que les méthodes de contexte que le
   proxy `OLP` de `render/canvas.js` connaît, ou ajoute-les au proxy.
+- **Pas d'allocation évitable dans les chemins chauds** (tout ce qui tourne à chaque image ou plusieurs
+  fois par seconde : `loop/`, `render/scene.js`, `render/sprites.js`, `rules/pathfield.js`) : pas
+  d'échange `[a, b] = [b, a]`, pas de tableau renvoyé pour transporter plusieurs valeurs, pas de
+  `for…of` ni de `filter`/`map` évitables. Le ramasse-miettes provoque des baisses de fps : le tas du
+  champ de distances allouait 140 Mo/s avant correction.
 
 ### Style
 
@@ -90,6 +96,8 @@ et les questions ouvertes : lis-le avant tout changement structurel.
 - Un changement de gameplay se teste au niveau macro dans `tests/`, dans le vocabulaire du jeu.
 - Toute question que le code ne tranche pas va dans « Open questions » de `docs/decisions.md`.
 - Pour vérifier le build publié : `npm run build` puis `./node_modules/.bin/vite preview`.
+- Après un changement dans un chemin chaud, et avant chaque publication sur itch.io, lance
+  `npm run perf` : en cas d'échec, il nomme les fonctions qui allouent le plus.
 
 ## Skills disponibles
 
