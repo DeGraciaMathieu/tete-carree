@@ -1,7 +1,7 @@
 import {
-  T, MW, MH, ZOOM_MIN, ZOOM_MAX, W, SOIF_MULTIPLIER,
+  T, MW, MH, ZOOM_MIN, ZOOM_MAX, W,
   RAR, MODS, PLAYER_HP, PLAYER_SPEED, FRENZY_SPEED_MUL, ACID_SPEED_MUL, REGEN_DELAY, REGEN_RATE, LOW_HP, MEDKIT_HP, ROLL,
-  WALL_HP, TURRET_WALL_HP, BARREL_HP, TURRET_EVERY, KILL_POINTS, DROP_CHANCE, BLOATER_RADIUS, BLOATER_DAMAGE, MAX_ENEMIES,
+  WALL_HP, TURRET_WALL_HP, BARREL_HP, TURRET_EVERY, BLOATER_RADIUS, BLOATER_DAMAGE, MAX_ENEMIES,
   FIRST_BREAK, WAVE_BREAK, PICK_DELAY, WAVE_BONUS, BOX_FIRST, BOX_PERIOD_MIN, BOX_PERIOD_RAND, MAX_PICKUPS, BOX_HP_CHANCE,
   MAX_PARTS, FIELD_PERIOD, STICK_RADIUS, PAD_MOVE_DEADZONE, PAD_AIM_DEADZONE,
   STORAGE_BEST, STORAGE_FPS, STORAGE_OUTLINE, SHOW_FPS_BY_DEFAULT,
@@ -13,6 +13,7 @@ import * as Grid from './rules/map.js';
 import * as Field from './rules/pathfield.js';
 import { rollCards } from './rules/cards.js';
 import * as Waves from './rules/waves.js';
+import { killPoints, soifHeal, rollDrop } from './rules/scoring.js';
 
 (() => {
 'use strict';
@@ -371,8 +372,8 @@ function hurtEnemy(e, dmg, dx, dy, knock, kind) {
 // fell : l'ennemi a été projeté dans une crevasse
 function killEnemy(e, dx, dy, fell) {
   e.dead = true; S.kills++; S.combo++; S.comboT = comboTime(); S.bestCombo = Math.max(S.bestCombo, S.combo);
-  const m = multiplier(), pts = Math.round((e.type === 'z' ? KILL_POINTS.z : e.type === 'b' ? KILL_POINTS.b * Math.pow(2, mod('chair')) : e.type === 'r' ? KILL_POINTS.r : e.type === 's' ? KILL_POINTS.s : e.type === 'a' ? KILL_POINTS.a : KILL_POINTS.d) * m * Math.pow(1.5, mod('prime')));
-  if (mod('soif') && m >= SOIF_MULTIPLIER && !player.dead) player.hp = Math.min(player.maxHp, player.hp + mod('soif'));
+  const m = multiplier(), pts = killPoints(e.type, S.mods, m), heal = soifHeal(S.mods, m);
+  if (heal && !player.dead) player.hp = Math.min(player.maxHp, player.hp + heal);
   addScore(pts);
   pop(e.x, e.y - 40, (fell ? 'Chute ! +' : '+') + fmt(pts), m > 1 || fell ? '#f2c230' : '#ffffff');
   const cEl = $('comboNum'); cEl.classList.add('bump'); setTimeout(() => cEl.classList.remove('bump'), 90);
@@ -382,8 +383,8 @@ function killEnemy(e, dx, dy, fell) {
   if (e.type === 'b') bursts.push({ x: e.x, y: e.y, t: .08 });
   stampBlood(e.x + dx * 6, e.y + dy * 6, 9 + Math.random() * 6, .7);
   sfx('splat', 25);
-  const drop = e.type === 'z' ? DROP_CHANCE.z : e.type === 'b' ? DROP_CHANCE.b : e.type === 'r' ? DROP_CHANCE.r : e.type === 's' ? DROP_CHANCE.s : e.type === 'a' ? DROP_CHANCE.a : DROP_CHANCE.d;
-  if (rng() < drop && !isVoid(e.x, e.y)) pickups.push({ x: e.x, y: e.y, kind: rng() < .5 ? 'hp' : 'ammo', ph: Math.random() * 6 });
+  const kind = rollDrop(e.type, isVoid(e.x, e.y), rng);
+  if (kind) pickups.push({ x: e.x, y: e.y, kind, ph: Math.random() * 6 });
 }
 
 /* ---------- Joueur ---------- */
