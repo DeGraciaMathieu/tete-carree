@@ -8,6 +8,7 @@ import {
 } from './config.js';
 import { createRng } from './rules/rng.js';
 import * as Mods from './rules/modifiers.js';
+import { weaponsToUnlock, ammoOnUnlock } from './rules/unlock.js';
 
 (() => {
 'use strict';
@@ -387,14 +388,12 @@ function banner(m, s = '', kind = 'info', count = 0) {
 /* ---------- Score, combo, déblocages ---------- */
 function addScore(n) {
   S.score += n;
-  W.forEach((w, i) => {
-    if (!unlocked[i] && S.score >= w.unlock) {
-      unlocked[i] = true; ammo[i] = w.refill * 2;
-      banner('Nouvelle arme', `${w.name} · touche ${i + 1}`);
-      sfx('unlock');
-      const el = $('slot' + i); if (el) { el.classList.remove('new'); void el.offsetWidth; el.classList.add('new'); }
-    }
-  });
+  for (const i of weaponsToUnlock(S.score, unlocked)) {
+    unlocked[i] = true; ammo[i] = ammoOnUnlock(i);
+    banner('Nouvelle arme', `${W[i].name} · touche ${i + 1}`);
+    sfx('unlock');
+    const el = $('slot' + i); if (el) { el.classList.remove('new'); void el.offsetWidth; el.classList.add('new'); }
+  }
 }
 function multiplier() { return Mods.multiplier(S.combo); }
 
