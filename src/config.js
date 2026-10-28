@@ -121,7 +121,17 @@ export const DEVIL_FIRE_CD = 2.1, DEVIL_FIRE_RAND = 1.6, DEVIL_RANGE = 340, DEVI
 export const FIREBALL_SPEED = 230, FIREBALL_LIFE = 3, FIREBALL_DAMAGE = 15, FIREBALL_BLOCK_DAMAGE = 25;
 // Cracheur et acide
 export const SPIT_CD = 2.8, SPIT_CD_RAND = .9;
-export const ACID_SPLASH_DAMAGE = 10;
+export const ACID_SPLASH_DAMAGE = 10, ACID_SPLASH_RADIUS = 24;
+export const PUDDLE_LIFE = 4, PUDDLE_RADIUS = 26;          // flaque laissée par un crachat
+export const SPIT_LEAD = 140, SPIT_LEAD_MIN = .4, SPIT_LEAD_RAND = .4; // anticipation du déplacement du joueur
+// Comportement du cracheur : il voit à SPITTER_SIGHT, recule de SPITTER_BACKOFF s'il est plus près que
+// SPITTER_TOO_CLOSE, se poste à moins de SPITTER_HOLD, ne crache pas à moins de SPITTER_MIN_RANGE.
+export const SPITTER_SIGHT = 270, SPITTER_TOO_CLOSE = 115, SPITTER_BACKOFF = 40, SPITTER_HOLD = 240, SPITTER_MIN_RANGE = 70;
+export const SPITTER_WINDUP = .6;     // anticipation avant le crachat (s)
+export const SPITTER_HOLD_SPEED = .35; // fraction de vitesse quand il se poste
+export const BLOATER_FUSE_SPEED = .3;  // fraction de vitesse du Gonflé mèche allumée
+export const ARMOR_SHOVE = 12;         // le blindé repousse le joueur à chaque coup (px)
+export const ACID_TICK_RESET = .12;    // hors de l'acide, prochain dégât au plus tard après ce délai
 export const ACID_TICK = .45, ACID_DAMAGE = 4;
 export const MAX_ENEMIES = 120;
 export const DROP_HP_CHANCE = .5; // caisse lâchée : santé ou munitions
@@ -157,6 +167,11 @@ export const BOX_FIRST = 7;
 export const BOX_PERIOD_MIN = 9, BOX_PERIOD_RAND = 5;
 export const MAX_PICKUPS = 3;
 export const BOX_HP_CHANCE = .35;
+export const BOX_MIN_DIST = 140;         // une caisse n'apparaît pas trop près du joueur
+export const PICKUP_RADIUS = 20;
+export const AMMO_REFILL_WEAPONS = 2;    // armes rechargées par une caisse de munitions
+export const AMMO_NO_WEAPON_BONUS = 150; // points si aucune arme à recharger
+export const AIMANT_RANGE = 160, AIMANT_SPEED = 300; // Aimant : portée par niveau (px), vitesse d'attraction (px/s)
 
 /* ---------- Moteur ---------- */
 export const MAX_PARTS = 1600;

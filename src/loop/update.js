@@ -1,6 +1,6 @@
 // Pas de simulation : fait avancer la partie de `dt` secondes.
 import { sfx } from '../audio/sfx.js';
-import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, BARBELES_DAMAGE, BLOATER_FUSE, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_PERIOD_MIN, BOX_PERIOD_RAND, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MH, MW, PICK_DELAY, PLAYER_SPEED, REGEN_DELAY, REGEN_RATE, ROCKET_DAMAGE, ROCKET_RADIUS, ROLL, T, W, WAVE_BONUS, WAVE_BREAK } from '../config.js';
+import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, ACID_TICK_RESET, AIMANT_RANGE, AIMANT_SPEED, AMMO_NO_WEAPON_BONUS, AMMO_REFILL_WEAPONS, ARMOR_SHOVE, BARBELES_DAMAGE, BLOATER_FUSE, BLOATER_FUSE_SPEED, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_MIN_DIST, BOX_PERIOD_MIN, BOX_PERIOD_RAND, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MH, MW, PICKUP_RADIUS, PICK_DELAY, PLAYER_SPEED, REGEN_DELAY, REGEN_RATE, ROCKET_DAMAGE, ROCKET_RADIUS, ROLL, SPITTER_BACKOFF, SPITTER_HOLD, SPITTER_HOLD_SPEED, SPITTER_MIN_RANGE, SPITTER_SIGHT, SPITTER_TOO_CLOSE, SPITTER_WINDUP, T, W, WAVE_BONUS, WAVE_BREAK } from '../config.js';
 import { explosion, hurtEnemy, hurtPlayer, killEnemy, toxicBurst } from '../game/combat.js';
 import { spawnEnemy, spit, startWave, updateGlobs } from '../game/enemies.js';
 import { gameOver, openPick } from '../game/flow.js';
@@ -31,7 +31,7 @@ export function update(dt) {
     player.acidT = (player.acidT || 0) - dt;
     if (player.acidT <= 0) { player.acidT = ACID_TICK; hurtPlayer(ACID_DAMAGE, true); }
     if (Math.random() < dt * 12) addPart({ t: 'smoke', x: player.x + rnd(8), y: player.y + rnd(3), z: 2, vx: rnd(10), vy: rnd(6), vz: 18, life: .5, max: .5, size: 3, color: 'rgba(182,224,74,' });
-  } else player.acidT = Math.min(player.acidT || 0, .12);
+  } else player.acidT = Math.min(player.acidT || 0, ACID_TICK_RESET);
   updateGlobs(dt);
 
   // joueur
@@ -96,7 +96,7 @@ export function update(dt) {
         for (let tries = 0; tries < 40; tries++) {
           const tx = 2 + rng() * (MW - 4) | 0, ty = 2 + rng() * (MH - 4) | 0;
           const x = tx * T + T / 2, y = ty * T + T / 2;
-          if (!openT(tx, ty) || Math.hypot(x - player.x, y - player.y) < 140 || dist[ty * MW + tx] > 1e8) continue;
+          if (!openT(tx, ty) || Math.hypot(x - player.x, y - player.y) < BOX_MIN_DIST || dist[ty * MW + tx] > 1e8) continue;
           world.pickups.push({ x, y, kind: rng() < BOX_HP_CHANCE ? 'hp' : 'ammo', ph: Math.random() * 6 });
           break;
         }
@@ -123,17 +123,17 @@ export function update(dt) {
     // cracheur : garde ses distances quand il voit le joueur, recule s'il est trop près
     let hold = false;
     if (e.type === 's' && !player.dead) {
-      e.see = dp < 270 && los(e.x, e.y, player.x, player.y);
-      if (e.see && dp < 115) {
-        const bx = e.x - dxp / dp * 40, by = e.y - dyp / dp * 40;
+      e.see = dp < SPITTER_SIGHT && los(e.x, e.y, player.x, player.y);
+      if (e.see && dp < SPITTER_TOO_CLOSE) {
+        const bx = e.x - dxp / dp * SPITTER_BACKOFF, by = e.y - dyp / dp * SPITTER_BACKOFF;
         if (walkLine(e.x, e.y, bx, by)) { tx = bx; ty = by; } else hold = true;
-      } else if (e.see && dp < 240) hold = true;
+      } else if (e.see && dp < SPITTER_HOLD) hold = true;
       if (e.wind > 0) hold = true;
       if (hold) { const sw = Math.sin(S.time * 1.3 + e.x * .1); tx = e.x - dyp / dp * 20 * sw; ty = e.y + dxp / dp * 20 * sw; }
     }
     let vx = tx - e.x, vy = ty - e.y; const l = Math.hypot(vx, vy) || 1;
     const k = Math.min(1, dt * 6);
-    const sp = e.fuse !== undefined ? e.sp * .3 : hold ? (e.wind > 0 ? 0 : e.sp * .35) : e.sp;
+    const sp = e.fuse !== undefined ? e.sp * BLOATER_FUSE_SPEED : hold ? (e.wind > 0 ? 0 : e.sp * SPITTER_HOLD_SPEED) : e.sp;
     e.vx += (vx / l * sp - e.vx) * k; e.vy += (vy / l * sp - e.vy) * k;
     const fxT = hold ? dxp / dp : vx / l, fyT = hold ? dyp / dp : vy / l;
     const turn = Math.min(1, dt * (e.type === 'a' ? 2.4 : 8));
@@ -147,7 +147,7 @@ export function update(dt) {
     if (e.type === 's' && playing && !player.dead) {
       e.spitCd -= dt;
       if (e.wind > 0) { e.wind -= dt; if (e.wind <= 0) spit(e); }
-      else if (e.spitCd <= 0 && e.see && dp > 70) { e.wind = .6; sfx('gurgle', 150); }
+      else if (e.spitCd <= 0 && e.see && dp > SPITTER_MIN_RANGE) { e.wind = SPITTER_WINDUP; sfx('gurgle', 150); }
     }
     if (e.type === 'b') {
       if (e.fuse === undefined && !player.dead && playing && dp < e.r + player.r + 14 && walkLine(e.x, e.y, player.x, player.y)) { e.fuse = BLOATER_FUSE; sfx('fuse'); }
@@ -158,7 +158,7 @@ export function update(dt) {
       if (playing && Math.random() < dt * .15) sfx('gloop', 400);
     } else if (!player.dead && dp < e.r + player.r + 6 && e.atk <= 0 && playing) {
       hurtPlayer(ENEMY_MELEE_DAMAGE[e.type]); e.atk = ENEMY_ATTACK_CD[e.type];
-      if (e.type === 'a' && !player.roll) { moveCircle(player, dxp / dp * 12, 0); moveCircle(player, 0, dyp / dp * 12); sfx('clang'); }
+      if (e.type === 'a' && !player.roll) { moveCircle(player, dxp / dp * ARMOR_SHOVE, 0); moveCircle(player, 0, dyp / dp * ARMOR_SHOVE); sfx('clang'); }
       e.vx += dxp / dp * 60; e.vy += dyp / dp * 60;
     }
     if (e.bump >= 0 && e.atk <= 0) {
@@ -250,16 +250,16 @@ export function update(dt) {
   if (!player.dead) for (const p of world.pickups) {
     if (mod('aimant')) {
       const ax = player.x - p.x, ay = player.y - p.y, d = Math.hypot(ax, ay);
-      if (d < 160 * mod('aimant') && d > 1) { const sp = Math.min(d, 300 * dt); p.x += ax / d * sp; p.y += ay / d * sp; }
+      if (d < AIMANT_RANGE * mod('aimant') && d > 1) { const sp = Math.min(d, AIMANT_SPEED * dt); p.x += ax / d * sp; p.y += ay / d * sp; }
     }
-    if (Math.hypot(p.x - player.x, p.y - player.y) < 20) {
+    if (Math.hypot(p.x - player.x, p.y - player.y) < PICKUP_RADIUS) {
       p.taken = true; sfx('pickup');
       if (p.kind === 'hp') { player.hp = Math.min(player.maxHp, player.hp + MEDKIT_HP); pop(p.x, p.y - 30, `+${MEDKIT_HP} santé`, '#62c46e'); }
       else {
         const pool = W.map((w, i) => i).filter(i => i > 0 && unlocked[i]);
-        if (!pool.length) { addScore(150); pop(p.x, p.y - 30, '+150', '#ffffff'); }
+        if (!pool.length) { addScore(AMMO_NO_WEAPON_BONUS); pop(p.x, p.y - 30, `+${AMMO_NO_WEAPON_BONUS}`, '#ffffff'); }
         else {
-          const picks = pool.sort(() => rng() - .5).slice(0, 2);
+          const picks = pool.sort(() => rng() - .5).slice(0, AMMO_REFILL_WEAPONS);
           for (const i of picks) ammo[i] += W[i].refill;
           pop(p.x, p.y - 30, picks.map(i => `+${W[i].refill} ${W[i].short}`).join(' · '), '#f2c230');
         }

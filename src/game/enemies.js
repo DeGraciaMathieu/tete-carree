@@ -1,6 +1,6 @@
 // Apparition des ennemis, lancement des vagues, crachats d'acide.
 import { sfx } from '../audio/sfx.js';
-import { ACID_SPLASH_DAMAGE, ENEMY_FIRST_ATTACK, ENEMY_STATS, MH, MW, SPIT_CD, SPIT_CD_RAND, T } from '../config.js';
+import { ACID_SPLASH_DAMAGE, ACID_SPLASH_RADIUS, ENEMY_FIRST_ATTACK, ENEMY_STATS, MH, MW, PUDDLE_LIFE, PUDDLE_RADIUS, SPIT_CD, SPIT_CD_RAND, SPIT_LEAD, SPIT_LEAD_MIN, SPIT_LEAD_RAND, T } from '../config.js';
 import { hurtPlayer } from './combat.js';
 import { moveInput } from './player.js';
 import { addPart } from '../render/effects.js';
@@ -48,7 +48,7 @@ export function spit(e) {
   e.spitCd = SPIT_CD + rng() * SPIT_CD_RAND;
   const [mx, my] = moveInput(), ml = Math.hypot(mx, my);
   const d = Math.hypot(player.x - e.x, player.y - e.y), fl = clamp(d / 260, .45, .9);
-  const lead = ml > .2 && !player.roll ? 140 * fl * (.4 + rng() * .4) / ml : 0;
+  const lead = ml > .2 && !player.roll ? SPIT_LEAD * fl * (SPIT_LEAD_MIN + rng() * SPIT_LEAD_RAND) / ml : 0;
   const x1 = clamp(player.x + mx * lead, T, (MW - 1) * T), y1 = clamp(player.y + my * lead, T, (MH - 1) * T);
   world.globs.push({ x0: e.x + e.fx * 6, y0: e.y + e.fy * 3, x1, y1, t: 0, T: fl, H: 36 + d * .15, x: e.x, y: e.y, z: 22 });
   sfx('spit');
@@ -67,7 +67,7 @@ function splashAcid(x, y) {
   for (let k = 0; k < 12; k++) addPart({ t: 'spark', x, y, z: 4, vx: rnd(90), vy: rnd(90), vz: 60 + Math.random() * 90, life: .6, size: 2.2, color: '#b6e04a' });
   sfx('splash', 60);
   if (isVoid(x, y) || tileAt(Math.floor(x / T), Math.floor(y / T))) return;
-  world.puddles.push({ x, y, t: 4, max: 4, r: 26 });
+  world.puddles.push({ x, y, t: PUDDLE_LIFE, max: PUDDLE_LIFE, r: PUDDLE_RADIUS });
   fctx.fillStyle = 'rgba(110,140,40,.16)'; fctx.beginPath(); fctx.ellipse(x, y, 22, 13, 0, 0, 7); fctx.fill();
-  if (Math.hypot(player.x - x, (player.y - y) * 1.4) < 24) hurtPlayer(ACID_SPLASH_DAMAGE);
+  if (Math.hypot(player.x - x, (player.y - y) * 1.4) < ACID_SPLASH_RADIUS) hurtPlayer(ACID_SPLASH_DAMAGE);
 }
