@@ -10,7 +10,10 @@ auto_invoke: true
 
 Les cartes sont le tableau `MODS` de `src/config.js`. Entre deux vagues, `openPick()`
 (`src/game/flow.js`) en propose jusqu'à `CARDS_PER_PICK` tirées par `rollCards(S.mods, rng)`
-(`src/rules/cards.js`), pondérées par la rareté `RAR`.
+(`src/rules/cards.js`), pondérées par la rareté `RAR`. Elles sont dessinées en cartes à jouer
+(niveau ou ★ dans les coins, pictogramme, crans de niveau), distribuées face cachée puis retournées
+une à une, la Légendaire en dernier ; une carte encore face cachée ne se choisit pas. Sous 640 px de
+large, elles se couchent.
 
 | Champ | Rôle |
 | --- | --- |
@@ -68,6 +71,8 @@ Les cartes sont le tableau `MODS` de `src/config.js`. Entre deux vagues, `openPi
 5. État propre à la carte (comme `S.souffleUsed`) : initialisé dans `resetWorld` (`src/state/world.js`).
 6. Vérifie `tests/cards.test.js` : le tirage reste valide, mais une graine donnée propose
    désormais d'autres cartes (le pool a changé).
+7. Dessine son pictogramme dans `src/render/cardIcons.js` (SVG au trait 24 × 24, clé = `id`) :
+   `tests/cards.test.js` échoue sinon.
 
 Réserve d'idées de cartes non implémentées : `docs/idees-cartes.md`.
 

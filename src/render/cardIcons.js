@@ -1,0 +1,30 @@
+// Pictogrammes des cartes de modificateurs (SVG au trait 24 × 24), repérés par l'id de la carte.
+const PATHS = {
+  perce: '<path d="M2 12h20"/><path d="M8 6v12M14 6v12"/><path d="M18 9l4 3-4 3"/>',
+  ricochet: '<path d="M21 2v20"/><path d="M3 5l15 7L3 19"/>',
+  cadence: '<path d="M2 8h6M2 12h8M2 16h6"/><path d="M12 9h7l3 3-3 3h-7z"/>',
+  calibre: '<path d="M7 3h10v13H7z"/><path d="M6 16h12v5H6z"/><path d="M7 8h10"/>',
+  double: '<path d="M3 14a5 5 0 1 1 5 5"/><path d="M13 14a5 5 0 1 1 5 5"/><path d="M8 19l-2-2M18 19l-2-2"/>',
+  rollboom: '<circle cx="12" cy="12" r="3"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/>',
+  rollammo: '<path d="M3 9h18v11H3z"/><path d="M3 13h18"/><path d="M8 9V4h2v5M14 9V4h2v5"/>',
+  firetrail: '<path d="M12 22c-4 0-7-3-7-7 0-5 5-6 5-12 3 2 4 5 4 7 1-1 2-2 2-4 2 2 3 5 3 9 0 4-3 7-7 7z"/>',
+  tenace: '<circle cx="12" cy="13" r="8"/><path d="M12 13V8M9 2h6M12 2v3"/>',
+  soif: '<path d="M12 2.5S5 10 5 15a7 7 0 0 0 14 0c0-5-7-12.5-7-12.5z"/><path d="M9 15a3 3 0 0 0 3 3"/>',
+  frenesie: '<path d="M13 2L4 14h7l-2 8 9-12h-7z"/>',
+  barbeles: '<path d="M2 12h20"/><path d="M6 9l3 6M9 9l-3 6M15 9l3 6M18 9l-3 6"/>',
+  grosbaril: '<path d="M6 3h12c1 3 1 15 0 18H6C5 18 5 6 6 3z"/><path d="M5.4 9h13.2M5.4 15h13.2"/>',
+  tourelle: '<path d="M4 16h16v4H4z"/><path d="M7 16v-5h10v5"/><path d="M12 11V8h9"/>',
+  constitution: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/>',
+  aimant: '<path d="M5 3v9a7 7 0 0 0 14 0V3h-5v9a2 2 0 0 1-4 0V3z"/><path d="M5 7h5M14 7h5"/>',
+  souffle: '<path d="M12 20.5S4 15.6 4 9.6A4.2 4.2 0 0 1 12 7.5a4.2 4.2 0 0 1 8 2.1c0 6-8 10.9-8 10.9z"/><path d="M6.5 12h3l1.3-2.6 2.4 5 1.3-2.4h3"/>',
+  prime: '<circle cx="12" cy="12" r="9"/><path d="M15 8.5c-.8-1-2-1.5-3-1.5-2 0-3 1-3 2.3 0 3 6 1.7 6 4.7 0 1.3-1.2 2.5-3 2.5-1.2 0-2.4-.6-3.2-1.5M12 5v2M12 17v2"/>',
+  chair: '<circle cx="11" cy="14" r="7"/><path d="M15 8l3-3M18 5l2-1M18 5l1 2"/>',
+  sansarmure: '<path d="M12 2.5l8 3.2v5.6c0 5.2-3.6 8.6-8 10.2-4.4-1.6-8-5-8-10.2V5.7z"/><path d="M12.5 2.8l-2 6 3 3-2.5 5"/>',
+  epaule: '<circle cx="7" cy="12" r="4"/><path d="M12 12h6M15 9l3 3-3 3M21 6v12"/>',
+  frag: '<circle cx="11" cy="14" r="6"/><path d="M9 8h4V5H9z"/><path d="M13 5l4-1M19 11l3-1M19 16l3 1M17 20l2 2"/>',
+  artificier: '<path d="M14 3c4 0 7 3 7 7l-9 9-7-7z"/><path d="M5 12l-2 4 3 1 1 3 4-2"/><circle cx="15" cy="9" r="2"/>',
+  fievre: '<path d="M10 4a2 2 0 0 1 4 0v10a4 4 0 1 1-4 0z"/><path d="M12 9v8"/>',
+};
+export function cardIcon(id) {
+  return `<svg viewBox="0 0 24 24" aria-hidden="true">${PATHS[id] || ''}</svg>`;
+}

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { MODS } from '../src/config.js';
 import { createRng } from '../src/rules/rng.js';
 import { rollCards } from '../src/rules/cards.js';
+import { cardIcon } from '../src/render/cardIcons.js';
 
 const ids = cards => cards.map(c => c.id);
 const allMaxed = () => Object.fromEntries(MODS.map(m => [m.id, m.max]));
@@ -24,4 +25,8 @@ test('une carte prise à son niveau max n\'est plus jamais proposée', () => {
 
 test('quand toutes les cartes sont au max, il n\'y a plus rien à proposer', () => {
   assert.deepEqual(rollCards(allMaxed(), createRng(1)), []);
+});
+
+test('chaque carte a son pictogramme', () => {
+  for (const m of MODS) assert.match(cardIcon(m.id), /<(path|circle)/, m.id);
 });

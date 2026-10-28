@@ -96,23 +96,63 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .pickwrap{width:100%;max-width:820px;display:flex;flex-direction:column;gap:14px}
 .picktitle span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--hazard)}
 .picktitle h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,6vw,40px);margin:2px 0 0;text-wrap:balance}
-.cards{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.mcard{display:flex;flex-direction:column;gap:8px;text-align:left;background:rgba(20,22,24,.96);border:1px solid var(--line);border-top:4px solid var(--rc);padding:14px 14px 12px;min-height:200px;cursor:pointer;border-radius:2px;animation:cardin .32s ease-out backwards;transition:transform .12s,border-color .12s}
-.mcard:hover,.mcard:focus-visible{transform:translateY(-4px);border-color:var(--rc)}
-.mcard.r-l{background:linear-gradient(180deg,rgba(242,194,48,.16),rgba(20,22,24,.96) 50%)}
-.mcard.r-p{background:linear-gradient(180deg,rgba(224,72,61,.16),rgba(20,22,24,.96) 50%)}
-.mtop{display:flex;justify-content:space-between;align-items:center;gap:8px}
-.rar{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--rc)}
-.mkey{font-size:11px;color:var(--muted);border:1px solid var(--line);padding:1px 6px}
-.mname{font-family:var(--display);font-size:21px;line-height:1.1;color:var(--text)}
-.mdesc,.plus,.minus{font-size:13px;line-height:1.45;color:var(--text)}
-.plus{color:var(--life)}
-.minus{color:#ff7a6e}
-.mlvl{margin-top:auto;font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+.cards{display:grid;grid-template-columns:repeat(3,minmax(0,220px));gap:18px;justify-content:center}
+/* Carte à jouer : papier clair, cadre à la couleur de la rareté, niveau dans les coins ; distribuée face cachée */
+.r-c{--rd:#5d645c} .r-r{--rd:#2c6ea3} .r-l{--rd:#8a6a00} .r-p{--rd:var(--r-p)}
+.mslot{position:relative;perspective:900px;animation:cardin .32s ease-out backwards;transition:transform .3s ease-in,opacity .3s}
+.mslot.away{transform:translateY(-120%) rotate(-8deg);opacity:0}
+.mslot.chosen{transform:scale(1.06)}
+.mflip{position:relative;transform-style:preserve-3d;transition:transform .55s cubic-bezier(.3,1.4,.5,1)}
+.mflip.down{transform:rotateY(180deg)}
+.mcard{width:100%;aspect-ratio:5/7;position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;text-align:center;cursor:pointer;
+  background:#ece8dc;color:#17191a;border:0;border-radius:8px;padding:14px 12px;box-shadow:0 8px 0 -2px rgba(0,0,0,.45);backface-visibility:hidden;transition:transform .12s}
+.mcard::before{content:'';position:absolute;inset:6px;border:2px solid var(--rc);border-radius:5px;pointer-events:none}
+.mcard.r-l{background:linear-gradient(160deg,#fff4cf,#ecd58a)}
+.mcard.r-p{background:#2a1513;color:#f6dcd6}
+.mcard:hover,.mcard:focus-visible,.mcard.focus{transform:translateY(-6px)}
+.mcard.focus{box-shadow:0 0 0 3px var(--rc),0 8px 0 -2px rgba(0,0,0,.45)}
+.mix{position:absolute;font-family:var(--display);font-size:22px;line-height:1;color:var(--rd)}
+.mix.tl{left:14px;top:13px}
+.mix.br{right:14px;bottom:13px;transform:rotate(180deg)}
+.mcard .rar{font-size:10px;letter-spacing:.14em;text-transform:uppercase;opacity:.75;margin-top:20px}
+.mico{width:56px;height:56px;color:var(--rd);flex:none;margin-top:4px}
+.mico svg{width:100%;height:100%;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:square;stroke-linejoin:miter;display:block}
+.mname{font-family:var(--display);font-size:19px;line-height:1.1}
+.mbody{display:flex;flex-direction:column;gap:4px;font-size:12.5px;line-height:1.4}
+.plus{color:#2f8f3c}
+.minus{color:#c43a2f}
+.mcard.r-p .plus{color:#8fe39a}
+.mcard.r-p .minus{color:#ff8f84}
+.mpips{display:flex;gap:4px;margin-top:auto;margin-bottom:8px}
+.mpips i{width:12px;height:5px;border:1px solid currentColor;opacity:.55}
+.mpips i.on{background:currentColor;opacity:1}
+.mpips i.new{animation:pip 1s ease-in-out infinite}
+.mback{position:absolute;inset:0;border-radius:8px;backface-visibility:hidden;transform:rotateY(180deg);display:grid;place-items:center;
+  background:repeating-linear-gradient(45deg,#26292b 0 6px,#1d1f20 6px 12px);border:6px solid #e9e3d2;box-shadow:0 8px 0 -2px rgba(0,0,0,.45)}
+.mback::before{content:'';position:absolute;inset:6px;border:2px solid var(--hazard)}
+.mlogo{width:56px;height:56px;background:#e9c49a;border:4px solid #17191a;position:relative;box-shadow:0 4px 0 rgba(0,0,0,.5)}
+.mlogo::before{content:'';position:absolute;left:-4px;right:-4px;top:12px;height:8px;background:#c8322a}
+.mlogo::after{content:'';position:absolute;left:12px;top:26px;width:6px;height:6px;background:#17191a;box-shadow:18px 0 0 #17191a}
+.mcard.flash::after{content:'';position:absolute;inset:-30%;border-radius:50%;background:radial-gradient(circle,rgba(255,226,140,.75),transparent 60%);animation:burst .7s ease-out forwards;pointer-events:none}
+.mkey{display:block;width:max-content;margin:12px auto 0;font-size:11px;color:var(--muted);border:1px solid var(--line);padding:1px 6px}
 .pickhint{font-size:12px;color:var(--muted);margin:0}
 @keyframes cardin{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
-@media (max-width:640px){ .cards{grid-template-columns:1fr} .mcard{min-height:0} }
-@media (prefers-reduced-motion:reduce){ .mcard{animation:none} }
+@keyframes pip{50%{background:transparent}}
+@keyframes burst{from{opacity:1;transform:scale(.4)}to{opacity:0;transform:scale(1.5)}}
+/* Téléphone : cartes couchées, coin à gauche, texte à droite */
+@media (max-width:640px){
+  .cards{grid-template-columns:1fr;gap:10px}
+  .mcard{aspect-ratio:auto;display:grid;grid-template-columns:38px 1fr;grid-template-areas:"ix name" "ico body" "ico pips";column-gap:12px;row-gap:3px;align-items:start;text-align:left;padding:12px 14px 10px 12px}
+  .mix.tl{position:static;grid-area:ix;justify-self:center}
+  .mix.br{display:none}
+  .mcard .rar{position:absolute;right:14px;top:12px;margin:0;font-size:9.5px}
+  .mico{grid-area:ico;width:30px;height:30px;justify-self:center;margin:0}
+  .mname{grid-area:name;font-size:16px;padding-right:76px}
+  .mbody{grid-area:body;font-size:12px}
+  .mpips{grid-area:pips;margin:4px 0 0}
+  .mkey{display:none}
+}
+@media (prefers-reduced-motion:reduce){ .mslot,.mflip,.mpips i.new,.mcard.flash::after{animation:none;transition:none} }
 
 /* Bannière centrale */
 /* annonces : panneau de chantier (début de vague), plaque verte de sécurité (fin), petit cartouche (le reste) */
@@ -164,7 +204,6 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .tips summary{cursor:pointer;color:var(--text);letter-spacing:.08em;text-transform:uppercase;font-size:12px}
 .tips p{margin:10px 0 0}
 .has-pad .only-desk,.has-pad .nopad{display:none}
-.mcard.focus{transform:translateY(-4px);border-color:var(--rc);box-shadow:0 0 0 2px var(--rc)}
 #toast{position:fixed;z-index:20;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 72px);transform:translate(-50%,8px);background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--hazard);padding:8px 14px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;max-width:calc(100% - 32px);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #toast.on{opacity:1;transform:translate(-50%,0)}
 .padhint{font-size:12px;color:var(--muted);margin:12px 0 0}
