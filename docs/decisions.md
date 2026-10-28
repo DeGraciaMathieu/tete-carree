@@ -186,3 +186,7 @@ Decisions the code does not settle and that were not made. Never resolved by gue
   (Windows sans WSL) ? Cela demanderait une dépendance de dev.
 - Garder la double balise viewport, ou n'en garder qu'une (laquelle : avec ou sans `user-scalable=no`) ?
 - Faut-il un favicon ? Le navigateur demande `/favicon.ico`, absent depuis l'origine (404 bénin).
+- Les textes des cartes (`MODS[].desc`, `plus`, `minus`) écrivent leurs nombres en dur au lieu de les
+  construire à partir des constantes d'effet (`TENACE_BONUS`, `BARBELES_DAMAGE`, `CONSTITUTION_HP`…) :
+  faut-il les dériver des constantes ? En attendant, le hook Stop de synchronisation de la
+  documentation (`.claude/settings.json`) surveille leur cohérence.
