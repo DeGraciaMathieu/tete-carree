@@ -1,5 +1,5 @@
 import {
-  T, MW, MH, ZOOM_MIN, ZOOM_MAX, W, COMBO_T, TENACE_BONUS, KILLS_PER_MULTIPLIER, FRENZY_MULTIPLIER, SOIF_MULTIPLIER,
+  T, MW, MH, ZOOM_MIN, ZOOM_MAX, W, SOIF_MULTIPLIER,
   RAR, MODS, PLAYER_HP, PLAYER_SPEED, FRENZY_SPEED_MUL, ACID_SPEED_MUL, REGEN_DELAY, REGEN_RATE, LOW_HP, MEDKIT_HP, ROLL,
   WALL_HP, TURRET_WALL_HP, BARREL_HP, TURRET_EVERY, KILL_POINTS, DROP_CHANCE, BLOATER_RADIUS, BLOATER_DAMAGE, MAX_ENEMIES,
   FIRST_BREAK, WAVE_BREAK, PICK_DELAY, WAVE_BONUS, BOX_FIRST, BOX_PERIOD_MIN, BOX_PERIOD_RAND, MAX_PICKUPS, BOX_HP_CHANCE,
@@ -7,6 +7,7 @@ import {
   STORAGE_BEST, STORAGE_FPS, STORAGE_OUTLINE, SHOW_FPS_BY_DEFAULT,
 } from './config.js';
 import { createRng } from './rules/rng.js';
+import * as Mods from './rules/modifiers.js';
 
 (() => {
 'use strict';
@@ -31,11 +32,11 @@ function resize() {
 addEventListener('resize', resize); resize();
 
 
-const mod = id => (S && S.mods && S.mods[id]) || 0;
-function frenzy() { return mod('frenesie') > 0 && multiplier() >= FRENZY_MULTIPLIER; }
-function fireMul() { return Math.pow(.8, mod('cadence')) * (mod('sansarmure') ? .5 : 1) * (frenzy() ? .75 : 1); }
-function comboTime() { return COMBO_T + TENACE_BONUS * mod('tenace'); }
-function rollMax() { return 1 + mod('double'); }
+const mod = id => Mods.modLevel(S && S.mods, id);
+function frenzy() { return Mods.frenzy(S.mods, S.combo); }
+function fireMul() { return Mods.fireMul(S.mods, S.combo); }
+function comboTime() { return Mods.comboTime(S.mods); }
+function rollMax() { return Mods.rollMax(S.mods); }
 
 /* ---------- Carte ---------- */
 const map = new Uint8Array(MW * MH); // 0 sol, 1 mur, 2 caisse
@@ -395,7 +396,7 @@ function addScore(n) {
     }
   });
 }
-function multiplier() { return 1 + Math.floor(S.combo / KILLS_PER_MULTIPLIER); }
+function multiplier() { return Mods.multiplier(S.combo); }
 
 /* ---------- Ennemis ---------- */
 function queueCount() { let c = 0; for (const t of S.queue) c += t[0] === 'p' ? +t.slice(1) : 1; return c; }
