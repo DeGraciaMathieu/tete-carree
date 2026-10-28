@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { multiplier, frenzy, fireMul, comboTime, rollMax } from '../src/rules/modifiers.js';
+import { multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo } from '../src/rules/modifiers.js';
 
 test('le multiplicateur gagne un cran tous les 5 kills enchaînés', () => {
   assert.equal(multiplier(0), 1);
@@ -29,4 +29,17 @@ test('Combo tenace prolonge la fenêtre de combo de 1,4 s par niveau', () => {
 test('Double roulade donne une seconde charge de roulade', () => {
   assert.equal(rollMax({}), 1);
   assert.equal(rollMax({ double: 1 }), 2);
+});
+
+test('Roulade tactique rend un quart de caisse par niveau à l\'Uzi presque vide', () => {
+  assert.equal(rollAmmo({ rollammo: 1 }, 120, 10), 30);
+  assert.equal(rollAmmo({ rollammo: 3 }, 120, 10), 90);
+  assert.equal(rollAmmo({}, 120, 10), 0);
+});
+
+test('Roulade tactique ne remplit jamais au-delà d\'une caisse pleine', () => {
+  assert.equal(rollAmmo({ rollammo: 3 }, 120, 100), 20);
+  assert.equal(rollAmmo({ rollammo: 3 }, 120, 120), 0);
+  assert.equal(rollAmmo({ rollammo: 3 }, 120, 300), 0);
+  assert.equal(rollAmmo({ rollammo: 3 }, 0, Infinity), 0);
 });

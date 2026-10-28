@@ -34,7 +34,7 @@ export const MODS = [
   { id: 'calibre', rar: 'c', max: 2, name: 'Gros calibre', short: 'Gros calibre', desc: n => `Le fusil à pompe repousse les ennemis ${n > 1 ? 'trois' : 'deux'} fois plus loin.` },
   { id: 'double', rar: 'r', max: 1, name: 'Double roulade', short: 'Double roulade', desc: () => `Deux roulades d'affilée avant la recharge.` },
   { id: 'rollboom', rar: 'r', max: 2, name: 'Roulade explosive', short: 'Roulade explosive', desc: n => n > 1 ? `L'onde de choc de la roulade est plus large et plus forte.` : `Chaque roulade libère une onde de choc qui blesse et repousse la horde.` },
-  { id: 'rollammo', rar: 'c', max: 3, name: 'Roulade tactique', short: 'Roulade tactique', desc: n => `Chaque roulade rend ${pct(.25 * n)} d'une caisse de munitions à l'arme en main.` },
+  { id: 'rollammo', rar: 'c', max: 3, name: 'Roulade tactique', short: 'Roulade tactique', desc: n => `Chaque roulade rend ${pct(ROLLAMMO_SHARE * n)} d'une caisse de munitions à l'arme en main, sans dépasser une caisse pleine.` },
   { id: 'firetrail', rar: 'r', max: 2, name: 'Traînée de feu', short: 'Traînée de feu', desc: n => n > 1 ? `Les flammes de la roulade brûlent deux fois plus fort.` : `La roulade laisse une ligne de flammes qui brûle la horde.` },
   { id: 'tenace', rar: 'c', max: 2, name: 'Combo tenace', short: 'Combo tenace', desc: n => `Le combo tient ${(COMBO_T + 1.4 * n).toFixed(1).replace('.', ',')} s au lieu de ${(COMBO_T + 1.4 * (n - 1)).toFixed(1).replace('.', ',')} s.` },
   { id: 'soif', rar: 'r', max: 3, name: 'Soif de sang', short: 'Soif de sang', desc: n => `À partir de ×3, chaque kill te rend ${n} point${n > 1 ? 's' : ''} de vie.` },
@@ -77,6 +77,7 @@ export const ROLL = { A: .06, B: .36, D: .46, CD: .7, V: 430, R: 10.5 };
 // Roulade explosive : rayon et dégâts de l'onde de choc = base + niveau × par niveau
 export const ROLLBOOM_RADIUS = 50, ROLLBOOM_RADIUS_LVL = 22, ROLLBOOM_DAMAGE = 20, ROLLBOOM_DAMAGE_LVL = 20;
 export const ROLLAMMO_SHARE = .25; // Roulade tactique : part d'une recharge rendue par niveau
+export const ROLLAMMO_CAP = 1;     // Roulade tactique : ne remplit pas au-delà de ce nombre de recharges
 export const SECOND_WIND_SHOCK_RADIUS = 110, SECOND_WIND_SHOCK_DAMAGE = 80, SECOND_WIND_SHOCK_KNOCK = 340;
 // Traînée de feu : durée d'une flamme au sol, dégâts par niveau (au moins 1), cadence et rayon de brûlure
 export const FIRETRAIL_LIFE = 2.4, FIRETRAIL_DAMAGE = 8, FIRETRAIL_TICK = .2, FIRETRAIL_RADIUS = 20;

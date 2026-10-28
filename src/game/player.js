@@ -1,13 +1,14 @@
 // Déplacement du joueur et roulade (avec ses cartes : onde de choc, munitions, traînée de feu).
 import { sfx } from '../audio/sfx.js';
-import { FIRETRAIL_DAMAGE, FIRETRAIL_LIFE, FIRETRAIL_RADIUS, FIRETRAIL_TICK, ROLL, ROLLAMMO_SHARE, ROLLBOOM_DAMAGE, ROLLBOOM_DAMAGE_LVL, ROLLBOOM_RADIUS, ROLLBOOM_RADIUS_LVL, W } from '../config.js';
+import { FIRETRAIL_DAMAGE, FIRETRAIL_LIFE, FIRETRAIL_RADIUS, FIRETRAIL_TICK, ROLL, ROLLBOOM_DAMAGE, ROLLBOOM_DAMAGE_LVL, ROLLBOOM_RADIUS, ROLLBOOM_RADIUS_LVL, W } from '../config.js';
 import { hurtEnemy, shockwave } from './combat.js';
 import { pad, rumble } from '../input/gamepad.js';
 import { keys } from '../input/keyboard.js';
 import { stick } from '../input/touch.js';
 import { addPart, dust, pop } from '../render/effects.js';
+import { rollAmmo } from '../rules/modifiers.js';
 import { circleTouchesVoid, moveCircle, unstick } from '../state/arena.js';
-import { ammo, mod, player, rollMax, world } from '../state/world.js';
+import { S, ammo, mod, player, rollMax, world } from '../state/world.js';
 import { rnd } from '../util.js';
 
 export function moveInput() {
@@ -42,11 +43,8 @@ export function tryRoll() {
 function rollPerks() {
   const lb = mod('rollboom');
   if (lb) shockwave(player.x, player.y, ROLLBOOM_RADIUS + ROLLBOOM_RADIUS_LVL * lb, ROLLBOOM_DAMAGE + ROLLBOOM_DAMAGE_LVL * lb);
-  const la = mod('rollammo'), wi = player.weapon, w = W[wi];
-  if (la && w.refill && ammo[wi] !== Infinity) {
-    const n = Math.ceil(w.refill * ROLLAMMO_SHARE * la);
-    ammo[wi] += n; pop(player.x, player.y - 46, `+${n} ${w.short}`, '#f2c230');
-  }
+  const wi = player.weapon, w = W[wi], n = rollAmmo(S.mods, w.refill, ammo[wi]);
+  if (n) { ammo[wi] += n; pop(player.x, player.y - 46, `+${n} ${w.short}`, '#f2c230'); }
 }
 export function updateRoll(dt) {
   const r = player.roll;
