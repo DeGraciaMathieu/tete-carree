@@ -6,7 +6,7 @@ import { pad, rumble } from '../input/gamepad.js';
 import { keys } from '../input/keyboard.js';
 import { stick } from '../input/touch.js';
 import { addPart, dust, pop } from '../render/effects.js';
-import { rollAmmo, rollHpCost, shoveKnock } from '../rules/modifiers.js';
+import { refillOf, rollAmmo, rollHpCost, shoveKnock } from '../rules/modifiers.js';
 import { circleTouchesVoid, moveCircle, unstick } from '../state/arena.js';
 import { S, ammo, mod, player, rollCooldown, rollMax, world } from '../state/world.js';
 import { rnd } from '../util.js';
@@ -46,7 +46,7 @@ export function tryRoll(dirX = 0, dirY = 0) {
 function rollPerks() {
   const lb = mod('rollboom');
   if (lb) shockwave(player.x, player.y, ROLLBOOM_RADIUS + ROLLBOOM_RADIUS_LVL * lb, ROLLBOOM_DAMAGE + ROLLBOOM_DAMAGE_LVL * lb);
-  const wi = player.weapon, w = W[wi], n = rollAmmo(S.mods, w.refill, ammo[wi]);
+  const wi = player.weapon, w = W[wi], n = rollAmmo(S.mods, refillOf(S.mods, wi), ammo[wi]);
   if (n) { ammo[wi] += n; pop(player.x, player.y - 46, `+${n} ${w.short}`, '#f2c230'); }
 }
 // Coup d'épaule : chaque ennemi traversé est bousculé une fois par roulade, loin du joueur

@@ -1,6 +1,6 @@
 // Enchaînement des écrans : titre, partie, pause, choix de carte, fin de partie.
 import { audio, sfx, silence } from '../audio/sfx.js';
-import { CONSTITUTION_HP, DIABLE_HP, RAR, STORAGE_BEST, STORAGE_RUNS, TOP_RUNS, VERRE_HP } from '../config.js';
+import { CONSTITUTION_HP, DIABLE_HP, MITRAILLE_PISTOL_AMMO, RAR, STORAGE_BEST, STORAGE_RUNS, TOP_RUNS, VERRE_HP } from '../config.js';
 import { pad } from '../input/gamepad.js';
 import { releaseFire } from '../input/keyboard.js';
 import { cardIcon } from '../render/cardIcons.js';
@@ -9,7 +9,7 @@ import { banner, buildSlots, renderRuns, resetHud } from '../render/hud.js';
 import { isPact, rollCards } from '../rules/cards.js';
 import { waveBreak } from '../rules/modifiers.js';
 import { rankRun } from '../rules/records.js';
-import { S, comboTime, mod, player, resetWorld, rng, rollMax, world } from '../state/world.js';
+import { S, ammo, comboTime, mod, player, resetWorld, rng, rollMax, world } from '../state/world.js';
 import { $, clamp, fmt } from '../util.js';
 
 export function newGame() {
@@ -100,6 +100,7 @@ function applyCard(m) {
   S.mods[m.id] = mod(m.id) + 1;
   if (m.id === 'constitution') { player.maxHp += CONSTITUTION_HP; player.hp = Math.min(player.maxHp, player.hp + CONSTITUTION_HP); }
   if (m.id === 'double') player.rollCharges = Math.min(rollMax(), player.rollCharges + 1);
+  if (m.id === 'mitraille') ammo[0] = MITRAILLE_PISTOL_AMMO;
   if (m.id === 'entrave') { player.rollCharges = 0; player.rollCd = 0; }
   if (m.id === 'fievre') S.comboT = Math.min(S.comboT, comboTime());
   if (m.id === 'repit') S.breakT = Math.min(S.breakT, waveBreak(S.mods));

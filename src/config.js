@@ -71,6 +71,7 @@ export const MODS = [
   { id: 'sablier', rar: 'm', max: 1, name: 'Sablier', short: 'Sablier', excl: ['vampire', 'sansarmure'], plus: () => `Points ×${SABLIER_POINTS_MUL} sur chaque kill`, minus: () => `Pendant une vague, tu perds ${SABLIER_DRAIN} PV par seconde jusqu'à la mort ; chaque kill arrête la perte ${num(SABLIER_HOLD)} s` },
   { id: 'elite', rar: 'm', max: 1, name: 'Élite', short: 'Élite', plus: () => `Points ×${ELITE_POINTS_MUL} sur chaque kill`, minus: () => `Deux fois moins d'ennemis par vague, mais ${num(ELITE_HP_MUL)} fois plus de PV et ${pct(ELITE_SPEED_MUL - 1)} plus rapides` },
   { id: 'entrave', rar: 'm', max: 1, name: 'Sans échappatoire', short: 'Sans échappatoire', excl: ['double', 'rollboom', 'rollammo', 'firetrail', 'epaule', 'brulee'], plus: () => `Déplacement +${pct(ENTRAVE_SPEED_MUL - 1)}, et tes tirs font ${num(ENTRAVE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `Plus aucune roulade : les crevasses deviennent infranchissables` },
+  { id: 'mitraille', rar: 'm', max: 1, name: 'Mitraille', short: 'Mitraille', excl: ['fidele'], plus: () => `Tes armes à feu tirent deux fois plus vite`, minus: () => `Chaque tir coûte ${MITRAILLE_AMMO_COST} munitions, et le pistolet n'est plus infini : ${MITRAILLE_PISTOL_AMMO} balles, rechargé par les caisses` },
 ];
 
 /* ---------- Effets des cartes ---------- */
@@ -107,6 +108,8 @@ export const UNEVIE_POINTS_MUL = 3; // Une seule vie : points des kills et du bo
 export const SABLIER_POINTS_MUL = 2, SABLIER_DRAIN = 4, SABLIER_HOLD = 1.5;
 // Élite : points des kills ; part des ennemis de chaque type (arrondi au supérieur) et taille des meutes (au moins
 // ELITE_PACK_MIN coureurs) ; PV (bouclier compris) et vitesse des ennemis
+// Mitraille : délai entre deux tirs des armes à feu, munitions par tir, munitions du pistolet à la prise et par caisse
+export const MITRAILLE_CD_MUL = .5, MITRAILLE_AMMO_COST = 2, MITRAILLE_PISTOL_AMMO = 120, MITRAILLE_PISTOL_REFILL = 60;
 export const ENTRAVE_SPEED_MUL = 1.3, ENTRAVE_DAMAGE_MUL = 1.5; // Sans échappatoire : déplacement, dégâts des tirs
 export const ELITE_POINTS_MUL = 3, ELITE_COUNT_MUL = .5, ELITE_PACK_MIN = 2, ELITE_HP_MUL = 2.5, ELITE_SPEED_MUL = 1.2;
 export const CARDS_PER_PICK = 3;

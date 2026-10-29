@@ -61,6 +61,7 @@ large, elles se couchent.
 | `sablier` (pacte majeur) | `hpRate` (perte en vague après `SABLIER_HOLD` s sans kill, `S.lastKill` posé par `killEnemy` et `startWave`) ; mort par `hurtPlayer` dans `update` ; `killPoints` ; barre `.drain` dans `renderHp` |
 | `elite` (pacte majeur) | `waveQueue` (`ELITE_COUNT_MUL`, `ELITE_PACK_MIN`) ; `enemyHpMul`, `enemySpeedMul` dans `spawnEnemy` ; `killPoints` |
 | `entrave` (pacte majeur) | `rollMax` rend 0 (charges vidées dans `applyCard`, clic à vide dans `tryRoll`) ; `speedMul` ; `shotDamageMul` |
+| `mitraille` (pacte majeur) | `weaponCdMul` et `ammoCost` dans `fireWeapon` (armes à feu seulement) ; munitions du pistolet dans `applyCard`, `refillOf` au ramassage et dans `rollPerks` ; `loadedWeapon` quand l'arme en main est vide |
 
 ## Pactes majeurs
 

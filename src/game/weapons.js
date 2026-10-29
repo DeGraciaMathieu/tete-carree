@@ -7,7 +7,7 @@ import { casing, dust, gibs, muzzleFx, sparks } from '../render/effects.js';
 import { GUNS } from '../render/sprites.js';
 import { clearShot, doorSet, frontTile, map, moveCircle, shotTile } from '../state/arena.js';
 import { S, ammo, blocks, cam, fireMul, jitter, mod, player, rng, unlocked, world } from '../state/world.js';
-import { shotDamageMul } from '../rules/modifiers.js';
+import { ammoCost, shotDamageMul, weaponCdMul } from '../rules/modifiers.js';
 import { clamp } from '../util.js';
 
 // pierce : nombre d'ennemis que le tir peut toucher (Infinity pour le railgun) ; bounce : rebonds restants
@@ -96,7 +96,7 @@ function recoil(camKick, gunKick) {
 }
 export function fireWeapon() {
   const wi = player.weapon, w = W[wi];
-  if (ammo[wi] <= 0) { sfx('click'); player.weapon = 0; player.cd = EMPTY_SWAP_CD; return; }
+  if (ammo[wi] <= 0) { sfx('click'); player.weapon = loadedWeapon(); player.cd = EMPTY_SWAP_CD; return; }
   const ang = Math.atan2(player.fy, player.fx);
   let ok = true;
   switch (w.id) {
@@ -125,8 +125,13 @@ export function fireWeapon() {
       shoot(ang, SHOTS.rail.speed, SHOTS.rail.damage, Infinity, SHOTS.rail.knock, { t: .35, w: 4, c: '120,230,255' });
       player.muzzle = .1; world.shake = Math.min(16, world.shake + 2.5); recoil(340, 310); muzzleFx(6, 2, '#c8f6ff'); sfx('rail'); casing('rail'); rumble(.45, .35, 120); break;
   }
-  if (ok && ammo[wi] !== Infinity) ammo[wi]--;
-  player.cd = ok ? w.cd * fireMul() : PLACE_FAIL_CD;
+  if (ok && ammo[wi] !== Infinity) ammo[wi] = Math.max(0, ammo[wi] - ammoCost(S.mods, w.id));
+  player.cd = ok ? w.cd * fireMul() * weaponCdMul(S.mods, w.id) : PLACE_FAIL_CD;
+}
+// Arme vers laquelle revenir quand celle en main est vide : le pistolet, ou sous Mitraille la première arme chargée.
+function loadedWeapon() {
+  for (let i = 0; i < W.length; i++) if (unlocked[i] && ammo[i] > 0) return i;
+  return player.weapon;
 }
 export function selectWeapon(i) {
   if (i < 0 || i >= W.length || !unlocked[i] || ammo[i] <= 0 || player.weapon === i) return;

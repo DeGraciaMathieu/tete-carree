@@ -7,7 +7,7 @@ import {
   QUITTE_POINTS_MUL, POUDRE_RADIUS_MUL, POUDRE_SELF_MUL, PORTANT_RANGE, PORTANT_NEAR_MUL, PORTANT_FAR_MUL, RAVITO_PERIOD_MUL,
   REPIT_MAX, REPIT_BREAK_MUL, FIDELE_PISTOL_MUL, VAMPIRE_DRAIN, BRULEE_ROLL_CD_MUL, BRULEE_ROLL_HP, RACINE_DAMAGE_MUL,
   RACINE_SPEED_MUL, VERRE_DAMAGE_MUL, SABLIER_DRAIN, SABLIER_HOLD, ELITE_HP_MUL, ELITE_SPEED_MUL,
-  ENTRAVE_SPEED_MUL, ENTRAVE_DAMAGE_MUL,
+  ENTRAVE_SPEED_MUL, ENTRAVE_DAMAGE_MUL, MITRAILLE_CD_MUL, MITRAILLE_AMMO_COST, MITRAILLE_PISTOL_REFILL, W,
 } from '../config.js';
 
 export const modLevel = (mods, id) => (mods && mods[id]) || 0;
@@ -47,6 +47,13 @@ export function rollHpCost(mods, hp) { return modLevel(mods, 'brulee') ? Math.ma
 // Élite : PV (bouclier compris) et vitesse des ennemis à leur apparition.
 export function enemyHpMul(mods) { return modLevel(mods, 'elite') ? ELITE_HP_MUL : 1; }
 export function enemySpeedMul(mods) { return modLevel(mods, 'elite') ? ELITE_SPEED_MUL : 1; }
+// Armes à feu : celles dont les tirs sont « tes tirs » (balles, plombs, railgun).
+const GUNS = ['pistol', 'uzi', 'rifle', 'shotgun', 'rail'];
+// Mitraille : délai entre deux tirs et munitions consommées par tir d'une arme à feu.
+export function weaponCdMul(mods, weapon) { return modLevel(mods, 'mitraille') && GUNS.includes(weapon) ? MITRAILLE_CD_MUL : 1; }
+export function ammoCost(mods, weapon) { return modLevel(mods, 'mitraille') && GUNS.includes(weapon) ? MITRAILLE_AMMO_COST : 1; }
+// Munitions d'une caisse pour l'arme i : le pistolet, infini d'ordinaire, en reçoit sous Mitraille.
+export function refillOf(mods, i) { return i === 0 && modLevel(mods, 'mitraille') ? MITRAILLE_PISTOL_REFILL : W[i].refill; }
 // Enraciné, Sans échappatoire : vitesse de déplacement.
 export function speedMul(mods) { return (modLevel(mods, 'racine') ? RACINE_SPEED_MUL : 1) * (modLevel(mods, 'entrave') ? ENTRAVE_SPEED_MUL : 1); }
 // Dégâts des tirs du joueur selon ses pactes : arme tirée, distance à la cible (px), joueur immobile.

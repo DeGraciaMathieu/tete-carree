@@ -15,7 +15,7 @@ import { VH, VW, zoom } from '../render/canvas.js';
 import { addPart, casing, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood } from '../render/floor.js';
 import { banner } from '../render/hud.js';
-import { blastRadius, boxKind, boxPeriod, fragShards, hpRate, repitBonus, speedMul, waveBreak, waveEndHp } from '../rules/modifiers.js';
+import { blastRadius, boxKind, boxPeriod, fragShards, hpRate, refillOf, repitBonus, speedMul, waveBreak, waveEndHp } from '../rules/modifiers.js';
 import { waveBonus } from '../rules/scoring.js';
 import * as Waves from '../rules/waves.js';
 import { computeField, dist, isVoid, los, moveCircle, nextStep, openT, passable, shotTile, unstick, walkLine } from '../state/arena.js';
@@ -271,12 +271,12 @@ export function update(dt) {
       p.taken = true; sfx('pickup');
       if (p.kind === 'hp') { player.hp = Math.min(player.maxHp, player.hp + MEDKIT_HP); pop(p.x, p.y - 30, `+${MEDKIT_HP} santé`, '#62c46e'); }
       else {
-        const pool = mod('fidele') ? [] : W.map((w, i) => i).filter(i => i > 0 && unlocked[i]); // Fidélité : plus aucune recharge
+        const pool = mod('fidele') ? [] : W.map((w, i) => i).filter(i => (i > 0 || mod('mitraille')) && unlocked[i]); // Fidélité : plus aucune recharge ; Mitraille : le pistolet aussi
         if (!pool.length) { addScore(AMMO_NO_WEAPON_BONUS); pop(p.x, p.y - 30, `+${AMMO_NO_WEAPON_BONUS}`, '#ffffff'); }
         else {
           const picks = pool.sort(() => rng() - .5).slice(0, AMMO_REFILL_WEAPONS);
-          for (const i of picks) ammo[i] += W[i].refill;
-          pop(p.x, p.y - 30, picks.map(i => `+${W[i].refill} ${W[i].short}`).join(' · '), '#f2c230');
+          for (const i of picks) ammo[i] += refillOf(S.mods, i);
+          pop(p.x, p.y - 30, picks.map(i => `+${refillOf(S.mods, i)} ${W[i].short}`).join(' · '), '#f2c230');
         }
       }
     }

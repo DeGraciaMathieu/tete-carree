@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, repitBonus, waveBreak,
-  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
+  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
 } from '../src/rules/modifiers.js';
 
 test('le multiplicateur gagne un cran tous les 5 kills enchaînés', () => {
@@ -181,4 +181,22 @@ test('Sans échappatoire : déplacement +30 % et tirs ×1,5, cumulés avec Enrac
   assert.equal(shotDamageMul({ entrave: 1 }, 'uzi', 400, false), 1.5);
   assert.ok(Math.abs(speedMul({ entrave: 1, racine: 1 }) - .91) < 1e-9);
   assert.equal(shotDamageMul({ entrave: 1, racine: 1 }, 'uzi', 400, true), 3);
+});
+
+test('Mitraille : les armes à feu tirent deux fois plus vite, quatre fois avec Sans armure, pas les grenades', () => {
+  assert.equal(weaponCdMul({ mitraille: 1 }, 'uzi'), .5);
+  assert.equal(weaponCdMul({ mitraille: 1 }, 'grenade'), 1);
+  assert.equal(weaponCdMul({ mitraille: 1 }, 'rifle') * fireMul({ mitraille: 1, sansarmure: 1 }, 0), .25);
+});
+
+test('Mitraille : un tir coûte 2 munitions, une barricade toujours 1', () => {
+  assert.equal(ammoCost({ mitraille: 1 }, 'pistol'), 2);
+  assert.equal(ammoCost({ mitraille: 1 }, 'wall'), 1);
+  assert.equal(ammoCost({}, 'uzi'), 1);
+});
+
+test('Mitraille : une caisse recharge aussi le pistolet', () => {
+  assert.equal(refillOf({ mitraille: 1 }, 0), 60);
+  assert.equal(refillOf({}, 0), 0);
+  assert.equal(refillOf({ mitraille: 1 }, 1), 120);
 });
