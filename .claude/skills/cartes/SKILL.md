@@ -57,6 +57,7 @@ large, elles se couchent.
 | `diable` (pacte) | `choosePick` : vie max −`DIABLE_HP`, `S.legendNext` ; `rollCards(mods, rng, legend)` tire une Légendaire en premier et retire le pacte quand il n'en reste plus |
 | `verre` (pacte, vie) | `choosePick` : vie max −`VERRE_HP` |
 | `sanssoin` (pacte majeur) | `hpRate` (aucune régénération) ; `boxKind` (caisses larguées dans `update`, `rollDrop`) ; `waveEndHp` en fin de vague dans `update` |
+| `unevie` (pacte majeur) | `applyCard` : vie et vie max à 1 ; `killPoints` et `waveBonus` (`UNEVIE_POINTS_MUL`, `rules/scoring.js`) ; `boxKind` ; libellé « 1 coup » dans `renderHp` |
 
 ## Pactes majeurs
 
@@ -73,7 +74,7 @@ qu'un pacte majeur est possédé (un seul par partie).
 | Frénésie | active si la carte est prise et `multiplier ≥ FRENZY_MULTIPLIER` |
 | Points d'un kill | `killPoints(type, mods, multiplier)` (`rules/scoring.js`, `KILL_POINTS`) |
 | Ajout au score | `addScore(n)` (`game/score.js`) : seul point d'entrée, déclenche les déblocages d'armes |
-| Bonus de fin de vague | `WAVE_BONUS × vague`, dans `update` |
+| Bonus de fin de vague | `waveBonus(wave, mods)` (`rules/scoring.js`) : `WAVE_BONUS × vague`, ajouté dans `update` |
 | Record | `world.best`, enregistré par `gameOver` sous `STORAGE_BEST` (`tete-carree-best`, clé à ne jamais changer) |
 | Dernière partie et meilleures parties | `world.runs` (`{ last, top }`), classées par `rankRun` (`rules/records.js`, `TOP_RUNS`), enregistrées par `gameOver` sous `STORAGE_RUNS` (`tete-carree-runs`) ; affichées par `renderRuns` (`render/hud.js`) sur l'accueil (bloc masqué tant qu'aucune partie n'est enregistrée) et l'écran de fin |
 | Affichage | `updateHud` (`render/hud.js`) : `#comboNum`, `#comboKills`, `#comboFill`, `#score`, `#next`, puces `#mods` |

@@ -32,8 +32,9 @@ export function hpRate(mods, combo, sinceHurt) {
   if (modLevel(mods, 'vampire') && !combo) return -VAMPIRE_DRAIN;
   return !modLevel(mods, 'sansarmure') && sinceHurt > REGEN_DELAY ? REGEN_RATE : 0;
 }
-// Nature d'une caisse (r : tirage entre 0 et 1, hpChance : part des caisses de soin). Plus de soins : que des munitions.
-export function boxKind(mods, r, hpChance) { return r < hpChance && !modLevel(mods, 'sanssoin') ? 'hp' : 'ammo'; }
+// Nature d'une caisse (r : tirage entre 0 et 1, hpChance : part des caisses de soin). Plus de soins, Une seule vie :
+// que des munitions.
+export function boxKind(mods, r, hpChance) { return r < hpChance && !modLevel(mods, 'sanssoin') && !modLevel(mods, 'unevie') ? 'hp' : 'ammo'; }
 // Vie après une vague terminée : Plus de soins la rend en entier.
 export function waveEndHp(mods, hp, maxHp) { return modLevel(mods, 'sanssoin') ? maxHp : hp; }
 export function rollMax(mods) { return 1 + modLevel(mods, 'double'); }

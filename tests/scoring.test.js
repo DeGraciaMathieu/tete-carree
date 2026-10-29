@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { killPoints, soifHeal, rollDrop } from '../src/rules/scoring.js';
+import { killPoints, soifHeal, rollDrop, waveBonus } from '../src/rules/scoring.js';
 
 const fixed = (...values) => () => values.shift();
 
@@ -38,4 +38,15 @@ test('Quitte ou double double les points de chaque kill', () => {
 test('Vampire : chaque kill rend 1 PV, et Soif de sang agit dès ×1', () => {
   assert.equal(soifHeal({ vampire: 1 }, 1), 1);
   assert.equal(soifHeal({ vampire: 1, soif: 2 }, 1), 3);
+});
+
+test('Une seule vie : chaque kill et le bonus de fin de vague rapportent trois fois plus', () => {
+  assert.equal(killPoints('z', { unevie: 1 }, 2), 300);
+  assert.equal(waveBonus(4, {}), 1000);
+  assert.equal(waveBonus(4, { unevie: 1 }), 3000);
+});
+
+test('Une seule vie : un ennemi ne lâche plus que des caisses de munitions', () => {
+  assert.equal(rollDrop('a', false, fixed(0, 0), {}), 'hp');
+  assert.equal(rollDrop('a', false, fixed(0, 0), { unevie: 1 }), 'ammo');
 });

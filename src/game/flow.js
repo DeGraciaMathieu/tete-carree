@@ -106,6 +106,7 @@ function applyCard(m) {
   // Marché du diable, Canon de verre : la vie max baisse, la vie suit sans tomber sous 1
   const lost = m.id === 'diable' ? DIABLE_HP : m.id === 'verre' ? VERRE_HP : 0;
   if (lost) { player.maxHp -= lost; player.hp = Math.max(1, Math.min(player.hp, player.maxHp)); }
+  if (m.id === 'unevie') player.maxHp = player.hp = 1; // le premier coup, quel qu'il soit, est mortel
 }
 // Démo : une des cartes qu'on aurait proposées, prise au hasard, sans écran de choix.
 export function demoPick() {

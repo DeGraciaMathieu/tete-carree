@@ -97,7 +97,7 @@ function renderHp() {
   setStyle('hpFill', 'width', width);
   const tick = (25 / player.maxHp * 100).toFixed(2) + '%'; // un repère tous les 25 PV
   if (hudCache.hpTick !== tick) { hudCache.hpTick = tick; $('hpTicks').style.setProperty('--tick', tick); }
-  setText('hpNum', String(Math.ceil(Math.max(0, player.hp))));
+  setText('hpNum', mod('unevie') && !player.dead ? '1 coup' : String(Math.ceil(Math.max(0, player.hp))));
 }
 // Volet Arsenal de l'écran titre : les armes dans l'ordre de leurs touches, avec leur score de déblocage.
 export function buildArsenal() {

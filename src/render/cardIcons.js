@@ -36,6 +36,7 @@ const PATHS = {
   diable: '<path d="M12 22V6"/><path d="M6 3v4a6 6 0 0 0 12 0V3"/><path d="M12 2v2"/>',
   verre: '<path d="M7 3h10l-1 7a4 4 0 0 1-8 0z"/><path d="M12 14v6M8 21h8"/><path d="M11 4l1 3-2 2"/>',
   sanssoin: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/><path d="M3 21L21 3"/>',
+  unevie: '<path d="M12 20s-8-4.6-8-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5C20 15.4 12 20 12 20z"/><path d="M12 3v18"/>',
 };
 export function cardIcon(id) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${PATHS[id] || ''}</svg>`;

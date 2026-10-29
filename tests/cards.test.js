@@ -45,6 +45,10 @@ test('aucun pacte majeur n\'est proposé avant la fin de la vague 5', () => {
   assert.ok(majors.some(m => draws({}, { wave: 5 }).includes(m.id)));
 });
 
+test('un seul pacte majeur par partie', () => {
+  for (const m of majors) assert.ok(!draws({ [m.id]: 1 }, { wave: 20 }, 100).some(id => majors.some(o => o.id === id)), m.id);
+});
+
 test('la démo ne tire jamais de pacte majeur', () => {
   assert.ok(!draws({}, { wave: 20, demo: true }).some(id => majors.some(m => m.id === id)));
 });
