@@ -139,6 +139,20 @@ Ouvrir `index.html` par double-clic ne fonctionne plus (ESM natif non servi en `
   peut mourir : la démo repart à sa mort ou à la fin de la vague `DEMO_WAVES`.
 - Le pilote n'utilise que les armes à feu (pas de construction ni d'explosif, qui le blesseraient).
 
+## Écran titre : disposition
+
+Maquettes comparées avant de choisir (proposition 1 retenue sur trois : carte centrale, barres haut et bas).
+
+- Colonne sombre ancrée au bord gauche : logo, menu vertical dont **Jouer** est la première entrée
+  (Commandes, Bestiaire, Arsenal, Cartes, Options), puis indications et drapeaux en pied. À droite, un
+  seul panneau réunit dernière partie et meilleures parties ; il disparaît tant qu'aucune partie n'est
+  enregistrée. La démo reste visible au centre. Sous 720 px, la colonne passe au-dessus des records
+  (Jouer visible sans défiler).
+- Menu au focus natif : flèches ↑ ↓ (ou croix et stick de la manette) d'une entrée à l'autre en boucle,
+  la première pression choisit Jouer ; Entrée (A) active l'entrée. Entrée sans focus et Start lancent la
+  partie comme avant. Un volet ouvert prend le focus sur Fermer, A ou B le referme, et le focus revient
+  à l'entrée qui l'a ouvert.
+
 ## Écran titre : dernière partie et meilleures parties
 
 - Par-dessus la démo, l'accueil montre la dernière partie (score, vague, kills, meilleur combo, cartes
