@@ -64,6 +64,10 @@ test('un pacte majeur s\'affiche comme un pacte : avantage et contrepartie', () 
   for (const m of majors) assert.ok(isPact(m) && m.plus(1) && m.minus(1), m.id);
 });
 
+test('Pas de pause : les cartes gagnées d\'office ne sont jamais des pactes', () => {
+  assert.ok(!draws({ sanspause: 1 }, { wave: 12, noPacts: true }).some(id => isPact(MODS.find(m => m.id === id))));
+});
+
 test('chaque carte a son pictogramme', () => {
   for (const m of MODS) assert.match(cardIcon(m.id), /<(path|circle)/, m.id);
 });

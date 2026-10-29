@@ -15,7 +15,7 @@ import { VH, VW, zoom } from '../render/canvas.js';
 import { addPart, casing, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood } from '../render/floor.js';
 import { banner } from '../render/hud.js';
-import { blastRadius, boxKind, boxPeriod, fragShards, hpRate, refillOf, repitBonus, speedMul, waveBreak, waveEndHp } from '../rules/modifiers.js';
+import { blastRadius, boxKind, boxPeriod, fragShards, hpRate, pickAfter, refillOf, repitBonus, speedMul, waveBreak, waveEndHp } from '../rules/modifiers.js';
 import { waveBonus } from '../rules/scoring.js';
 import * as Waves from '../rules/waves.js';
 import { computeField, dist, isVoid, los, moveCircle, nextStep, openT, passable, shotTile, unstick, walkLine } from '../state/arena.js';
@@ -90,7 +90,7 @@ export function update(dt) {
         S.spawnT = Waves.spawnGap(S.wave);
       }
       if (!S.queue.length && world.enemies.length === 0) {
-        S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = PICK_DELAY; S.repit = repitBonus(S.mods, S.repit);
+        S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = pickAfter(S.mods, S.wave) ? PICK_DELAY : 0; S.repit = repitBonus(S.mods, S.repit);
         const bonus = waveBonus(S.wave, S.mods) + S.pot; S.pot = 0; addScore(bonus); // Tout ou rien : la cagnotte est versée
         banner('Vague terminée', 'Bonus +', 'end', bonus);
         const hp = waveEndHp(S.mods, player.hp, player.maxHp);

@@ -7,7 +7,7 @@ import { cardIcon } from '../render/cardIcons.js';
 import { paintFloor } from '../render/floor.js';
 import { banner, buildSlots, renderRuns, resetHud } from '../render/hud.js';
 import { isPact, rollCards } from '../rules/cards.js';
-import { waveBreak } from '../rules/modifiers.js';
+import { takeAllCards, waveBreak } from '../rules/modifiers.js';
 import { rankRun } from '../rules/records.js';
 import { S, ammo, comboTime, mod, player, resetWorld, rng, rollMax, world } from '../state/world.js';
 import { $, clamp, fmt } from '../util.js';
@@ -63,12 +63,15 @@ function dealCards(slots) {
   });
 }
 export function openPick() {
-  pickChoices = rollCards(S.mods, rng, S.legendNext, { wave: S.wave });
+  // Pas de pause : le joueur gagne toutes les cartes proposées, tirées hors pactes
+  const all = takeAllCards(S.mods);
+  pickChoices = rollCards(S.mods, rng, S.legendNext, { wave: S.wave, noPacts: all });
   if (!pickChoices.length) return;
   S.legendNext = false;
   world.state = 'pick'; releaseFire();
   pickTimers.forEach(clearTimeout); pickTimers = []; pickLocked = false;
   $('pickWave').textContent = `Vague ${S.wave} terminée`;
+  $('pickTitle').textContent = all ? `Tu gagnes ces ${pickChoices.length > 1 ? pickChoices.length + ' cartes' : 'cette carte'}` : 'Choisis une carte';
   const box = $('cards'); box.innerHTML = '';
   pickChoices.forEach((m, i) => {
     const slot = document.createElement('div');
@@ -88,12 +91,23 @@ export function choosePick(i) {
   const m = pickChoices[i], slots = $('cards').children;
   // une carte encore face cachée ne se choisit pas
   if (!m || world.state !== 'pick' || pickLocked || slots[i].firstChild.classList.contains('down')) return;
+  if (takeAllCards(S.mods)) { takeAll(slots); return; }
   pickLocked = true;
   applyCard(m);
   for (let k = 0; k < slots.length; k++) slots[k].classList.add(k === i ? 'chosen' : 'away');
   sfx('unlock');
   const sub = isPact(m) ? 'Pacte scellé' : mod(m.id) > 1 ? `Niveau ${mod(m.id)}` : 'Carte obtenue';
   pickTimers.push(setTimeout(() => { $('pickScreen').hidden = true; world.state = 'play'; banner(m.name, sub); }, DEAL_OUT_MS));
+}
+// Pas de pause : toutes les cartes sont gagnées d'un coup, une fois toutes retournées.
+function takeAll(slots) {
+  for (let k = 0; k < slots.length; k++) if (slots[k].firstChild.classList.contains('down')) return;
+  pickLocked = true;
+  const won = pickChoices.slice();
+  for (const m of won) applyCard(m);
+  for (let k = 0; k < slots.length; k++) slots[k].classList.add('chosen');
+  sfx('unlock');
+  pickTimers.push(setTimeout(() => { $('pickScreen').hidden = true; world.state = 'play'; banner(won.length > 1 ? 'Cartes obtenues' : won[0].name, won.map(m => m.short).join(' · ')); }, DEAL_OUT_MS));
 }
 // Effets d'une carte prise : niveau, et effet immédiat de certaines cartes.
 function applyCard(m) {
@@ -103,7 +117,7 @@ function applyCard(m) {
   if (m.id === 'mitraille') ammo[0] = MITRAILLE_PISTOL_AMMO;
   if (m.id === 'entrave') { player.rollCharges = 0; player.rollCd = 0; }
   if (m.id === 'fievre') S.comboT = Math.min(S.comboT, comboTime());
-  if (m.id === 'repit') S.breakT = Math.min(S.breakT, waveBreak(S.mods));
+  if (m.id === 'repit' || m.id === 'sanspause') S.breakT = Math.min(S.breakT, waveBreak(S.mods));
   if (m.id === 'diable') S.legendNext = true;
   // Marché du diable, Canon de verre : la vie max baisse, la vie suit sans tomber sous 1
   const lost = m.id === 'diable' ? DIABLE_HP : m.id === 'verre' ? VERRE_HP : 0;

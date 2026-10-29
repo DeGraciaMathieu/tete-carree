@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, repitBonus, waveBreak,
-  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
+  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, pickAfter, takeAllCards, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
 } from '../src/rules/modifiers.js';
 
 test('le multiplicateur gagne un cran tous les 5 kills enchaînés', () => {
@@ -216,4 +216,12 @@ test('Main lourde : chaque tir d\'arme à feu fait reculer le joueur et dévie s
 test('Tout ou rien : un cran de multiplicateur tous les 2 kills', () => {
   assert.equal(multiplier(4, { toutourien: 1 }), 3);
   assert.equal(multiplier(4, {}), 1);
+});
+
+test('Pas de pause : 1,5 s entre deux vagues, un choix de cartes après les vagues paires seulement, où l\'on garde tout', () => {
+  assert.equal(waveBreak({ sanspause: 1 }), 1.5);
+  assert.equal(pickAfter({ sanspause: 1 }, 7), false);
+  assert.equal(pickAfter({ sanspause: 1 }, 8), true);
+  assert.equal(pickAfter({}, 7), true);
+  assert.equal(takeAllCards({ sanspause: 1 }), true);
 });

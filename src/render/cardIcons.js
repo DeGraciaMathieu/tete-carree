@@ -43,6 +43,7 @@ const PATHS = {
   mitraille: '<path d="M4 4v6M8 4v6M12 4v6M16 4v6M20 4v6"/><path d="M3 14h18v6H3z"/><path d="M7 14v6M12 14v6M17 14v6"/>',
   lourde: '<path d="M3 9h12v5H8l-1 6H4l1-6H3z"/><path d="M15 10h3M18 7v7"/><path d="M21 6l-2 2M21 15l-2-2"/>',
   toutourien: '<path d="M4 20h16"/><path d="M6 20v-4h12v4"/><path d="M8 16l1-6h6l1 6"/><path d="M12 10V3M9 6l3-3 3 3"/>',
+  sanspause: '<path d="M8 4v16M14 4v16"/><path d="M3 21L21 3"/>',
 };
 export function cardIcon(id) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${PATHS[id] || ''}</svg>`;

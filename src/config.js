@@ -74,6 +74,7 @@ export const MODS = [
   { id: 'mitraille', rar: 'm', max: 1, name: 'Mitraille', short: 'Mitraille', excl: ['fidele'], plus: () => `Tes armes à feu tirent deux fois plus vite`, minus: () => `Chaque tir coûte ${MITRAILLE_AMMO_COST} munitions, et le pistolet n'est plus infini : ${MITRAILLE_PISTOL_AMMO} balles, rechargé par les caisses` },
   { id: 'lourde', rar: 'm', max: 1, name: 'Main lourde', short: 'Main lourde', plus: () => `Tes tirs font ${num(LOURDE_DAMAGE_MUL)} fois plus de dégâts et repoussent ${LOURDE_KNOCK_MUL === 2 ? 'deux' : num(LOURDE_KNOCK_MUL)} fois plus loin`, minus: () => `Chaque tir te fait reculer et dévie ta visée, railgun compris` },
   { id: 'toutourien', rar: 'm', max: 1, name: 'Tout ou rien', short: 'Tout ou rien', excl: ['fievre', 'quitte'], plus: () => `Un cran de multiplicateur tous les ${TOUTOURIEN_KILLS_PER_MULTIPLIER} kills au lieu de ${KILLS_PER_MULTIPLIER}`, minus: () => `Les points d'une vague ne comptent qu'à sa fin : un coup encaissé les fait tous perdre` },
+  { id: 'sanspause', rar: 'm', max: 1, name: 'Pas de pause', short: 'Pas de pause', excl: ['repit'], plus: () => `Toutes les deux vagues, tu gagnes les trois cartes proposées (jamais de pacte)`, minus: () => `Plus de pause entre les vagues, et aucune carte après une vague impaire` },
 ];
 
 /* ---------- Effets des cartes ---------- */
@@ -114,6 +115,7 @@ export const SABLIER_POINTS_MUL = 2, SABLIER_DRAIN = 4, SABLIER_HOLD = 1.5;
 export const MITRAILLE_CD_MUL = .5, MITRAILLE_AMMO_COST = 2, MITRAILLE_PISTOL_AMMO = 120, MITRAILLE_PISTOL_REFILL = 60;
 // Main lourde : dégâts et recul infligés par tes tirs ; recul subi par tir (px) ; dispersion ajoutée (rad)
 export const LOURDE_DAMAGE_MUL = 1.8, LOURDE_KNOCK_MUL = 2, LOURDE_SELF_PUSH = 8, LOURDE_SPREAD = .14;
+export const SANSPAUSE_BREAK = 1.5; // Pas de pause : secondes entre deux vagues
 export const TOUTOURIEN_KILLS_PER_MULTIPLIER = 2; // Tout ou rien : kills par cran de multiplicateur
 export const ENTRAVE_SPEED_MUL = 1.3, ENTRAVE_DAMAGE_MUL = 1.5; // Sans échappatoire : déplacement, dégâts des tirs
 export const ELITE_POINTS_MUL = 3, ELITE_COUNT_MUL = .5, ELITE_PACK_MIN = 2, ELITE_HP_MUL = 2.5, ELITE_SPEED_MUL = 1.2;

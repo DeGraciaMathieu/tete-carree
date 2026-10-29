@@ -8,7 +8,7 @@ import {
   REPIT_MAX, REPIT_BREAK_MUL, FIDELE_PISTOL_MUL, VAMPIRE_DRAIN, BRULEE_ROLL_CD_MUL, BRULEE_ROLL_HP, RACINE_DAMAGE_MUL,
   RACINE_SPEED_MUL, VERRE_DAMAGE_MUL, SABLIER_DRAIN, SABLIER_HOLD, ELITE_HP_MUL, ELITE_SPEED_MUL,
   ENTRAVE_SPEED_MUL, ENTRAVE_DAMAGE_MUL, MITRAILLE_CD_MUL, MITRAILLE_AMMO_COST, MITRAILLE_PISTOL_REFILL, W,
-  TOUTOURIEN_KILLS_PER_MULTIPLIER, LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL, LOURDE_SELF_PUSH, LOURDE_SPREAD,
+  TOUTOURIEN_KILLS_PER_MULTIPLIER, SANSPAUSE_BREAK, LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL, LOURDE_SELF_PUSH, LOURDE_SPREAD,
 } from '../config.js';
 
 export const modLevel = (mods, id) => (mods && mods[id]) || 0;
@@ -24,7 +24,10 @@ export function comboTime(mods) { return (COMBO_T + TENACE_BONUS * modLevel(mods
 export function comboAfterHit(mods, comboT) { return modLevel(mods, 'quitte') ? 0 : Math.max(0, comboT - COMBO_HIT_DRAIN); }
 // Sans répit : crans de multiplicateur après une vague terminée, et pause raccourcie entre les vagues.
 export function repitBonus(mods, bonus) { return modLevel(mods, 'repit') ? Math.min(REPIT_MAX, bonus + 1) : bonus; }
-export function waveBreak(mods) { return WAVE_BREAK * (modLevel(mods, 'repit') ? REPIT_BREAK_MUL : 1); }
+export function waveBreak(mods) { return modLevel(mods, 'sanspause') ? SANSPAUSE_BREAK : WAVE_BREAK * (modLevel(mods, 'repit') ? REPIT_BREAK_MUL : 1); }
+// Pas de pause : un choix de cartes après les vagues paires seulement, où l'on garde toutes les cartes proposées.
+export function pickAfter(mods, wave) { return !modLevel(mods, 'sanspause') || wave % 2 === 0; }
+export function takeAllCards(mods) { return !!modLevel(mods, 'sanspause'); }
 // Ravitaillement : délai avant la prochaine caisse larguée (r : tirage entre 0 et 1).
 export function boxPeriod(mods, r) { return (BOX_PERIOD_MIN + r * BOX_PERIOD_RAND) * (modLevel(mods, 'ravito') ? RAVITO_PERIOD_MUL : 1); }
 // Points de vie gagnés (> 0) ou perdus (< 0) par seconde hors des coups : régénération après REGEN_DELAY s sans
