@@ -127,8 +127,9 @@ export const TOUTOURIEN_KILLS_PER_MULTIPLIER = 2; // Tout ou rien : kills par cr
 export const ENTRAVE_SPEED_MUL = 1.3, ENTRAVE_DAMAGE_MUL = 1.5; // Sans échappatoire : déplacement, dégâts des tirs
 export const ELITE_POINTS_MUL = 3, ELITE_COUNT_MUL = .5, ELITE_PACK_MIN = 2, ELITE_HP_MUL = 2.5, ELITE_SPEED_MUL = 1.2;
 export const CARDS_PER_PICK = 3;
-// Pactes majeurs (rareté `m`) : proposés à partir de la fin de cette vague, un seul par partie.
-export const MAJOR_FROM_WAVE = 5;
+// Pactes majeurs (rareté `m`) : proposés à partir de la fin de cette vague, un seul par partie ; tant qu'aucun n'est pris,
+// l'un d'eux est garanti à la fin de cette vague puis toutes les MAJOR_EVERY vagues.
+export const MAJOR_FROM_WAVE = 5, MAJOR_EVERY = 2;
 
 /* ---------- Joueur ---------- */
 export const PLAYER_HP = 100, PLAYER_RADIUS = 9;

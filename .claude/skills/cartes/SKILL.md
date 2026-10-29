@@ -73,7 +73,9 @@ large, elles se couchent.
 
 Spécification : `docs/prd/pactes-majeurs.md`. `rollCards(mods, rng, legend, { wave, demo })` ne propose un
 pacte majeur qu'à partir de la fin de la vague `MAJOR_FROM_WAVE`, jamais en démo, et plus aucun dès
-qu'un pacte majeur est possédé (un seul par partie).
+qu'un pacte majeur est possédé (un seul par partie). Tant qu'aucun n'est pris, `majorDue(wave)` en garantit un
+(tiré en premier, parmi ceux encore permis) à la fin de la vague `MAJOR_FROM_WAVE` puis toutes les `MAJOR_EVERY` vagues ;
+à la distribution, il se retourne en dernier comme la Légendaire.
 
 ## Combo, multiplicateur, score
 

@@ -161,6 +161,8 @@ Spécification : `docs/prd/pactes-majeurs.md`.
   points qui se composent. Choix « pour le moment », plus simple.
 - Exclusions symétriques (champ `excl`) : une carte que le pacte majeur rend inutile n'est plus
   proposée, et le pacte n'est pas proposé si on la possède déjà.
+- Tant qu'aucun n'est pris, un pacte majeur est garanti (tiré en premier, comme la Légendaire du Marché du
+  diable) à la fin de la vague 5 puis toutes les `MAJOR_EVERY` (2) vagues ; entre-temps, chance normale.
 - La démo ne tire jamais de pacte majeur.
 
 ## Rules extracted

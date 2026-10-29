@@ -37,7 +37,7 @@ export function gameOver() {
   renderRuns(); $('overScreen').hidden = false;
 }
 let pickChoices = [], pickTimers = [], pickLocked = false, weaponChoices = null;
-// Distribution : les cartes arrivent face cachée puis se retournent une à une, la Légendaire en dernier.
+// Distribution : les cartes arrivent face cachée puis se retournent une à une, Légendaire et pacte majeur en dernier.
 const DEAL_FIRST_MS = 350, DEAL_STEP_MS = 300, DEAL_LEGEND_MS = 250, DEAL_OUT_MS = 320;
 function cardHtml(m, i) {
   const n = mod(m.id) + 1, corner = m.max > 1 ? n : '★';
@@ -53,9 +53,10 @@ function cardHtml(m, i) {
 }
 function dealCards(slots) {
   const fast = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const order = pickChoices.map((m, i) => i).sort((a, b) => (pickChoices[a].rar === 'l') - (pickChoices[b].rar === 'l'));
+  const rare = m => m.rar === 'l' || m.rar === 'm';
+  const order = pickChoices.map((m, i) => i).sort((a, b) => rare(pickChoices[a]) - rare(pickChoices[b]));
   order.forEach((i, k) => {
-    const legend = pickChoices[i].rar === 'l';
+    const legend = rare(pickChoices[i]);
     pickTimers.push(setTimeout(() => {
       slots[i].firstChild.classList.remove('down');
       if (legend) slots[i].querySelector('.mcard').classList.add('flash');

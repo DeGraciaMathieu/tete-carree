@@ -40,7 +40,10 @@ Les valeurs chiffrées ci-dessous sont des valeurs de départ, à régler en jeu
    proposée si une carte possédée l'exclut, ou si elle exclut une carte possédée. La règle est
    symétrique : prendre Sans échappatoire retire Double roulade du tirage, et posséder Double roulade
    empêche de se voir proposer Sans échappatoire ;
-4. la démo (`demoPick`) ne tire jamais de pacte majeur.
+4. la démo (`demoPick`) ne tire jamais de pacte majeur ;
+5. **garantie** : tant qu'aucun pacte majeur n'est pris, l'un d'eux (parmi ceux encore permis) est tiré
+   en premier à la fin de la vague 5, puis toutes les `MAJOR_EVERY = 2` vagues (7, 9, 11…). Entre-temps,
+   chance normale. À la distribution, il se retourne en dernier, comme la Légendaire.
 
 `rollCards` reçoit la vague en cours : `rollCards(mods, rng, legend, wave)`. Marché du diable garde
 son comportement : sa Légendaire garantie est tirée parmi les Légendaires non exclues, et le pacte

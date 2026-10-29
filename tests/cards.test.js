@@ -49,6 +49,23 @@ test('un seul pacte majeur par partie', () => {
   for (const m of majors) assert.ok(!draws({ [m.id]: 1 }, { wave: 20 }, 100).some(id => majors.some(o => o.id === id)), m.id);
 });
 
+test('à la fin de la vague 5, un pacte majeur est toujours proposé', () => {
+  for (let seed = 0; seed < 100; seed++) assert.ok(rollCards({}, createRng(seed), false, { wave: 5 }).some(c => c.rar === 'm'), seed);
+});
+
+test('tant qu\'aucun n\'est pris, un pacte majeur est de nouveau garanti toutes les deux vagues', () => {
+  for (let seed = 0; seed < 100; seed++) for (const wave of [7, 9, 15]) assert.ok(rollCards({}, createRng(seed), false, { wave }).some(c => c.rar === 'm'), `${seed} ${wave}`);
+  assert.ok(Array.from({ length: 100 }, (_, seed) => rollCards({}, createRng(seed), false, { wave: 6 })).some(cs => !cs.some(c => c.rar === 'm')), 'pas garanti en vague 6');
+});
+
+test('le pacte majeur garanti respecte les exclusions, et la Légendaire du Marché du diable reste promise', () => {
+  for (let seed = 0; seed < 100; seed++) {
+    const cards = rollCards({ rollammo: 1, diable: 1 }, createRng(seed), true, { wave: 7, weapons: 4 });
+    assert.ok(cards.some(c => c.rar === 'l') && cards.some(c => c.rar === 'm'), seed);
+    assert.ok(!cards.some(c => c.id === 'specialiste' || c.id === 'entrave'), seed);
+  }
+});
+
 test('la démo ne tire jamais de pacte majeur', () => {
   assert.ok(!draws({}, { wave: 20, demo: true }).some(id => majors.some(m => m.id === id)));
 });
