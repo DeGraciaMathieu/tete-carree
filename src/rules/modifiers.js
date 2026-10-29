@@ -7,6 +7,7 @@ import {
   QUITTE_POINTS_MUL, POUDRE_RADIUS_MUL, POUDRE_SELF_MUL, PORTANT_RANGE, PORTANT_NEAR_MUL, PORTANT_FAR_MUL, RAVITO_PERIOD_MUL,
   REPIT_MAX, REPIT_BREAK_MUL, FIDELE_PISTOL_MUL, VAMPIRE_DRAIN, BRULEE_ROLL_CD_MUL, BRULEE_ROLL_HP, RACINE_DAMAGE_MUL,
   RACINE_SPEED_MUL, VERRE_DAMAGE_MUL, SABLIER_DRAIN, SABLIER_HOLD, ELITE_HP_MUL, ELITE_SPEED_MUL,
+  ENTRAVE_SPEED_MUL, ENTRAVE_DAMAGE_MUL,
 } from '../config.js';
 
 export const modLevel = (mods, id) => (mods && mods[id]) || 0;
@@ -38,20 +39,22 @@ export function hpRate(mods, combo, sinceHurt, sinceKill = Infinity, inWave = fa
 export function boxKind(mods, r, hpChance) { return r < hpChance && !modLevel(mods, 'sanssoin') && !modLevel(mods, 'unevie') ? 'hp' : 'ammo'; }
 // Vie après une vague terminée : Plus de soins la rend en entier.
 export function waveEndHp(mods, hp, maxHp) { return modLevel(mods, 'sanssoin') ? maxHp : hp; }
-export function rollMax(mods) { return 1 + modLevel(mods, 'double'); }
+// Sans échappatoire : aucune charge de roulade.
+export function rollMax(mods) { return modLevel(mods, 'entrave') ? 0 : 1 + modLevel(mods, 'double'); }
 // Terre brûlée : recharge de la roulade, et PV qu'elle coûte sans jamais prendre le dernier.
 export function rollCooldown(mods) { return ROLL.CD * (modLevel(mods, 'brulee') ? BRULEE_ROLL_CD_MUL : 1); }
 export function rollHpCost(mods, hp) { return modLevel(mods, 'brulee') ? Math.max(0, Math.min(BRULEE_ROLL_HP, hp - 1)) : 0; }
 // Élite : PV (bouclier compris) et vitesse des ennemis à leur apparition.
 export function enemyHpMul(mods) { return modLevel(mods, 'elite') ? ELITE_HP_MUL : 1; }
 export function enemySpeedMul(mods) { return modLevel(mods, 'elite') ? ELITE_SPEED_MUL : 1; }
-// Enraciné : vitesse de déplacement.
-export function speedMul(mods) { return modLevel(mods, 'racine') ? RACINE_SPEED_MUL : 1; }
+// Enraciné, Sans échappatoire : vitesse de déplacement.
+export function speedMul(mods) { return (modLevel(mods, 'racine') ? RACINE_SPEED_MUL : 1) * (modLevel(mods, 'entrave') ? ENTRAVE_SPEED_MUL : 1); }
 // Dégâts des tirs du joueur selon ses pactes : arme tirée, distance à la cible (px), joueur immobile.
 export function shotDamageMul(mods, weapon, d, still) {
   let m = 1;
   if (weapon === 'pistol' && modLevel(mods, 'fidele')) m *= FIDELE_PISTOL_MUL;
   if (modLevel(mods, 'verre')) m *= VERRE_DAMAGE_MUL;
+  if (modLevel(mods, 'entrave')) m *= ENTRAVE_DAMAGE_MUL;
   if (modLevel(mods, 'portant')) m *= d < PORTANT_RANGE * T ? PORTANT_NEAR_MUL : PORTANT_FAR_MUL;
   if (still && modLevel(mods, 'racine')) m *= RACINE_DAMAGE_MUL;
   return m;

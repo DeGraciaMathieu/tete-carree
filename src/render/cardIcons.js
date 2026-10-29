@@ -39,6 +39,7 @@ const PATHS = {
   unevie: '<path d="M12 20s-8-4.6-8-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5C20 15.4 12 20 12 20z"/><path d="M12 3v18"/>',
   sablier: '<path d="M6 2h12M6 22h12"/><path d="M7 2c0 6 10 6 10 10S7 16 7 22M17 2c0 6-10 6-10 10s10 4 10 10"/><path d="M12 18v2"/>',
   elite: '<path d="M3 18h18"/><path d="M4 18L3 7l5 4 4-7 4 7 5-4-1 11"/><circle cx="12" cy="14" r="1.5"/>',
+  entrave: '<circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/><path d="M10 17h4"/><path d="M12 3v8M9 8l3 3 3-3"/>',
 };
 export function cardIcon(id) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${PATHS[id] || ''}</svg>`;

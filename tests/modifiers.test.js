@@ -171,3 +171,14 @@ test('Élite : ennemis deux fois et demie plus résistants et 20 % plus rapides'
   assert.equal(enemySpeedMul({ elite: 1 }), 1.2);
   assert.equal(enemyHpMul({}) * enemySpeedMul({}), 1);
 });
+
+test('Sans échappatoire : plus aucune charge de roulade', () => {
+  assert.equal(rollMax({ entrave: 1 }), 0);
+});
+
+test('Sans échappatoire : déplacement +30 % et tirs ×1,5, cumulés avec Enraciné', () => {
+  assert.equal(speedMul({ entrave: 1 }), 1.3);
+  assert.equal(shotDamageMul({ entrave: 1 }, 'uzi', 400, false), 1.5);
+  assert.ok(Math.abs(speedMul({ entrave: 1, racine: 1 }) - .91) < 1e-9);
+  assert.equal(shotDamageMul({ entrave: 1, racine: 1 }, 'uzi', 400, true), 3);
+});

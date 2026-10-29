@@ -100,6 +100,7 @@ function applyCard(m) {
   S.mods[m.id] = mod(m.id) + 1;
   if (m.id === 'constitution') { player.maxHp += CONSTITUTION_HP; player.hp = Math.min(player.maxHp, player.hp + CONSTITUTION_HP); }
   if (m.id === 'double') player.rollCharges = Math.min(rollMax(), player.rollCharges + 1);
+  if (m.id === 'entrave') { player.rollCharges = 0; player.rollCd = 0; }
   if (m.id === 'fievre') S.comboT = Math.min(S.comboT, comboTime());
   if (m.id === 'repit') S.breakT = Math.min(S.breakT, waveBreak(S.mods));
   if (m.id === 'diable') S.legendNext = true;

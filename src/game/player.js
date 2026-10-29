@@ -32,6 +32,7 @@ function rollClears(dx, dy) {
 }
 // dirX, dirY : direction imposée (pilote de la démo) ; sinon celle de la marche
 export function tryRoll(dirX = 0, dirY = 0) {
+  if (!world.demo && world.state === 'play' && !player.dead && !rollMax()) { sfx('click'); return; } // Sans échappatoire
   if ((world.state !== 'play' && !world.demo) || player.dead || player.roll || player.rollCharges <= 0) return;
   let [mx, my] = dirX || dirY ? [dirX, dirY] : moveInput(), l = Math.hypot(mx, my);
   if (l < .2) { mx = player.fx; my = player.fy; l = Math.hypot(mx, my) || 1; }
