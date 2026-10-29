@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
-  multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, repitBonus, waveBreak,
+  multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, comboKillsAfterHit, repitBonus, waveBreak,
   boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, pickAfter, takeAllCards, canSwitch, specialMul, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
 } from '../src/rules/modifiers.js';
 
@@ -80,6 +80,18 @@ test('Coup d\'épaule bouscule plus fort au niveau 2, pas du tout sans la carte'
 test('Quitte ou double : un coup encaissé vide le combo au lieu de lui retirer 0,6 s', () => {
   assert.ok(Math.abs(comboAfterHit({}, 2) - 1.4) < 1e-9);
   assert.equal(comboAfterHit({ quitte: 1 }, 2), 0);
+});
+
+test('Quitte ou double : après un coup encaissé, le combo tombe à zéro et le kill suivant repart de ×1', () => {
+  const mods = { quitte: 1 };
+  const combo = comboKillsAfterHit(mods, 20, 2);
+  assert.equal(combo, 0);
+  assert.equal(multiplier(combo + 1, mods), 1);
+});
+
+test('un coup encaissé garde le combo s\'il lui reste du temps, le casse aussitôt sinon', () => {
+  assert.equal(comboKillsAfterHit({}, 12, 2), 12);
+  assert.equal(comboKillsAfterHit({}, 12, .5), 0);
 });
 
 test('Sans répit : un cran de plus à chaque vague terminée, jusqu\'à +5, et une pause moitié plus courte', () => {

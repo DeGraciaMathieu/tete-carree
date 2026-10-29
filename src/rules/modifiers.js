@@ -22,6 +22,9 @@ export function fireMul(mods, combo, bonus = 0) { return Math.pow(CADENCE_CD_MUL
 export function comboTime(mods) { return (COMBO_T + TENACE_BONUS * modLevel(mods, 'tenace')) * (modLevel(mods, 'fievre') ? FIEVRE_COMBO_MUL : 1); }
 // Temps de combo restant après un coup encaissé : Quitte ou double le remet à zéro.
 export function comboAfterHit(mods, comboT) { return modLevel(mods, 'quitte') ? 0 : Math.max(0, comboT - COMBO_HIT_DRAIN); }
+// Kills enchaînés après un coup encaissé : le combo est cassé sur-le-champ quand son temps tombe à zéro,
+// sans attendre l'image suivante (sinon un kill dans la foulée le relance).
+export function comboKillsAfterHit(mods, combo, comboT) { return comboAfterHit(mods, comboT) > 0 ? combo : 0; }
 // Sans répit : crans de multiplicateur après une vague terminée, et pause raccourcie entre les vagues.
 export function repitBonus(mods, bonus) { return modLevel(mods, 'repit') ? Math.min(REPIT_MAX, bonus + 1) : bonus; }
 export function waveBreak(mods) { return modLevel(mods, 'sanspause') ? SANSPAUSE_BREAK : WAVE_BREAK * (modLevel(mods, 'repit') ? REPIT_BREAK_MUL : 1); }

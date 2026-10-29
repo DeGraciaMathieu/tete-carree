@@ -9,7 +9,7 @@ import { addPart, blood, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood, stampScorch } from '../render/floor.js';
 import { banner } from '../render/hud.js';
 import { playerProtected, resolveEnemyHit, secondWind } from '../rules/damage.js';
-import { comboAfterHit, ownBlastRadius, ownBlastSelfMul, specialMul } from '../rules/modifiers.js';
+import { comboAfterHit, comboKillsAfterHit, ownBlastRadius, ownBlastSelfMul, specialMul } from '../rules/modifiers.js';
 import { killPoints, potAfterHit, potsKill, rollDrop, soifHeal } from '../rules/scoring.js';
 import { isVoid } from '../state/arena.js';
 import { S, blocks, comboTime, mod, multiplier, player, rng, world } from '../state/world.js';
@@ -62,7 +62,7 @@ export function hurtPlayer(dmg, soft) {
   if (player.dead || (world.state !== 'play' && !world.demo)) return;
   if (playerProtected(player)) return;
   player.hp -= dmg; player.hurtT = .35; player.flash = .08; player.lastHurt = S.time;
-  if (!soft) { world.shake = Math.min(16, world.shake + 4); S.comboT = comboAfterHit(S.mods, S.comboT); }
+  if (!soft) { world.shake = Math.min(16, world.shake + 4); S.combo = comboKillsAfterHit(S.mods, S.combo, S.comboT); S.comboT = comboAfterHit(S.mods, S.comboT); }
   if (S.pot && !potAfterHit(S.mods, S.pot)) { pop(player.x, player.y - 46, `−${fmt(S.pot)} perdus`, '#ff8f84'); S.pot = 0; }
   blood(player.x, player.y, 4);
   sfx('hurt', 120);
