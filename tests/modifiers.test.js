@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, repitBonus, waveBreak,
-  boxPeriod, boxKind, waveEndHp, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
+  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
 } from '../src/rules/modifiers.js';
 
 test('le multiplicateur gagne un cran tous les 5 kills enchaînés', () => {
@@ -164,4 +164,10 @@ test('Sablier : en vague, le joueur perd 4 PV par seconde dès qu\'il ne tue plu
 test('Sablier : régénération normale entre les vagues, aucune pendant', () => {
   assert.equal(hpRate({ sablier: 1 }, 0, 60, 30, false), hpRate({}, 0, 60));
   assert.equal(hpRate({ sablier: 1 }, 5, 60, 0, true), 0);
+});
+
+test('Élite : ennemis deux fois et demie plus résistants et 20 % plus rapides', () => {
+  assert.equal(enemyHpMul({ elite: 1 }), 2.5);
+  assert.equal(enemySpeedMul({ elite: 1 }), 1.2);
+  assert.equal(enemyHpMul({}) * enemySpeedMul({}), 1);
 });

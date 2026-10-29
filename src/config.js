@@ -69,6 +69,7 @@ export const MODS = [
   { id: 'sanssoin', rar: 'm', max: 1, name: 'Plus de soins', short: 'Plus de soins', excl: ['vampire', 'soif', 'sansarmure'], plus: () => `Chaque vague terminée te rend toute ta vie`, minus: () => `Plus aucune régénération ni caisse de soin` },
   { id: 'unevie', rar: 'm', max: 1, name: 'Une seule vie', short: 'Une seule vie', excl: ['constitution', 'souffle', 'vampire', 'soif', 'verre', 'diable', 'brulee', 'sansarmure'], plus: () => `Points ×${UNEVIE_POINTS_MUL} sur chaque kill et sur le bonus de fin de vague`, minus: () => `Le premier coup encaissé te tue, et plus aucune caisse de soin` },
   { id: 'sablier', rar: 'm', max: 1, name: 'Sablier', short: 'Sablier', excl: ['vampire', 'sansarmure'], plus: () => `Points ×${SABLIER_POINTS_MUL} sur chaque kill`, minus: () => `Pendant une vague, tu perds ${SABLIER_DRAIN} PV par seconde jusqu'à la mort ; chaque kill arrête la perte ${num(SABLIER_HOLD)} s` },
+  { id: 'elite', rar: 'm', max: 1, name: 'Élite', short: 'Élite', plus: () => `Points ×${ELITE_POINTS_MUL} sur chaque kill`, minus: () => `Deux fois moins d'ennemis par vague, mais ${num(ELITE_HP_MUL)} fois plus de PV et ${pct(ELITE_SPEED_MUL - 1)} plus rapides` },
 ];
 
 /* ---------- Effets des cartes ---------- */
@@ -103,6 +104,9 @@ export const VERRE_DAMAGE_MUL = 1.5, VERRE_HP = 40;
 export const UNEVIE_POINTS_MUL = 3; // Une seule vie : points des kills et du bonus de vague
 // Sablier : points des kills ; PV perdus par seconde en vague ; secondes de répit après chaque kill
 export const SABLIER_POINTS_MUL = 2, SABLIER_DRAIN = 4, SABLIER_HOLD = 1.5;
+// Élite : points des kills ; part des ennemis de chaque type (arrondi au supérieur) et taille des meutes (au moins
+// ELITE_PACK_MIN coureurs) ; PV (bouclier compris) et vitesse des ennemis
+export const ELITE_POINTS_MUL = 3, ELITE_COUNT_MUL = .5, ELITE_PACK_MIN = 2, ELITE_HP_MUL = 2.5, ELITE_SPEED_MUL = 1.2;
 export const CARDS_PER_PICK = 3;
 // Pactes majeurs (rareté `m`) : proposés à partir de la fin de cette vague, un seul par partie.
 export const MAJOR_FROM_WAVE = 5;

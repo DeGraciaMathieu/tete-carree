@@ -365,7 +365,8 @@ dans les 1,5 s qui suivent un kill », « Sablier : régénération normale entr
   mais ennemis ×`ELITE_HP_MUL` (2,5) PV et ×`ELITE_SPEED_MUL` (1,2) vitesse.
 
 **Comportement.**
-- `waveQueue` réduit chaque type, meutes de coureurs comprises (taille de meute ×0,5, au moins 2).
+- `waveQueue` réduit chaque type ; les meutes gardent leur nombre mais comptent deux fois moins de
+  coureurs (au moins 2).
 - PV et vitesse multipliés à l'apparition (`spawnEnemy`), bouclier du Blindé compris.
 - Gonflés : rayon et dégâts d'explosion inchangés.
 - Moins de kills : le multiplicateur monte moins vite. Le bonus ×3 doit compenser.

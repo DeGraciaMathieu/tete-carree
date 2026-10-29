@@ -54,3 +54,7 @@ test('Une seule vie : un ennemi ne lâche plus que des caisses de munitions', ()
 test('Sablier : chaque kill rapporte deux fois plus', () => {
   assert.equal(killPoints('r', { sablier: 1 }, 1), 150);
 });
+
+test('Élite : chaque kill rapporte trois fois plus', () => {
+  assert.equal(killPoints('z', { elite: 1 }, 1), 150);
+});

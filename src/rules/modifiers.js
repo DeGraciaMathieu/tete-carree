@@ -6,7 +6,7 @@ import {
   EPAULE_KNOCK, EPAULE_KNOCK_LVL, COMBO_HIT_DRAIN, REGEN_DELAY, REGEN_RATE, ROLL, T, WAVE_BREAK, BOX_PERIOD_MIN, BOX_PERIOD_RAND,
   QUITTE_POINTS_MUL, POUDRE_RADIUS_MUL, POUDRE_SELF_MUL, PORTANT_RANGE, PORTANT_NEAR_MUL, PORTANT_FAR_MUL, RAVITO_PERIOD_MUL,
   REPIT_MAX, REPIT_BREAK_MUL, FIDELE_PISTOL_MUL, VAMPIRE_DRAIN, BRULEE_ROLL_CD_MUL, BRULEE_ROLL_HP, RACINE_DAMAGE_MUL,
-  RACINE_SPEED_MUL, VERRE_DAMAGE_MUL, SABLIER_DRAIN, SABLIER_HOLD,
+  RACINE_SPEED_MUL, VERRE_DAMAGE_MUL, SABLIER_DRAIN, SABLIER_HOLD, ELITE_HP_MUL, ELITE_SPEED_MUL,
 } from '../config.js';
 
 export const modLevel = (mods, id) => (mods && mods[id]) || 0;
@@ -42,6 +42,9 @@ export function rollMax(mods) { return 1 + modLevel(mods, 'double'); }
 // Terre brûlée : recharge de la roulade, et PV qu'elle coûte sans jamais prendre le dernier.
 export function rollCooldown(mods) { return ROLL.CD * (modLevel(mods, 'brulee') ? BRULEE_ROLL_CD_MUL : 1); }
 export function rollHpCost(mods, hp) { return modLevel(mods, 'brulee') ? Math.max(0, Math.min(BRULEE_ROLL_HP, hp - 1)) : 0; }
+// Élite : PV (bouclier compris) et vitesse des ennemis à leur apparition.
+export function enemyHpMul(mods) { return modLevel(mods, 'elite') ? ELITE_HP_MUL : 1; }
+export function enemySpeedMul(mods) { return modLevel(mods, 'elite') ? ELITE_SPEED_MUL : 1; }
 // Enraciné : vitesse de déplacement.
 export function speedMul(mods) { return modLevel(mods, 'racine') ? RACINE_SPEED_MUL : 1; }
 // Dégâts des tirs du joueur selon ses pactes : arme tirée, distance à la cible (px), joueur immobile.

@@ -6,6 +6,7 @@ import { moveInput } from './player.js';
 import { addPart } from '../render/effects.js';
 import { fctx } from '../render/floor.js';
 import { banner } from '../render/hud.js';
+import { enemyHpMul, enemySpeedMul } from '../rules/modifiers.js';
 import * as Waves from '../rules/waves.js';
 import { doors, isVoid, tileAt } from '../state/arena.js';
 import { S, jitter, player, queueCount, rng, world } from '../state/world.js';
@@ -24,8 +25,9 @@ export function spawnEnemy(type, door) {
   const [dx, dy] = door || doors[rng() * doors.length | 0];
   const n = S.wave;
   const s = ENEMY_STATS[type] || ENEMY_STATS.d;
-  const e = { type, r: s.r, hp: s.hp + n * s.hpWave, sp: s.sp + Math.min(s.spCap, n * s.spWave) + rng() * s.spRand };
-  if (type === 'a') e.shield = s.shield + n * s.shieldWave;
+  const hpMul = enemyHpMul(S.mods);
+  const e = { type, r: s.r, hp: (s.hp + n * s.hpWave) * hpMul, sp: (s.sp + Math.min(s.spCap, n * s.spWave) + rng() * s.spRand) * enemySpeedMul(S.mods) };
+  if (type === 'a') e.shield = (s.shield + n * s.shieldWave) * hpMul;
   else if (type === 's') { e.spitCd = s.spitCd + rng() * s.spitCdRand; e.wind = 0; }
   else if (s === ENEMY_STATS.d) e.fire = s.fire + rng() * s.fireRand;
   Object.assign(e, { x: dx * T + T / 2 + jitter(6), y: dy * T + T / 2 + jitter(6), vx: 0, vy: 0, fx: 0, fy: 1, flash: 0, atk: ENEMY_FIRST_ATTACK, walk: Math.random() * 6, moving: true, bump: -1, dead: false });

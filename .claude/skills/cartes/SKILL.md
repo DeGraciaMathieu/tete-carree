@@ -59,6 +59,7 @@ large, elles se couchent.
 | `sanssoin` (pacte majeur) | `hpRate` (aucune régénération) ; `boxKind` (caisses larguées dans `update`, `rollDrop`) ; `waveEndHp` en fin de vague dans `update` |
 | `unevie` (pacte majeur) | `applyCard` : vie et vie max à 1 ; `killPoints` et `waveBonus` (`UNEVIE_POINTS_MUL`, `rules/scoring.js`) ; `boxKind` ; libellé « 1 coup » dans `renderHp` |
 | `sablier` (pacte majeur) | `hpRate` (perte en vague après `SABLIER_HOLD` s sans kill, `S.lastKill` posé par `killEnemy` et `startWave`) ; mort par `hurtPlayer` dans `update` ; `killPoints` ; barre `.drain` dans `renderHp` |
+| `elite` (pacte majeur) | `waveQueue` (`ELITE_COUNT_MUL`, `ELITE_PACK_MIN`) ; `enemyHpMul`, `enemySpeedMul` dans `spawnEnemy` ; `killPoints` |
 
 ## Pactes majeurs
 
