@@ -1,7 +1,7 @@
 // HUD DOM : bannières, santé, score, combo, emplacements d'armes, cartes actives ; écrans d'accueil et de fin
 // (arsenal, dernière partie, meilleures parties).
 import { sfx } from '../audio/sfx.js';
-import { LOW_HP, MODS, W } from '../config.js';
+import { LOW_HP, MODS, SABLIER_HOLD, W } from '../config.js';
 import { selectWeapon } from '../game/weapons.js';
 import { S, ammo, comboTime, frenzy, mod, multiplier, player, queueCount, unlocked, world } from '../state/world.js';
 import { $, fmt } from '../util.js';
@@ -97,6 +97,8 @@ function renderHp() {
   setStyle('hpFill', 'width', width);
   const tick = (25 / player.maxHp * 100).toFixed(2) + '%'; // un repère tous les 25 PV
   if (hudCache.hpTick !== tick) { hudCache.hpTick = tick; $('hpTicks').style.setProperty('--tick', tick); }
+  const drain = mod('sablier') && S.waveActive && S.time - S.lastKill > SABLIER_HOLD && !player.dead; // le Sablier s'écoule
+  if (hudCache.hpDrain !== drain) { hudCache.hpDrain = drain; $('hpBar').classList.toggle('drain', drain); }
   setText('hpNum', mod('unevie') && !player.dead ? '1 coup' : String(Math.ceil(Math.max(0, player.hp))));
 }
 // Volet Arsenal de l'écran titre : les armes dans l'ordre de leurs touches, avec leur score de déblocage.

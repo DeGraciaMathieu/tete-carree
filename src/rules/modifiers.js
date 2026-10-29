@@ -6,7 +6,7 @@ import {
   EPAULE_KNOCK, EPAULE_KNOCK_LVL, COMBO_HIT_DRAIN, REGEN_DELAY, REGEN_RATE, ROLL, T, WAVE_BREAK, BOX_PERIOD_MIN, BOX_PERIOD_RAND,
   QUITTE_POINTS_MUL, POUDRE_RADIUS_MUL, POUDRE_SELF_MUL, PORTANT_RANGE, PORTANT_NEAR_MUL, PORTANT_FAR_MUL, RAVITO_PERIOD_MUL,
   REPIT_MAX, REPIT_BREAK_MUL, FIDELE_PISTOL_MUL, VAMPIRE_DRAIN, BRULEE_ROLL_CD_MUL, BRULEE_ROLL_HP, RACINE_DAMAGE_MUL,
-  RACINE_SPEED_MUL, VERRE_DAMAGE_MUL,
+  RACINE_SPEED_MUL, VERRE_DAMAGE_MUL, SABLIER_DRAIN, SABLIER_HOLD,
 } from '../config.js';
 
 export const modLevel = (mods, id) => (mods && mods[id]) || 0;
@@ -26,9 +26,10 @@ export function waveBreak(mods) { return WAVE_BREAK * (modLevel(mods, 'repit') ?
 export function boxPeriod(mods, r) { return (BOX_PERIOD_MIN + r * BOX_PERIOD_RAND) * (modLevel(mods, 'ravito') ? RAVITO_PERIOD_MUL : 1); }
 // Points de vie gagnés (> 0) ou perdus (< 0) par seconde hors des coups : régénération après REGEN_DELAY s sans
 // dégât, aucune sous Sans armure ; Vampire : perte quand le combo est retombé.
-// Plus de soins : aucune régénération.
-export function hpRate(mods, combo, sinceHurt) {
+// Plus de soins : aucune régénération. Sablier : en vague (inWave), perte dès SABLIER_HOLD s sans kill, jamais de régénération.
+export function hpRate(mods, combo, sinceHurt, sinceKill = Infinity, inWave = false) {
   if (modLevel(mods, 'sanssoin')) return 0;
+  if (modLevel(mods, 'sablier') && inWave) return sinceKill > SABLIER_HOLD ? -SABLIER_DRAIN : 0;
   if (modLevel(mods, 'vampire') && !combo) return -VAMPIRE_DRAIN;
   return !modLevel(mods, 'sansarmure') && sinceHurt > REGEN_DELAY ? REGEN_RATE : 0;
 }

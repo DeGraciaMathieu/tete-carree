@@ -65,8 +65,9 @@ export function update(dt) {
     }
     player.cd -= dt;
     if ((aiming || (!world.demo && (mouseFire || pad.fire))) && player.cd <= 0) fireWeapon();
-    const rate = hpRate(S.mods, S.combo, S.time - player.lastHurt);
+    const rate = hpRate(S.mods, S.combo, S.time - player.lastHurt, S.time - S.lastKill, S.waveActive);
     if (rate > 0) player.hp = Math.min(player.maxHp, player.hp + rate * dt);
+    else if (rate < 0 && mod('sablier')) { if (player.hp + rate * dt > 0) player.hp += rate * dt; else hurtPlayer(player.hp, true); } // le Sablier peut tuer
     else if (rate < 0) player.hp = Math.max(Math.min(1, player.hp), player.hp + rate * dt); // Vampire ne prend jamais le dernier PV
   }
   player.flash -= dt; player.hurtT -= dt; player.muzzle -= dt; player.invuln -= dt;

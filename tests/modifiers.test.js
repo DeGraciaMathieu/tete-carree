@@ -155,3 +155,13 @@ test('Plus de soins : plus aucune caisse de soin, chaque vague terminée rend to
   assert.equal(waveEndHp({ sanssoin: 1 }, 12, 100), 100);
   assert.equal(waveEndHp({}, 12, 100), 12);
 });
+
+test('Sablier : en vague, le joueur perd 4 PV par seconde dès qu\'il ne tue plus, jamais dans les 1,5 s qui suivent un kill', () => {
+  assert.equal(hpRate({ sablier: 1 }, 0, 60, 2, true), -4);
+  assert.equal(hpRate({ sablier: 1 }, 3, 60, 1, true), 0);
+});
+
+test('Sablier : régénération normale entre les vagues, aucune pendant', () => {
+  assert.equal(hpRate({ sablier: 1 }, 0, 60, 30, false), hpRate({}, 0, 60));
+  assert.equal(hpRate({ sablier: 1 }, 5, 60, 0, true), 0);
+});

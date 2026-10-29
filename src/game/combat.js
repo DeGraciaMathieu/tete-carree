@@ -41,7 +41,7 @@ export function hurtEnemy(e, dmg, dx, dy, knock, kind) {
 }
 // fell : l'ennemi a été projeté dans une crevasse
 export function killEnemy(e, dx, dy, fell) {
-  e.dead = true; S.kills++; S.combo++; S.comboT = comboTime(); S.bestCombo = Math.max(S.bestCombo, S.combo);
+  e.dead = true; S.kills++; S.combo++; S.lastKill = S.time; S.comboT = comboTime(); S.bestCombo = Math.max(S.bestCombo, S.combo);
   const m = multiplier(), pts = killPoints(e.type, S.mods, m), heal = soifHeal(S.mods, m);
   if (heal && !player.dead) player.hp = Math.min(player.maxHp, player.hp + heal);
   addScore(pts);

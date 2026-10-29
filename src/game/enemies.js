@@ -38,6 +38,7 @@ export function startWave() {
   S.wave++; const n = S.wave;
   S.queue = Waves.waveQueue(n, S.mods, rng);
   S.waveActive = true; S.spawnT = WAVE_FIRST_SPAWN;
+  S.lastKill = S.time + WAVE_FIRST_SPAWN; // Sablier : la perte ne commence qu'après la première apparition
   world.shake = Math.min(16, world.shake + 6);
   banner(`Vague ${n}`, n === 2 ? 'Les Gonflés arrivent : ils explosent' : n === 3 ? 'Les diables arrivent' : n === 4 ? 'Des coureurs arrivent en meute' : n === 5 ? 'Des cracheurs arrivent : sors de l\'acide' : n === 6 ? 'Des blindés arrivent : prends-les à revers' : `${queueCount()} ennemis`, 'start');
   sfx('wave');

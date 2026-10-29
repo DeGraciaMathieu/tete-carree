@@ -68,6 +68,7 @@ export const MODS = [
   // Pactes majeurs : un seul par partie, `excl` liste les cartes qu'ils rendent inutiles (docs/prd/pactes-majeurs.md).
   { id: 'sanssoin', rar: 'm', max: 1, name: 'Plus de soins', short: 'Plus de soins', excl: ['vampire', 'soif', 'sansarmure'], plus: () => `Chaque vague terminée te rend toute ta vie`, minus: () => `Plus aucune régénération ni caisse de soin` },
   { id: 'unevie', rar: 'm', max: 1, name: 'Une seule vie', short: 'Une seule vie', excl: ['constitution', 'souffle', 'vampire', 'soif', 'verre', 'diable', 'brulee', 'sansarmure'], plus: () => `Points ×${UNEVIE_POINTS_MUL} sur chaque kill et sur le bonus de fin de vague`, minus: () => `Le premier coup encaissé te tue, et plus aucune caisse de soin` },
+  { id: 'sablier', rar: 'm', max: 1, name: 'Sablier', short: 'Sablier', excl: ['vampire', 'sansarmure'], plus: () => `Points ×${SABLIER_POINTS_MUL} sur chaque kill`, minus: () => `Pendant une vague, tu perds ${SABLIER_DRAIN} PV par seconde jusqu'à la mort ; chaque kill arrête la perte ${num(SABLIER_HOLD)} s` },
 ];
 
 /* ---------- Effets des cartes ---------- */
@@ -100,6 +101,8 @@ export const RACINE_DAMAGE_MUL = 2, RACINE_SPEED_MUL = .7;
 export const DIABLE_HP = 25;
 export const VERRE_DAMAGE_MUL = 1.5, VERRE_HP = 40;
 export const UNEVIE_POINTS_MUL = 3; // Une seule vie : points des kills et du bonus de vague
+// Sablier : points des kills ; PV perdus par seconde en vague ; secondes de répit après chaque kill
+export const SABLIER_POINTS_MUL = 2, SABLIER_DRAIN = 4, SABLIER_HOLD = 1.5;
 export const CARDS_PER_PICK = 3;
 // Pactes majeurs (rareté `m`) : proposés à partir de la fin de cette vague, un seul par partie.
 export const MAJOR_FROM_WAVE = 5;

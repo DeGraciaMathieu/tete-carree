@@ -319,6 +319,7 @@ portrait et en paysage.
 - Contrairement à Vampire, le Sablier peut prendre le dernier PV : la contrepartie l'annonce
   (« jusqu'à la mort »).
 - La suspension ne se cumule pas : un kill remet le délai à 1,5 s, il ne l'allonge pas.
+- Début de vague : la perte ne commence que 1,5 s après la première apparition d'ennemi.
 - La barre de santé pulse quand la perte est active.
 
 **Impact.** `config` ; `state/world.js` (`S.sablierT`) ; `rules/modifiers.js` (`hpRate` reçoit l'état de

@@ -41,6 +41,8 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .hpHead{display:flex;justify-content:space-between;align-items:baseline;gap:8px}
 #hpNum{font-size:13px;font-variant-numeric:tabular-nums}
 .bar.hp{height:12px;border:1px solid rgba(0,0,0,.4)}
+.bar.hp.drain{animation:drain .5s ease-in-out infinite alternate}
+@keyframes drain{to{box-shadow:0 0 0 2px var(--r-m)}}
 #hpGhost{background:#f3e6c4;transition:width .5s ease-in .35s}
 #hpGhost.snap{transition:none}
 #hpFill::after{content:'';position:absolute;inset:0 0 50% 0;background:rgba(255,255,255,.18)}

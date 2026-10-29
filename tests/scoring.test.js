@@ -50,3 +50,7 @@ test('Une seule vie : un ennemi ne lâche plus que des caisses de munitions', ()
   assert.equal(rollDrop('a', false, fixed(0, 0), {}), 'hp');
   assert.equal(rollDrop('a', false, fixed(0, 0), { unevie: 1 }), 'ammo');
 });
+
+test('Sablier : chaque kill rapporte deux fois plus', () => {
+  assert.equal(killPoints('r', { sablier: 1 }, 1), 150);
+});
