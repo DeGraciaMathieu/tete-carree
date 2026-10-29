@@ -1,5 +1,8 @@
 # Tête Carrée
 
+[![Tests](https://github.com/DeGraciaMathieu/tete-carree/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/DeGraciaMathieu/tete-carree/actions/workflows/tests.yml)
+[![Perf](https://github.com/DeGraciaMathieu/tete-carree/actions/workflows/perf.yml/badge.svg?branch=main)](https://github.com/DeGraciaMathieu/tete-carree/actions/workflows/perf.yml)
+
 > ⚠️ **Ouvrir `index.html` par double-clic ne fonctionne plus.** Le jeu est découpé en modules ES,
 > que les navigateurs ne chargent pas depuis `file://`. Lance `npm run dev` à la place.
 

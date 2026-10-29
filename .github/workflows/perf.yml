@@ -1,0 +1,20 @@
+name: Perf
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  perf:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      # Chrome est préinstallé sur les runners ubuntu-latest
+      - run: npm run perf
+        env:
+          CHROME: /usr/bin/google-chrome
