@@ -237,3 +237,7 @@ test('Spécialiste : ses tirs, ses explosions et ses barricades comptent double'
   assert.equal(specialMul({ specialiste: 1 }), 2);
   assert.equal(specialMul({}), 1);
 });
+
+test('Aveugle : tes tirs font deux fois plus de dégâts', () => {
+  assert.equal(shotDamageMul({ aveugle: 1 }, 'pistol', 100, false), 2);
+});

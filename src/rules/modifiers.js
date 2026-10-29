@@ -8,7 +8,7 @@ import {
   REPIT_MAX, REPIT_BREAK_MUL, FIDELE_PISTOL_MUL, VAMPIRE_DRAIN, BRULEE_ROLL_CD_MUL, BRULEE_ROLL_HP, RACINE_DAMAGE_MUL,
   RACINE_SPEED_MUL, VERRE_DAMAGE_MUL, SABLIER_DRAIN, SABLIER_HOLD, ELITE_HP_MUL, ELITE_SPEED_MUL,
   ENTRAVE_SPEED_MUL, ENTRAVE_DAMAGE_MUL, MITRAILLE_CD_MUL, MITRAILLE_AMMO_COST, MITRAILLE_PISTOL_REFILL, W,
-  TOUTOURIEN_KILLS_PER_MULTIPLIER, SANSPAUSE_BREAK, SPECIALISTE_DAMAGE_MUL, LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL, LOURDE_SELF_PUSH, LOURDE_SPREAD,
+  TOUTOURIEN_KILLS_PER_MULTIPLIER, SANSPAUSE_BREAK, SPECIALISTE_DAMAGE_MUL, AVEUGLE_DAMAGE_MUL, LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL, LOURDE_SELF_PUSH, LOURDE_SPREAD,
 } from '../config.js';
 
 export const modLevel = (mods, id) => (mods && mods[id]) || 0;
@@ -73,6 +73,7 @@ export function shotDamageMul(mods, weapon, d, still) {
   if (modLevel(mods, 'verre')) m *= VERRE_DAMAGE_MUL;
   if (modLevel(mods, 'entrave')) m *= ENTRAVE_DAMAGE_MUL;
   if (modLevel(mods, 'lourde')) m *= LOURDE_DAMAGE_MUL;
+  if (modLevel(mods, 'aveugle')) m *= AVEUGLE_DAMAGE_MUL;
   if (modLevel(mods, 'specialiste')) m *= SPECIALISTE_DAMAGE_MUL; // la seule arme encore utilisable est la sienne
   if (modLevel(mods, 'portant')) m *= d < PORTANT_RANGE * T ? PORTANT_NEAR_MUL : PORTANT_FAR_MUL;
   if (still && modLevel(mods, 'racine')) m *= RACINE_DAMAGE_MUL;

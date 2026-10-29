@@ -46,6 +46,7 @@ const PATHS = {
   sanspause: '<path d="M8 4v16M14 4v16"/><path d="M3 21L21 3"/>',
   specialiste: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/>',
   silence: '<path d="M3 5h18v12H8l-5 4z"/><path d="M3 3l18 18"/>',
+  aveugle: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 21L21 3"/>',
 };
 export function cardIcon(id) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${PATHS[id] || ''}</svg>`;

@@ -1,5 +1,5 @@
 // Composition de chaque image : décor, crevasses, constructions, caisses, entités triées, repères, vignette.
-import { LOW_HP, MH, MW, T, W } from '../config.js';
+import { AVEUGLE_SIGHT, LOW_HP, MH, MW, T, W } from '../config.js';
 import { ctx, cv, dpr, outlined, zoom } from './canvas.js';
 import { floorC } from './floor.js';
 import { aimMuzzle, drawAcidGround, drawArmored, drawBloater, drawChar, drawGlobs, drawPlayerState, drawRunner, drawSpitter } from './sprites.js';
@@ -191,6 +191,21 @@ function drawPickup(p) {
   ctx.restore();
 }
 
+// Aveugle : voile sombre au-delà de AVEUGLE_SIGHT cases autour du joueur, en ellipse écrasée par la vue 3/4, fondu sur
+// la dernière case. Le dégradé est créé une fois (repère centré sur le joueur) et réutilisé à chaque image.
+const BLIND_DARK = 'rgba(10,11,12,.94)', BLIND_SQUASH = .55, BLIND_COVER = 4000;
+let blindGrad = null, blindCtx = null;
+function drawBlindness() {
+  if (!blindGrad || blindCtx !== ctx) {
+    blindCtx = ctx;
+    blindGrad = ctx.createRadialGradient(0, 0, (AVEUGLE_SIGHT - 1) * T, 0, 0, AVEUGLE_SIGHT * T);
+    blindGrad.addColorStop(0, 'rgba(10,11,12,0)'); blindGrad.addColorStop(1, BLIND_DARK);
+  }
+  ctx.save();
+  ctx.translate(player.x, player.y - 10); ctx.scale(1, BLIND_SQUASH);
+  ctx.fillStyle = blindGrad; ctx.fillRect(-BLIND_COVER, -BLIND_COVER, BLIND_COVER * 2, BLIND_COVER * 2);
+  ctx.restore();
+}
 export function render() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = '#1a1c1d'; ctx.fillRect(0, 0, cv.width, cv.height);
@@ -321,6 +336,7 @@ export function render() {
     ctx.fillStyle = p.color; ctx.fillText(p.text, p.x, p.y);
   }
   ctx.globalAlpha = 1;
+  if (mod('aveugle')) drawBlindness();
   // indicateur de pose de bloc
   if (world.state === 'play' && !player.dead && (W[player.weapon].id === 'wall' || W[player.weapon].id === 'barrel')) {
     const [tx, ty] = frontTile(); const i = ty * MW + tx;

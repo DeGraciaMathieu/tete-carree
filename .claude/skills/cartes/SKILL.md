@@ -67,6 +67,7 @@ large, elles se couchent.
 | `sanspause` (pacte majeur) | `waveBreak` (`SANSPAUSE_BREAK`) ; `pickAfter` en fin de vague dans `update` ; `takeAllCards` : `openPick` tire hors pactes (`noPacts`), `takeAll` applique toutes les cartes |
 | `specialiste` (pacte majeur) | `choosePick` enchaîne sur `openWeaponPick` / `chooseWeapon` (`S.special`, munitions infinies) ; `canSwitch` dans `selectWeapon` et `cycleWeapon` ; `shotDamageMul`, `specialMul` (explosions du joueur dans `explosion`, PV des barricades dans `placeBlock`) ; caisses de munitions en points ; cases `.sealed` ; proposé à partir de `SPECIALISTE_MIN_WEAPONS` armes (`ctx.weapons` de `rollCards`) |
 | `silence` (pacte majeur) | `killPoints` (`SILENCE_POINTS_MUL`) ; classe `#hud.silence` posée par `renderMods` (CSS : cases d'armes gardées au tactile) ; `#pauseScore` dans `updateHud` |
+| `aveugle` (pacte majeur) | `shotDamageMul` ; voile `drawBlindness` dans `render()` (`render/scene.js`, portée `AVEUGLE_SIGHT`, dégradé créé une fois) |
 
 ## Pactes majeurs
 
