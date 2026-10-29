@@ -35,6 +35,18 @@ const PATHS = {
   racine: '<path d="M12 2v12"/><path d="M8 6h8"/><path d="M12 14l-6 6M12 14l6 6M12 14v8M9 17l-5 1M15 17l5 1"/>',
   diable: '<path d="M12 22V6"/><path d="M6 3v4a6 6 0 0 0 12 0V3"/><path d="M12 2v2"/>',
   verre: '<path d="M7 3h10l-1 7a4 4 0 0 1-8 0z"/><path d="M12 14v6M8 21h8"/><path d="M11 4l1 3-2 2"/>',
+  sanssoin: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/><path d="M3 21L21 3"/>',
+  unevie: '<path d="M12 20s-8-4.6-8-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 8 2.5C20 15.4 12 20 12 20z"/><path d="M12 3v18"/>',
+  sablier: '<path d="M6 2h12M6 22h12"/><path d="M7 2c0 6 10 6 10 10S7 16 7 22M17 2c0 6-10 6-10 10s10 4 10 10"/><path d="M12 18v2"/>',
+  elite: '<path d="M3 18h18"/><path d="M4 18L3 7l5 4 4-7 4 7 5-4-1 11"/><circle cx="12" cy="14" r="1.5"/>',
+  entrave: '<circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/><path d="M10 17h4"/><path d="M12 3v8M9 8l3 3 3-3"/>',
+  mitraille: '<path d="M4 4v6M8 4v6M12 4v6M16 4v6M20 4v6"/><path d="M3 14h18v6H3z"/><path d="M7 14v6M12 14v6M17 14v6"/>',
+  lourde: '<path d="M3 9h12v5H8l-1 6H4l1-6H3z"/><path d="M15 10h3M18 7v7"/><path d="M21 6l-2 2M21 15l-2-2"/>',
+  toutourien: '<path d="M4 20h16"/><path d="M6 20v-4h12v4"/><path d="M8 16l1-6h6l1 6"/><path d="M12 10V3M9 6l3-3 3 3"/>',
+  sanspause: '<path d="M8 4v16M14 4v16"/><path d="M3 21L21 3"/>',
+  specialiste: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/>',
+  silence: '<path d="M3 5h18v12H8l-5 4z"/><path d="M3 3l18 18"/>',
+  aveugle: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 21L21 3"/>',
 };
 export function cardIcon(id) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${PATHS[id] || ''}</svg>`;

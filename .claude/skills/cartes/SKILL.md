@@ -18,11 +18,12 @@ large, elles se couchent.
 | Champ | Rôle |
 | --- | --- |
 | `id` | clé dans `S.mods` (`{ id: niveau }`) ; lue par `mod('<id>')` (`state/world.js`) ou `modLevel(mods, '<id>')` (règles) |
-| `rar` | `c` Commune, `r` Rare, `l` Légendaire, `p` Pacte ; poids de tirage `RAR[rar].w` |
+| `rar` | `c` Commune, `r` Rare, `l` Légendaire, `p` Pacte, `m` Pacte majeur ; poids de tirage `RAR[rar].w` |
+| `excl` | pacte majeur : ids des cartes qu'il rend inutiles ; exclusion symétrique dans `rollCards` |
 | `max` | niveau maximal ; une carte au max n'est plus proposée |
 | `name`, `short` | titre de la carte ; libellé court du HUD (`#mods`) et de l'écran de pause |
 | `desc(n)` | texte d'une carte ordinaire au niveau `n` qu'elle donnerait |
-| `plus(n)`, `minus(n)` | pour un pacte (`rar: 'p'`) : avantage et contrepartie, à la place de `desc` |
+| `plus(n)`, `minus(n)` | pour un pacte (`isPact(m)` : `rar` `p` ou `m`) : avantage et contrepartie, à la place de `desc` |
 
 | Carte (`id`) | Où l'effet s'applique |
 | --- | --- |
@@ -55,6 +56,26 @@ large, elles se couchent.
 | `brulee` (pacte) | `rollCooldown` (`update`, `updateRoll`, jauge de `render/sprites.js`) ; `rollHpCost` dans `tryRoll` |
 | `diable` (pacte) | `choosePick` : vie max −`DIABLE_HP`, `S.legendNext` ; `rollCards(mods, rng, legend)` tire une Légendaire en premier et retire le pacte quand il n'en reste plus |
 | `verre` (pacte, vie) | `choosePick` : vie max −`VERRE_HP` |
+| `sanssoin` (pacte majeur) | `hpRate` (aucune régénération) ; `boxKind` (caisses larguées dans `update`, `rollDrop`) ; `waveEndHp` en fin de vague dans `update` |
+| `unevie` (pacte majeur) | `applyCard` : vie et vie max à 1 ; `killPoints` et `waveBonus` (`UNEVIE_POINTS_MUL`, `rules/scoring.js`) ; `boxKind` ; libellé « 1 coup » dans `renderHp` |
+| `sablier` (pacte majeur) | `hpRate` (perte en vague après `SABLIER_HOLD` s sans kill, `S.lastKill` posé par `killEnemy` et `startWave`) ; mort par `hurtPlayer` dans `update` ; `killPoints` ; barre `.drain` dans `renderHp` |
+| `elite` (pacte majeur) | `waveQueue` (`ELITE_COUNT_MUL`, `ELITE_PACK_MIN`) ; `enemyHpMul`, `enemySpeedMul` dans `spawnEnemy` ; `killPoints` |
+| `entrave` (pacte majeur) | `rollMax` rend 0 (charges vidées dans `applyCard`, clic à vide dans `tryRoll`) ; `speedMul` ; `shotDamageMul` |
+| `mitraille` (pacte majeur) | `weaponCdMul` et `ammoCost` dans `fireWeapon` (armes à feu seulement) ; munitions du pistolet dans `applyCard`, `refillOf` au ramassage et dans `rollPerks` ; `loadedWeapon` quand l'arme en main est vide |
+| `lourde` (pacte majeur) | `shotDamageMul` ; `shotKnockMul` dans `shoot` ; `extraSpread` (un tirage `jitter` de plus) et `selfPush` dans `fireWeapon` ; recul cosmétique ×1,5 dans `recoil` |
+| `toutourien` (pacte majeur) | `multiplier` (`TOUTOURIEN_KILLS_PER_MULTIPLIER`) ; `potsKill` dans `killEnemy` (cagnotte `S.pot`), `potAfterHit` dans `hurtPlayer`, versement avec le bonus de fin de vague dans `update` ; `#pot` dans `updateHud` |
+| `sanspause` (pacte majeur) | `waveBreak` (`SANSPAUSE_BREAK`) ; `pickAfter` en fin de vague dans `update` ; `takeAllCards` : `openPick` tire hors pactes (`noPacts`), `takeAll` applique toutes les cartes |
+| `specialiste` (pacte majeur) | `choosePick` enchaîne sur `openWeaponPick` / `chooseWeapon` (`S.special`, munitions infinies) ; `canSwitch` dans `selectWeapon` et `cycleWeapon` ; `shotDamageMul`, `specialMul` (explosions du joueur dans `explosion`, PV des barricades dans `placeBlock`) ; caisses de munitions en points ; cases `.sealed` ; proposé à partir de `SPECIALISTE_MIN_WEAPONS` armes (`ctx.weapons` de `rollCards`) |
+| `silence` (pacte majeur) | `killPoints` (`SILENCE_POINTS_MUL`) ; classe `#hud.silence` posée par `renderMods` (CSS : cases d'armes gardées au tactile) ; `#pauseScore` dans `updateHud` |
+| `aveugle` (pacte majeur) | `shotDamageMul` ; voile `drawBlindness` dans `render()` (`render/scene.js`, portée `AVEUGLE_SIGHT`, dégradé créé une fois) |
+
+## Pactes majeurs
+
+Spécification : `docs/prd/pactes-majeurs.md`. `rollCards(mods, rng, legend, { wave, demo })` ne propose un
+pacte majeur qu'à partir de la fin de la vague `MAJOR_FROM_WAVE`, jamais en démo, et plus aucun dès
+qu'un pacte majeur est possédé (un seul par partie). Tant qu'aucun n'est pris, `majorDue(wave)` en garantit un
+(tiré en premier, parmi ceux encore permis) à la fin de la vague `MAJOR_FROM_WAVE` puis toutes les `MAJOR_EVERY` vagues ;
+à la distribution, il se retourne en dernier comme la Légendaire.
 
 ## Combo, multiplicateur, score
 
@@ -64,8 +85,8 @@ large, elles se couchent.
 | Multiplicateur | `multiplier(combo, mods, bonus) = 1 + bonus + floor(combo / KILLS_PER_MULTIPLIER)` (`rules/modifiers.js`), `FIEVRE_KILLS_PER_MULTIPLIER` sous Fièvre ; `bonus` = crans de Sans répit (`S.repit`) |
 | Frénésie | active si la carte est prise et `multiplier ≥ FRENZY_MULTIPLIER` |
 | Points d'un kill | `killPoints(type, mods, multiplier)` (`rules/scoring.js`, `KILL_POINTS`) |
-| Ajout au score | `addScore(n)` (`game/score.js`) : seul point d'entrée, déclenche les déblocages d'armes |
-| Bonus de fin de vague | `WAVE_BONUS × vague`, dans `update` |
+| Ajout au score | `addScore(n)` (`game/score.js`) : seul point d'entrée, déclenche les déblocages d'armes ; sous Tout ou rien, les kills d'une vague passent par la cagnotte `S.pot` |
+| Bonus de fin de vague | `waveBonus(wave, mods)` (`rules/scoring.js`) : `WAVE_BONUS × vague`, ajouté dans `update` |
 | Record | `world.best`, enregistré par `gameOver` sous `STORAGE_BEST` (`tete-carree-best`, clé à ne jamais changer) |
 | Dernière partie et meilleures parties | `world.runs` (`{ last, top }`), classées par `rankRun` (`rules/records.js`, `TOP_RUNS`), enregistrées par `gameOver` sous `STORAGE_RUNS` (`tete-carree-runs`) ; affichées par `renderRuns` (`render/hud.js`) sur l'accueil (bloc masqué tant qu'aucune partie n'est enregistrée) et l'écran de fin |
 | Affichage | `updateHud` (`render/hud.js`) : `#comboNum`, `#comboKills`, `#comboFill`, `#score`, `#next`, puces `#mods` |
@@ -85,6 +106,9 @@ large, elles se couchent.
    désormais d'autres cartes (le pool a changé).
 7. Dessine son pictogramme dans `src/render/cardIcons.js` (SVG au trait 24 × 24, clé = `id`) :
    `tests/cards.test.js` échoue sinon.
+
+Volet « Cartes » de l'accueil : `buildCardsPanel` (`render/hud.js`) dessine toutes les cartes de `MODS` par rareté, au
+texte de leur premier niveau ; une nouvelle carte y apparaît sans rien ajouter.
 
 Réserve d'idées de cartes non implémentées : `docs/idees-cartes.md`.
 

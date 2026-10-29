@@ -1,9 +1,10 @@
 // HUD DOM : bannières, santé, score, combo, emplacements d'armes, cartes actives ; écrans d'accueil et de fin
 // (arsenal, dernière partie, meilleures parties).
 import { sfx } from '../audio/sfx.js';
-import { LOW_HP, MODS, W } from '../config.js';
+import { LOW_HP, MODS, RAR, SABLIER_HOLD, W } from '../config.js';
 import { selectWeapon } from '../game/weapons.js';
 import { S, ammo, comboTime, frenzy, mod, multiplier, player, queueCount, unlocked, world } from '../state/world.js';
+import { cardIcon } from './cardIcons.js';
 import { $, fmt } from '../util.js';
 
 const bannerEl = $('banner');
@@ -43,7 +44,7 @@ export function buildSlots() {
 }
 let modsSig = '';
 // Vide les caches du HUD pour forcer un redessin complet en début de partie.
-export function resetHud() { slotSig = []; hudCache = {}; modsSig = ''; }
+export function resetHud() { slotSig = []; hudCache = {}; modsSig = ''; $('pauseScore').textContent = ''; }
 function renderMods() {
   const act = MODS.filter(m => mod(m.id));
   const sig = act.map(m => m.id + mod(m.id)).join(',') + (S.souffleUsed ? 'u' : '');
@@ -52,6 +53,7 @@ function renderMods() {
   const html = act.map(m => `<span class="mchip r-${m.rar}">${m.short}${m.max > 1 ? ` <b>${mod(m.id)}</b>` : ''}${m.id === 'souffle' && S.souffleUsed ? ' <i>utilisé</i>' : ''}</span>`).join('');
   $('mods').innerHTML = html;
   $('pauseMods').innerHTML = html || `<span class="none">Aucune carte pour l'instant</span>`;
+  $('hud').classList.toggle('silence', !!mod('silence')); // Silence : le HUD s'efface, la pause montre le score
 }
 // Portrait : la tête carrée du héros, 13 × 13 pixels, encaisse avec lui. Quatre états : intact, blessé (sous 60 %
 // de la vie max : pansement, moue), critique (sous LOW_HP : yeux plissés, sang), mort (yeux en croix). Blanchit le temps
@@ -97,11 +99,25 @@ function renderHp() {
   setStyle('hpFill', 'width', width);
   const tick = (25 / player.maxHp * 100).toFixed(2) + '%'; // un repère tous les 25 PV
   if (hudCache.hpTick !== tick) { hudCache.hpTick = tick; $('hpTicks').style.setProperty('--tick', tick); }
-  setText('hpNum', String(Math.ceil(Math.max(0, player.hp))));
+  const drain = mod('sablier') && S.waveActive && S.time - S.lastKill > SABLIER_HOLD && !player.dead; // le Sablier s'écoule
+  if (hudCache.hpDrain !== drain) { hudCache.hpDrain = drain; $('hpBar').classList.toggle('drain', drain); }
+  setText('hpNum', mod('unevie') && !player.dead ? '1 coup' : String(Math.ceil(Math.max(0, player.hp))));
 }
 // Volet Arsenal de l'écran titre : les armes dans l'ordre de leurs touches, avec leur score de déblocage.
 export function buildArsenal() {
   $('arsenalList').innerHTML = W.map(w => `<li><span class="n">${w.name}</span><span class="u">${w.unlock ? fmt(w.unlock) + ' points' : 'de départ'}</span></li>`).join('');
+}
+// Volet Cartes de l'écran titre : toutes les cartes par rareté, au texte de leur premier niveau.
+const RAR_GROUPS = { c: 'Communes', r: 'Rares', l: 'Légendaires', p: 'Pactes', m: 'Pactes majeurs' };
+export function buildCardsPanel() {
+  $('cardsList').innerHTML = Object.keys(RAR_GROUPS).map(r => {
+    const cards = MODS.filter(m => m.rar === r).map(m => {
+      const body = m.plus ? `<span class="plus">+ ${m.plus(1)}</span><span class="minus">− ${m.minus(1)}</span>` : `<span>${m.desc(1)}</span>`;
+      return `<div class="mcard r-${r}"><span class="rar">${RAR[r].name}</span><span class="mico">${cardIcon(m.id)}</span><span class="mname">${m.name}</span>`
+        + `<span class="mbody">${body}</span><span class="lv">${m.max > 1 ? `jusqu'au niveau ${m.max}` : 'Unique'}</span></div>`;
+    }).join('');
+    return `<h3 class="rgroup r-${r}">${RAR_GROUPS[r]} · ${MODS.filter(m => m.rar === r).length}</h3><div class="cgrid">${cards}</div>`;
+  }).join('');
 }
 const NONE = `<p class="none">Aucune partie pour l'instant</p>`;
 function runDate(t) {
@@ -132,6 +148,9 @@ export function updateHud() {
   const low = player.hp < LOW_HP ? 'low' : '';
   if (hudCache.low !== low) { hudCache.low = low; $('hpBar').classList.toggle('low', !!low); }
   setText('score', fmt(S.score));
+  if (mod('silence') && hudCache.pauseScore !== S.score) { hudCache.pauseScore = S.score; $('pauseScore').textContent = `Score : ${fmt(S.score)}`; }
+  const pot = mod('toutourien') ? S.pot : -1; // Tout ou rien : points en jeu pendant la vague
+  if (hudCache.pot !== pot) { hudCache.pot = pot; $('pot').hidden = pot < 0; $('pot').innerHTML = `En jeu : <b>${fmt(Math.max(0, pot))}</b>`; }
   const rc = player.rollCharges <= 0 || !!player.roll;
   if (hudCache.rc !== rc) { hudCache.rc = rc; $('rollBtn').classList.toggle('cd', rc); }
   const nx = W.findIndex((w, i) => !unlocked[i]);
@@ -144,11 +163,13 @@ export function updateHud() {
   setText('comboKills', S.combo + (S.combo > 1 ? ' kills' : ' kill'));
   setStyle('comboFill', 'width', (S.combo ? S.comboT / comboTime() * 100 : 0).toFixed(1) + '%');
   W.forEach((w, i) => {
-    const sig = (unlocked[i] ? 'u' : 'l') + (player.weapon === i ? 's' : '') + ammo[i];
+    const sealed = S.special >= 0 && i !== S.special; // Spécialiste : les autres armes sont condamnées
+    const sig = (unlocked[i] ? 'u' : 'l') + (player.weapon === i ? 's' : '') + (sealed ? 'x' : '') + ammo[i];
     if (slotSig[i] === sig) return; slotSig[i] = sig;
     const b = $('slot' + i);
     b.classList.toggle('locked', !unlocked[i]);
     b.classList.toggle('sel', player.weapon === i);
+    b.classList.toggle('sealed', sealed);
     b.classList.toggle('empty', unlocked[i] && ammo[i] <= 0);
     b.querySelector('.a').textContent = !unlocked[i] ? fmt(w.unlock) : ammo[i] === Infinity ? '∞' : ammo[i];
   });

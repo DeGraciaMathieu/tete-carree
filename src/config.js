@@ -26,7 +26,7 @@ export const FRENZY_MULTIPLIER = 5; // Frénésie s'active à partir de ×5
 export const SOIF_MULTIPLIER = 3;   // Soif de sang soigne à partir de ×3
 
 /* ---------- Cartes de modificateurs ---------- */
-export const RAR = { c: { name: 'Commune', w: 55 }, r: { name: 'Rare', w: 28 }, l: { name: 'Légendaire', w: 9 }, p: { name: 'Pacte', w: 12 } };
+export const RAR = { c: { name: 'Commune', w: 55 }, r: { name: 'Rare', w: 28 }, l: { name: 'Légendaire', w: 9 }, p: { name: 'Pacte', w: 12 }, m: { name: 'Pacte majeur', w: 3 } };
 const pct = x => Math.round(x * 100) + ' %';
 const num = x => String(x).replace('.', ',');
 export const MODS = [
@@ -65,6 +65,19 @@ export const MODS = [
   { id: 'racine', rar: 'p', max: 1, name: 'Enraciné', short: 'Enraciné', plus: () => `Tes tirs font ${num(RACINE_DAMAGE_MUL)} fois plus de dégâts quand tu es immobile`, minus: () => `Déplacement −${pct(1 - RACINE_SPEED_MUL)}` },
   { id: 'diable', rar: 'p', max: 1, name: 'Marché du diable', short: 'Marché du diable', plus: () => `Une carte Légendaire garantie au prochain choix`, minus: () => `−${DIABLE_HP} PV max, définitivement` },
   { id: 'verre', rar: 'p', max: 1, name: 'Canon de verre', short: 'Canon de verre', plus: () => `Tes tirs font ${num(VERRE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `−${VERRE_HP} PV max` },
+  // Pactes majeurs : un seul par partie, `excl` liste les cartes qu'ils rendent inutiles (docs/prd/pactes-majeurs.md).
+  { id: 'sanssoin', rar: 'm', max: 1, name: 'Plus de soins', short: 'Plus de soins', excl: ['vampire', 'soif', 'sansarmure'], plus: () => `Chaque vague terminée te rend toute ta vie`, minus: () => `Plus aucune régénération ni caisse de soin` },
+  { id: 'unevie', rar: 'm', max: 1, name: 'Une seule vie', short: 'Une seule vie', excl: ['constitution', 'souffle', 'vampire', 'soif', 'verre', 'diable', 'brulee', 'sansarmure'], plus: () => `Points ×${UNEVIE_POINTS_MUL} sur chaque kill et sur le bonus de fin de vague`, minus: () => `Le premier coup encaissé te tue, et plus aucune caisse de soin` },
+  { id: 'sablier', rar: 'm', max: 1, name: 'Sablier', short: 'Sablier', excl: ['vampire', 'sansarmure'], plus: () => `Points ×${SABLIER_POINTS_MUL} sur chaque kill`, minus: () => `Pendant une vague, tu perds ${SABLIER_DRAIN} PV par seconde jusqu'à la mort ; chaque kill arrête la perte ${num(SABLIER_HOLD)} s` },
+  { id: 'elite', rar: 'm', max: 1, name: 'Élite', short: 'Élite', plus: () => `Points ×${ELITE_POINTS_MUL} sur chaque kill`, minus: () => `Deux fois moins d'ennemis par vague, mais ${num(ELITE_HP_MUL)} fois plus de PV et ${pct(ELITE_SPEED_MUL - 1)} plus rapides` },
+  { id: 'entrave', rar: 'm', max: 1, name: 'Sans échappatoire', short: 'Sans échappatoire', excl: ['double', 'rollboom', 'rollammo', 'firetrail', 'epaule', 'brulee'], plus: () => `Déplacement +${pct(ENTRAVE_SPEED_MUL - 1)}, et tes tirs font ${num(ENTRAVE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `Plus aucune roulade : les crevasses deviennent infranchissables` },
+  { id: 'mitraille', rar: 'm', max: 1, name: 'Mitraille', short: 'Mitraille', excl: ['fidele'], plus: () => `Tes armes à feu tirent deux fois plus vite`, minus: () => `Chaque tir coûte ${MITRAILLE_AMMO_COST} munitions, et le pistolet n'est plus infini : ${MITRAILLE_PISTOL_AMMO} balles, rechargé par les caisses` },
+  { id: 'lourde', rar: 'm', max: 1, name: 'Main lourde', short: 'Main lourde', plus: () => `Tes tirs font ${num(LOURDE_DAMAGE_MUL)} fois plus de dégâts et repoussent ${LOURDE_KNOCK_MUL === 2 ? 'deux' : num(LOURDE_KNOCK_MUL)} fois plus loin`, minus: () => `Chaque tir te fait reculer et dévie ta visée, railgun compris` },
+  { id: 'toutourien', rar: 'm', max: 1, name: 'Tout ou rien', short: 'Tout ou rien', excl: ['fievre', 'quitte'], plus: () => `Un cran de multiplicateur tous les ${TOUTOURIEN_KILLS_PER_MULTIPLIER} kills au lieu de ${KILLS_PER_MULTIPLIER}`, minus: () => `Les points d'une vague ne comptent qu'à sa fin : un coup encaissé les fait tous perdre` },
+  { id: 'sanspause', rar: 'm', max: 1, name: 'Pas de pause', short: 'Pas de pause', excl: ['repit'], plus: () => `Toutes les deux vagues, tu gagnes les trois cartes proposées (jamais de pacte)`, minus: () => `Plus de pause entre les vagues, et aucune carte après une vague impaire` },
+  { id: 'specialiste', rar: 'm', max: 1, name: 'Spécialiste', short: 'Spécialiste', excl: ['fidele', 'rollammo'], plus: () => `L'arme que tu choisis devient infinie et fait ${SPECIALISTE_DAMAGE_MUL === 2 ? 'deux' : num(SPECIALISTE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `Tu ne pourras plus jamais changer d'arme` },
+  { id: 'silence', rar: 'm', max: 1, name: 'Silence', short: 'Silence', plus: () => `Points ×${SILENCE_POINTS_MUL} sur chaque kill`, minus: () => `Plus de HUD : santé, score, combo, armes et cartes disparaissent (score et cartes restent en pause)` },
+  { id: 'aveugle', rar: 'm', max: 1, name: 'Aveugle', short: 'Aveugle', plus: () => `Tes tirs font ${AVEUGLE_DAMAGE_MUL === 2 ? 'deux' : num(AVEUGLE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `Tu ne vois plus rien au-delà de ${AVEUGLE_SIGHT} cases` },
 ];
 
 /* ---------- Effets des cartes ---------- */
@@ -96,7 +109,27 @@ export const BRULEE_ROLL_CD_MUL = .5, BRULEE_ROLL_HP = 5;
 export const RACINE_DAMAGE_MUL = 2, RACINE_SPEED_MUL = .7;
 export const DIABLE_HP = 25;
 export const VERRE_DAMAGE_MUL = 1.5, VERRE_HP = 40;
+export const UNEVIE_POINTS_MUL = 3; // Une seule vie : points des kills et du bonus de vague
+// Sablier : points des kills ; PV perdus par seconde en vague ; secondes de répit après chaque kill
+export const SABLIER_POINTS_MUL = 2, SABLIER_DRAIN = 4, SABLIER_HOLD = 1.5;
+// Élite : points des kills ; part des ennemis de chaque type (arrondi au supérieur) et taille des meutes (au moins
+// ELITE_PACK_MIN coureurs) ; PV (bouclier compris) et vitesse des ennemis
+// Mitraille : délai entre deux tirs des armes à feu, munitions par tir, munitions du pistolet à la prise et par caisse
+export const MITRAILLE_CD_MUL = .5, MITRAILLE_AMMO_COST = 2, MITRAILLE_PISTOL_AMMO = 120, MITRAILLE_PISTOL_REFILL = 60;
+// Main lourde : dégâts et recul infligés par tes tirs ; recul subi par tir (px) ; dispersion ajoutée (rad)
+export const LOURDE_DAMAGE_MUL = 1.8, LOURDE_KNOCK_MUL = 2, LOURDE_SELF_PUSH = 8, LOURDE_SPREAD = .14;
+// Spécialiste : dégâts de l'arme choisie (tirs, explosions, PV des barricades) ; armes débloquées pour être proposé
+export const SPECIALISTE_DAMAGE_MUL = 2, SPECIALISTE_MIN_WEAPONS = 2;
+export const AVEUGLE_DAMAGE_MUL = 2, AVEUGLE_SIGHT = 5; // Aveugle : dégâts des tirs ; portée de vue (cases)
+export const SILENCE_POINTS_MUL = 2; // Silence : points des kills
+export const SANSPAUSE_BREAK = 1.5; // Pas de pause : secondes entre deux vagues
+export const TOUTOURIEN_KILLS_PER_MULTIPLIER = 2; // Tout ou rien : kills par cran de multiplicateur
+export const ENTRAVE_SPEED_MUL = 1.3, ENTRAVE_DAMAGE_MUL = 1.5; // Sans échappatoire : déplacement, dégâts des tirs
+export const ELITE_POINTS_MUL = 3, ELITE_COUNT_MUL = .5, ELITE_PACK_MIN = 2, ELITE_HP_MUL = 2.5, ELITE_SPEED_MUL = 1.2;
 export const CARDS_PER_PICK = 3;
+// Pactes majeurs (rareté `m`) : proposés à partir de la fin de cette vague, un seul par partie ; tant qu'aucun n'est pris,
+// l'un d'eux est garanti à la fin de cette vague puis toutes les MAJOR_EVERY vagues.
+export const MAJOR_FROM_WAVE = 5, MAJOR_EVERY = 2;
 
 /* ---------- Joueur ---------- */
 export const PLAYER_HP = 100, PLAYER_RADIUS = 9;

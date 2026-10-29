@@ -6,7 +6,7 @@ import { pad, rumble } from '../input/gamepad.js';
 import { keys } from '../input/keyboard.js';
 import { stick } from '../input/touch.js';
 import { addPart, dust, pop } from '../render/effects.js';
-import { rollAmmo, rollHpCost, shoveKnock } from '../rules/modifiers.js';
+import { refillOf, rollAmmo, rollHpCost, shoveKnock } from '../rules/modifiers.js';
 import { circleTouchesVoid, moveCircle, unstick } from '../state/arena.js';
 import { S, ammo, mod, player, rollCooldown, rollMax, world } from '../state/world.js';
 import { rnd } from '../util.js';
@@ -32,6 +32,7 @@ function rollClears(dx, dy) {
 }
 // dirX, dirY : direction imposée (pilote de la démo) ; sinon celle de la marche
 export function tryRoll(dirX = 0, dirY = 0) {
+  if (!world.demo && world.state === 'play' && !player.dead && !rollMax()) { sfx('click'); return; } // Sans échappatoire
   if ((world.state !== 'play' && !world.demo) || player.dead || player.roll || player.rollCharges <= 0) return;
   let [mx, my] = dirX || dirY ? [dirX, dirY] : moveInput(), l = Math.hypot(mx, my);
   if (l < .2) { mx = player.fx; my = player.fy; l = Math.hypot(mx, my) || 1; }
@@ -45,7 +46,7 @@ export function tryRoll(dirX = 0, dirY = 0) {
 function rollPerks() {
   const lb = mod('rollboom');
   if (lb) shockwave(player.x, player.y, ROLLBOOM_RADIUS + ROLLBOOM_RADIUS_LVL * lb, ROLLBOOM_DAMAGE + ROLLBOOM_DAMAGE_LVL * lb);
-  const wi = player.weapon, w = W[wi], n = rollAmmo(S.mods, w.refill, ammo[wi]);
+  const wi = player.weapon, w = W[wi], n = rollAmmo(S.mods, refillOf(S.mods, wi), ammo[wi]);
   if (n) { ammo[wi] += n; pop(player.x, player.y - 46, `+${n} ${w.short}`, '#f2c230'); }
 }
 // Coup d'épaule : chaque ennemi traversé est bousculé une fois par roulade, loin du joueur

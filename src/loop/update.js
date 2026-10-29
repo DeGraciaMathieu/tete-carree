@@ -1,6 +1,6 @@
 // Pas de simulation : fait avancer la partie de `dt` secondes.
 import { sfx } from '../audio/sfx.js';
-import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, ACID_TICK_RESET, AIMANT_RANGE, AIMANT_SPEED, AMMO_NO_WEAPON_BONUS, AMMO_REFILL_WEAPONS, ARMOR_SHOVE, BARBELES_DAMAGE, BLOATER_FUSE, BLOATER_FUSE_SPEED, BLOATER_TRIGGER_REACH, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_MIN_DIST, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_HIT_REACH, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MELEE_REACH, MH, MW, PICKUP_RADIUS, PICK_DELAY, PLAYER_SPEED, RAVITO_ZOMBIES, ROCKET_DAMAGE, ROCKET_HIT_REACH, ROCKET_RADIUS, SPITTER_BACKOFF, SPITTER_HOLD, SPITTER_HOLD_SPEED, SPITTER_MIN_RANGE, SPITTER_SIGHT, SPITTER_TOO_CLOSE, SPITTER_WINDUP, T, W, WAVE_BONUS } from '../config.js';
+import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, ACID_TICK_RESET, AIMANT_RANGE, AIMANT_SPEED, AMMO_NO_WEAPON_BONUS, AMMO_REFILL_WEAPONS, ARMOR_SHOVE, BARBELES_DAMAGE, BLOATER_FUSE, BLOATER_FUSE_SPEED, BLOATER_TRIGGER_REACH, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_MIN_DIST, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_HIT_REACH, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MELEE_REACH, MH, MW, PICKUP_RADIUS, PICK_DELAY, PLAYER_SPEED, RAVITO_ZOMBIES, ROCKET_DAMAGE, ROCKET_HIT_REACH, ROCKET_RADIUS, SPITTER_BACKOFF, SPITTER_HOLD, SPITTER_HOLD_SPEED, SPITTER_MIN_RANGE, SPITTER_SIGHT, SPITTER_TOO_CLOSE, SPITTER_WINDUP, T, W } from '../config.js';
 import { explosion, hurtEnemy, hurtPlayer, killEnemy, toxicBurst } from '../game/combat.js';
 import { spawnEnemy, spit, startWave, updateGlobs } from '../game/enemies.js';
 import { DEMO_BREAK, ctl, demoControl } from '../game/demo.js';
@@ -15,7 +15,8 @@ import { VH, VW, zoom } from '../render/canvas.js';
 import { addPart, casing, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood } from '../render/floor.js';
 import { banner } from '../render/hud.js';
-import { blastRadius, boxPeriod, fragShards, hpRate, repitBonus, speedMul, waveBreak } from '../rules/modifiers.js';
+import { blastRadius, boxKind, boxPeriod, fragShards, hpRate, pickAfter, refillOf, repitBonus, speedMul, waveBreak, waveEndHp } from '../rules/modifiers.js';
+import { waveBonus } from '../rules/scoring.js';
 import * as Waves from '../rules/waves.js';
 import { computeField, dist, isVoid, los, moveCircle, nextStep, openT, passable, shotTile, unstick, walkLine } from '../state/arena.js';
 import { S, ammo, blocks, cam, frenzy, jitter, mod, player, rng, rollCooldown, rollMax, unlocked, world } from '../state/world.js';
@@ -64,8 +65,9 @@ export function update(dt) {
     }
     player.cd -= dt;
     if ((aiming || (!world.demo && (mouseFire || pad.fire))) && player.cd <= 0) fireWeapon();
-    const rate = hpRate(S.mods, S.combo, S.time - player.lastHurt);
+    const rate = hpRate(S.mods, S.combo, S.time - player.lastHurt, S.time - S.lastKill, S.waveActive);
     if (rate > 0) player.hp = Math.min(player.maxHp, player.hp + rate * dt);
+    else if (rate < 0 && mod('sablier')) { if (player.hp + rate * dt > 0) player.hp += rate * dt; else hurtPlayer(player.hp, true); } // le Sablier peut tuer
     else if (rate < 0) player.hp = Math.max(Math.min(1, player.hp), player.hp + rate * dt); // Vampire ne prend jamais le dernier PV
   }
   player.flash -= dt; player.hurtT -= dt; player.muzzle -= dt; player.invuln -= dt;
@@ -88,9 +90,11 @@ export function update(dt) {
         S.spawnT = Waves.spawnGap(S.wave);
       }
       if (!S.queue.length && world.enemies.length === 0) {
-        S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = PICK_DELAY; S.repit = repitBonus(S.mods, S.repit);
-        const bonus = WAVE_BONUS * S.wave; addScore(bonus);
+        S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = pickAfter(S.mods, S.wave) ? PICK_DELAY : 0; S.repit = repitBonus(S.mods, S.repit);
+        const bonus = waveBonus(S.wave, S.mods) + S.pot; S.pot = 0; addScore(bonus); // Tout ou rien : la cagnotte est versée
         banner('Vague terminée', 'Bonus +', 'end', bonus);
+        const hp = waveEndHp(S.mods, player.hp, player.maxHp);
+        if (hp > player.hp && !player.dead) { player.hp = hp; pop(player.x, player.y - 46, 'Vie restaurée', '#62c46e'); }
       }
     }
     // combo
@@ -104,7 +108,7 @@ export function update(dt) {
           const tx = 2 + rng() * (MW - 4) | 0, ty = 2 + rng() * (MH - 4) | 0;
           const x = tx * T + T / 2, y = ty * T + T / 2;
           if (!openT(tx, ty) || Math.hypot(x - player.x, y - player.y) < BOX_MIN_DIST || dist[ty * MW + tx] > 1e8) continue;
-          world.pickups.push({ x, y, kind: rng() < BOX_HP_CHANCE ? 'hp' : 'ammo', ph: Math.random() * 6 });
+          world.pickups.push({ x, y, kind: boxKind(S.mods, rng(), BOX_HP_CHANCE), ph: Math.random() * 6 });
           if (mod('ravito')) for (let k = 0; k < RAVITO_ZOMBIES; k++) spawnEnemy('z');
           break;
         }
@@ -267,12 +271,12 @@ export function update(dt) {
       p.taken = true; sfx('pickup');
       if (p.kind === 'hp') { player.hp = Math.min(player.maxHp, player.hp + MEDKIT_HP); pop(p.x, p.y - 30, `+${MEDKIT_HP} santé`, '#62c46e'); }
       else {
-        const pool = mod('fidele') ? [] : W.map((w, i) => i).filter(i => i > 0 && unlocked[i]); // Fidélité : plus aucune recharge
+        const pool = mod('fidele') || S.special >= 0 ? [] : W.map((w, i) => i).filter(i => (i > 0 || mod('mitraille')) && unlocked[i]); // Fidélité, Spécialiste : plus aucune recharge ; Mitraille : le pistolet aussi
         if (!pool.length) { addScore(AMMO_NO_WEAPON_BONUS); pop(p.x, p.y - 30, `+${AMMO_NO_WEAPON_BONUS}`, '#ffffff'); }
         else {
           const picks = pool.sort(() => rng() - .5).slice(0, AMMO_REFILL_WEAPONS);
-          for (const i of picks) ammo[i] += W[i].refill;
-          pop(p.x, p.y - 30, picks.map(i => `+${W[i].refill} ${W[i].short}`).join(' · '), '#f2c230');
+          for (const i of picks) ammo[i] += refillOf(S.mods, i);
+          pop(p.x, p.y - 30, picks.map(i => `+${refillOf(S.mods, i)} ${W[i].short}`).join(' · '), '#f2c230');
         }
       }
     }

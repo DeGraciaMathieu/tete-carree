@@ -8,8 +8,8 @@ import { addPart, blood, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood, stampScorch } from '../render/floor.js';
 import { banner } from '../render/hud.js';
 import { playerProtected, resolveEnemyHit, secondWind } from '../rules/damage.js';
-import { comboAfterHit, ownBlastRadius, ownBlastSelfMul } from '../rules/modifiers.js';
-import { killPoints, rollDrop, soifHeal } from '../rules/scoring.js';
+import { comboAfterHit, ownBlastRadius, ownBlastSelfMul, specialMul } from '../rules/modifiers.js';
+import { killPoints, potAfterHit, potsKill, rollDrop, soifHeal } from '../rules/scoring.js';
 import { isVoid } from '../state/arena.js';
 import { S, blocks, comboTime, mod, multiplier, player, rng, world } from '../state/world.js';
 import { $, fmt, rnd } from '../util.js';
@@ -41,10 +41,10 @@ export function hurtEnemy(e, dmg, dx, dy, knock, kind) {
 }
 // fell : l'ennemi a été projeté dans une crevasse
 export function killEnemy(e, dx, dy, fell) {
-  e.dead = true; S.kills++; S.combo++; S.comboT = comboTime(); S.bestCombo = Math.max(S.bestCombo, S.combo);
+  e.dead = true; S.kills++; S.combo++; S.lastKill = S.time; S.comboT = comboTime(); S.bestCombo = Math.max(S.bestCombo, S.combo);
   const m = multiplier(), pts = killPoints(e.type, S.mods, m), heal = soifHeal(S.mods, m);
   if (heal && !player.dead) player.hp = Math.min(player.maxHp, player.hp + heal);
-  addScore(pts);
+  if (potsKill(S.mods, S.waveActive)) S.pot += pts; else addScore(pts);
   pop(e.x, e.y - 40, (fell ? 'Chute ! +' : '+') + fmt(pts), m > 1 || fell ? '#f2c230' : '#ffffff');
   const cEl = $('comboNum'); cEl.classList.add('bump'); setTimeout(() => cEl.classList.remove('bump'), 90);
   if (fell) { world.fallers.push({ e, t: 0 }); sfx('fall'); return; }
@@ -53,7 +53,7 @@ export function killEnemy(e, dx, dy, fell) {
   if (e.type === 'b') world.bursts.push({ x: e.x, y: e.y, t: .08 });
   stampBlood(e.x + dx * 6, e.y + dy * 6, 9 + Math.random() * 6, .7);
   sfx('splat', 25); sfx('kill', 30);
-  const kind = rollDrop(e.type, isVoid(e.x, e.y), rng);
+  const kind = rollDrop(e.type, isVoid(e.x, e.y), rng, S.mods);
   if (kind) world.pickups.push({ x: e.x, y: e.y, kind, ph: Math.random() * 6 });
 }
 
@@ -62,6 +62,7 @@ export function hurtPlayer(dmg, soft) {
   if (playerProtected(player)) return;
   player.hp -= dmg; player.hurtT = .35; player.flash = .08; player.lastHurt = S.time;
   if (!soft) { world.shake = Math.min(16, world.shake + 4); S.comboT = comboAfterHit(S.mods, S.comboT); }
+  if (S.pot && !potAfterHit(S.mods, S.pot)) { pop(player.x, player.y - 46, `−${fmt(S.pot)} perdus`, '#ff8f84'); S.pot = 0; }
   blood(player.x, player.y, 4);
   sfx('hurt', 120);
   if (soft) rumble(0, .15, 50); else rumble(.6, .4, 140);
@@ -90,11 +91,12 @@ export function shockwave(x, y, R, dmg) {
 // own : explosion provoquée par le joueur (baril, grenade, roquette), soumise à Poudre noire
 export function explosion(x, y, R, dmg, own = false) {
   if (own) R = ownBlastRadius(S.mods, R);
+  const em = own ? specialMul(S.mods) : 1; // Spécialiste : ses explosions blessent deux fois plus la horde
   { const pd = Math.hypot(player.x - x, player.y - y); if (pd < 420) rumble(.75 * (1 - pd / 420), .45 * (1 - pd / 420), 220); }
   for (const e of world.enemies) {
     if (e.dead) continue;
     const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy) || 1;
-    if (d < R + e.r) { const f = 1 - Math.max(0, d - e.r) / R * BLAST_FALLOFF; hurtEnemy(e, dmg * f, dx / d, dy / d, BLAST_KNOCK * f, 'blast'); }
+    if (d < R + e.r) { const f = 1 - Math.max(0, d - e.r) / R * BLAST_FALLOFF; hurtEnemy(e, dmg * f * em, dx / d, dy / d, BLAST_KNOCK * f, 'blast'); }
   }
   const pd = Math.hypot(player.x - x, player.y - y);
   if (pd < R * BLAST_SELF_RANGE) hurtPlayer(dmg * BLAST_SELF_DAMAGE * (1 - pd / R * BLAST_SELF_FALLOFF) * (own ? ownBlastSelfMul(S.mods) : 1));

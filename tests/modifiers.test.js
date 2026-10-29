@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, repitBonus, waveBreak,
-  boxPeriod, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
+  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, pickAfter, takeAllCards, canSwitch, specialMul, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
 } from '../src/rules/modifiers.js';
 
 test('le multiplicateur gagne un cran tous les 5 kills enchaînés', () => {
@@ -143,4 +143,101 @@ test('Poudre noire : explosions du joueur 50 % plus larges, et deux fois plus do
   assert.equal(ownBlastRadius({ poudre: 1 }, 80), 120);
   assert.equal(ownBlastSelfMul({}), 1);
   assert.equal(ownBlastSelfMul({ poudre: 1 }), 2);
+});
+
+test('Plus de soins : aucune régénération, même longtemps après le dernier coup', () => {
+  assert.equal(hpRate({ sanssoin: 1 }, 0, 60), 0);
+});
+
+test('Plus de soins : plus aucune caisse de soin, chaque vague terminée rend toute la vie', () => {
+  assert.equal(boxKind({}, 0, .35), 'hp');
+  assert.equal(boxKind({ sanssoin: 1 }, 0, .35), 'ammo');
+  assert.equal(waveEndHp({ sanssoin: 1 }, 12, 100), 100);
+  assert.equal(waveEndHp({}, 12, 100), 12);
+});
+
+test('Sablier : en vague, le joueur perd 4 PV par seconde dès qu\'il ne tue plus, jamais dans les 1,5 s qui suivent un kill', () => {
+  assert.equal(hpRate({ sablier: 1 }, 0, 60, 2, true), -4);
+  assert.equal(hpRate({ sablier: 1 }, 3, 60, 1, true), 0);
+});
+
+test('Sablier : régénération normale entre les vagues, aucune pendant', () => {
+  assert.equal(hpRate({ sablier: 1 }, 0, 60, 30, false), hpRate({}, 0, 60));
+  assert.equal(hpRate({ sablier: 1 }, 5, 60, 0, true), 0);
+});
+
+test('Élite : ennemis deux fois et demie plus résistants et 20 % plus rapides', () => {
+  assert.equal(enemyHpMul({ elite: 1 }), 2.5);
+  assert.equal(enemySpeedMul({ elite: 1 }), 1.2);
+  assert.equal(enemyHpMul({}) * enemySpeedMul({}), 1);
+});
+
+test('Sans échappatoire : plus aucune charge de roulade', () => {
+  assert.equal(rollMax({ entrave: 1 }), 0);
+});
+
+test('Sans échappatoire : déplacement +30 % et tirs ×1,5, cumulés avec Enraciné', () => {
+  assert.equal(speedMul({ entrave: 1 }), 1.3);
+  assert.equal(shotDamageMul({ entrave: 1 }, 'uzi', 400, false), 1.5);
+  assert.ok(Math.abs(speedMul({ entrave: 1, racine: 1 }) - .91) < 1e-9);
+  assert.equal(shotDamageMul({ entrave: 1, racine: 1 }, 'uzi', 400, true), 3);
+});
+
+test('Mitraille : les armes à feu tirent deux fois plus vite, quatre fois avec Sans armure, pas les grenades', () => {
+  assert.equal(weaponCdMul({ mitraille: 1 }, 'uzi'), .5);
+  assert.equal(weaponCdMul({ mitraille: 1 }, 'grenade'), 1);
+  assert.equal(weaponCdMul({ mitraille: 1 }, 'rifle') * fireMul({ mitraille: 1, sansarmure: 1 }, 0), .25);
+});
+
+test('Mitraille : un tir coûte 2 munitions, une barricade toujours 1', () => {
+  assert.equal(ammoCost({ mitraille: 1 }, 'pistol'), 2);
+  assert.equal(ammoCost({ mitraille: 1 }, 'wall'), 1);
+  assert.equal(ammoCost({}, 'uzi'), 1);
+});
+
+test('Mitraille : une caisse recharge aussi le pistolet', () => {
+  assert.equal(refillOf({ mitraille: 1 }, 0), 60);
+  assert.equal(refillOf({}, 0), 0);
+  assert.equal(refillOf({ mitraille: 1 }, 1), 120);
+});
+
+test('Main lourde : tes tirs font 1,8 fois plus de dégâts et repoussent deux fois plus loin', () => {
+  assert.equal(shotDamageMul({ lourde: 1 }, 'rifle', 300, false), 1.8);
+  assert.equal(shotKnockMul({ lourde: 1 }), 2);
+  assert.equal(shotKnockMul({}), 1);
+});
+
+test('Main lourde : chaque tir d\'arme à feu fait reculer le joueur et dévie sa visée, railgun compris, pas une grenade', () => {
+  assert.ok(selfPush({ lourde: 1 }, 'uzi') > 0 && extraSpread({ lourde: 1 }, 'rail') > 0);
+  assert.equal(selfPush({ lourde: 1 }, 'grenade') + extraSpread({ lourde: 1 }, 'wall'), 0);
+  assert.equal(selfPush({}, 'uzi') + extraSpread({}, 'rail'), 0);
+});
+
+test('Tout ou rien : un cran de multiplicateur tous les 2 kills', () => {
+  assert.equal(multiplier(4, { toutourien: 1 }), 3);
+  assert.equal(multiplier(4, {}), 1);
+});
+
+test('Pas de pause : 1,5 s entre deux vagues, un choix de cartes après les vagues paires seulement, où l\'on garde tout', () => {
+  assert.equal(waveBreak({ sanspause: 1 }), 1.5);
+  assert.equal(pickAfter({ sanspause: 1 }, 7), false);
+  assert.equal(pickAfter({ sanspause: 1 }, 8), true);
+  assert.equal(pickAfter({}, 7), true);
+  assert.equal(takeAllCards({ sanspause: 1 }), true);
+});
+
+test('Spécialiste : seule l\'arme choisie se sélectionne', () => {
+  assert.equal(canSwitch(3, 3), true);
+  assert.equal(canSwitch(3, 0), false);
+  assert.equal(canSwitch(-1, 0), true);
+});
+
+test('Spécialiste : ses tirs, ses explosions et ses barricades comptent double', () => {
+  assert.equal(shotDamageMul({ specialiste: 1 }, 'shotgun', 100, false), 2);
+  assert.equal(specialMul({ specialiste: 1 }), 2);
+  assert.equal(specialMul({}), 1);
+});
+
+test('Aveugle : tes tirs font deux fois plus de dégâts', () => {
+  assert.equal(shotDamageMul({ aveugle: 1 }, 'pistol', 100, false), 2);
 });

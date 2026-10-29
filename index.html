@@ -19,6 +19,7 @@
         </div>
       </div>
       <div id="score">0</div>
+      <div id="pot" hidden></div>
       <div id="next"></div>
     </div>
     <div class="panel wave">
@@ -105,6 +106,12 @@
     <ol class="arsenal" id="arsenalList"></ol>
     <button class="btn ghost tclose">Fermer</button>
   </div>
+  <div class="card tpanel" id="panelCards" hidden>
+    <h2>Cartes</h2>
+    <p>Entre deux vagues, choisis une carte parmi trois. Les pactes donnent un avantage contre une contrepartie ; un seul pacte majeur par partie, à partir de la vague 5.</p>
+    <div id="cardsList"></div>
+    <button class="btn ghost tclose">Fermer</button>
+  </div>
   <div class="card tpanel" id="panelOpts" hidden>
     <h2>Options</h2>
     <div class="btns opts">
@@ -118,15 +125,16 @@
     <button class="tlink" data-panel="panelCtrl">Commandes</button>
     <button class="tlink" data-panel="panelBeasts">Bestiaire</button>
     <button class="tlink" data-panel="panelArsenal">Arsenal</button>
+    <button class="tlink" data-panel="panelCards">Cartes</button>
     <button class="tlink" data-panel="panelOpts">Options</button>
   </nav>
 </div>
 
 <div class="overlay pick" id="pickScreen" hidden>
   <div class="pickwrap">
-    <div class="picktitle"><span id="pickWave">Vague terminée</span><h2>Choisis une carte</h2></div>
+    <div class="picktitle"><span id="pickWave">Vague terminée</span><h2 id="pickTitle">Choisis une carte</h2></div>
     <div class="cards" id="cards"></div>
-    <p class="pickhint only-desk">Clique sur une carte ou appuie sur 1, 2 ou 3.</p>
+    <p class="pickhint only-desk" id="pickHint">Clique sur une carte ou appuie sur 1, 2 ou 3.</p>
     <p class="pickhint only-pad">Croix directionnelle ou stick gauche pour choisir, A (✕) pour valider.</p>
   </div>
 </div>
@@ -136,6 +144,7 @@
     <h2>Pause</h2>
     <div class="label">Cartes actives</div>
     <div id="pauseMods" class="pmods"></div>
+    <p id="pauseScore" class="pickhint"></p>
     <div class="btns">
       <button class="btn" id="resumeBtn">Reprendre</button>
       <button class="btn ghost optMute">Son : activé</button>
