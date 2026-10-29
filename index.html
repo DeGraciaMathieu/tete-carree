@@ -55,19 +55,34 @@
 <div id="toast" role="status"></div>
 
 <div class="overlay" id="titleScreen">
-  <div class="tmain" id="titleMain">
-    <canvas id="mascot" width="13" height="13" aria-hidden="true"></canvas>
-    <h1 class="logo">Tête <em>Carrée</em></h1>
-    <div class="stripe"></div>
-    <div class="records" id="records">
-      <section class="rpanel"><h2 class="rlabel" data-i18n="lastRun"></h2><div id="lastRun"></div></section>
-      <section class="rpanel"><h2 class="rlabel" data-i18n="bestRuns"></h2><div id="runsTitle"></div></section>
+  <div class="tside" id="titleMain">
+    <div class="tbrand">
+      <canvas id="mascot" width="13" height="13" aria-hidden="true"></canvas>
+      <h1 class="logo">Tête <em>Carrée</em></h1>
+      <div class="stripe"></div>
     </div>
-    <button class="btn" id="playBtn" data-i18n="play"></button>
-    <p class="starthint only-desk" data-i18n-html="startDesk"></p>
-    <p class="starthint only-pad" data-i18n="startPad"></p>
-    <p class="padhint nopad" id="padHint" data-i18n="padHint"></p>
+    <nav class="tmenu" id="titleMenu" data-i18n-aria="infoAria">
+      <button class="btn" id="playBtn" data-i18n="play"></button>
+      <button class="titem" data-panel="panelCtrl" data-i18n="controls"></button>
+      <button class="titem" data-panel="panelBeasts" data-i18n="bestiary"></button>
+      <button class="titem" data-panel="panelArsenal" data-i18n="arsenal"></button>
+      <button class="titem" data-panel="panelCards" data-i18n="cardsTitle"></button>
+      <button class="titem" data-panel="panelOpts" data-i18n="options"></button>
+    </nav>
+    <div class="tfoot">
+      <p class="starthint only-desk" data-i18n-html="startDesk"></p>
+      <p class="starthint only-pad" data-i18n="startPad"></p>
+      <p class="padhint nopad" id="padHint" data-i18n="padHint"></p>
+      <span class="tflags">
+        <button class="tflag" data-lang="fr" aria-label="Français" lang="fr"><svg viewBox="0 0 3 2" aria-hidden="true"><path fill="#002395" d="M0 0h1v2H0z"/><path fill="#fff" d="M1 0h1v2H1z"/><path fill="#ed2939" d="M2 0h1v2H2z"/></svg></button>
+        <button class="tflag" data-lang="en" aria-label="English" lang="en"><svg viewBox="0 0 60 30" aria-hidden="true"><clipPath id="ukClip"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><path fill="#012169" d="M0 0h60v30H0z"/><path stroke="#fff" stroke-width="6" d="M0 0l60 30m0-30L0 30"/><path stroke="#c8102e" stroke-width="4" clip-path="url(#ukClip)" d="M0 0l60 30m0-30L0 30"/><path stroke="#fff" stroke-width="10" d="M30 0v30M0 15h60"/><path stroke="#c8102e" stroke-width="6" d="M30 0v30M0 15h60"/></svg></button>
+      </span>
+    </div>
   </div>
+  <section class="rpanel records" id="records">
+    <h2 class="rlabel" data-i18n="lastRun"></h2><div id="lastRun"></div>
+    <h2 class="rlabel" data-i18n="bestRuns"></h2><div id="runsTitle"></div>
+  </section>
   <div class="card tpanel" id="panelCtrl" hidden>
     <h2 data-i18n="controls"></h2>
     <dl class="keys only-desk">
@@ -122,17 +137,6 @@
     </div>
     <button class="btn ghost tclose" data-i18n="close"></button>
   </div>
-  <nav class="tlinks" data-i18n-aria="infoAria">
-    <button class="tlink" data-panel="panelCtrl" data-i18n="controls"></button>
-    <button class="tlink" data-panel="panelBeasts" data-i18n="bestiary"></button>
-    <button class="tlink" data-panel="panelArsenal" data-i18n="arsenal"></button>
-    <button class="tlink" data-panel="panelCards" data-i18n="cardsTitle"></button>
-    <button class="tlink" data-panel="panelOpts" data-i18n="options"></button>
-    <span class="tflags">
-      <button class="tflag" data-lang="fr" aria-label="Français" lang="fr"><svg viewBox="0 0 3 2" aria-hidden="true"><path fill="#002395" d="M0 0h1v2H0z"/><path fill="#fff" d="M1 0h1v2H1z"/><path fill="#ed2939" d="M2 0h1v2H2z"/></svg></button>
-      <button class="tflag" data-lang="en" aria-label="English" lang="en"><svg viewBox="0 0 60 30" aria-hidden="true"><clipPath id="ukClip"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><path fill="#012169" d="M0 0h60v30H0z"/><path stroke="#fff" stroke-width="6" d="M0 0l60 30m0-30L0 30"/><path stroke="#c8102e" stroke-width="4" clip-path="url(#ukClip)" d="M0 0l60 30m0-30L0 30"/><path stroke="#fff" stroke-width="10" d="M30 0v30M0 15h60"/><path stroke="#c8102e" stroke-width="6" d="M30 0v30M0 15h60"/></svg></button>
-    </span>
-  </nav>
 </div>
 
 <div class="overlay pick" id="pickScreen" hidden>

@@ -4,6 +4,7 @@ import { PAD_AIM_DEADZONE, PAD_MOVE_DEADZONE } from '../config.js';
 import { choosePick, focusCard, pause, pickFocus, resume, startGame } from '../game/flow.js';
 import { tryRoll } from '../game/player.js';
 import { cycleWeapon } from '../game/weapons.js';
+import { moveMenu, openPanel, panelOpen } from './buttons.js';
 import { root } from './touch.js';
 import { tr } from '../i18n/index.js';
 import { S, world } from '../state/world.js';
@@ -51,7 +52,17 @@ export function pollPad() {
   const fdir = Math.abs(ax[0] || 0) > .6 ? Math.sign(ax[0]) : Math.abs(ax[1] || 0) > .6 ? Math.sign(ax[1]) * 2 : 0;
   const flick = fdir && fdir !== padFlick ? fdir : 0; padFlick = fdir;
   pad.prev = now;
-  if (world.state === 'title' || world.state === 'over') { if (hit(0) || hit(9)) startGame(); return; }
+  if (world.state === 'title') {
+    // volet ouvert : A ou B le referme ; sinon croix ou stick pour choisir, A pour valider, Start pour jouer
+    if (panelOpen()) { if (hit(0) || hit(1)) openPanel(''); return; }
+    if (hit(12) || flick === -2) moveMenu(-1);
+    if (hit(13) || flick === 2) moveMenu(1);
+    const f = document.activeElement;
+    if (hit(9) || (hit(0) && !(f && f.closest('#titleMenu')))) startGame();
+    else if (hit(0)) f.click();
+    return;
+  }
+  if (world.state === 'over') { if (hit(0) || hit(9)) startGame(); return; }
   if (world.state === 'pause') { if (hit(0) || hit(1) || hit(9)) resume(); return; }
   if (world.state === 'pick') {
     if (hit(14) || hit(12) || flick < 0) focusCard(pickFocus - 1);

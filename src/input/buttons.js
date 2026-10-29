@@ -24,10 +24,21 @@ export function applyLang() {
 for (const b of document.querySelectorAll('.optLang')) b.addEventListener('click', () => { setLang(lang === 'fr' ? 'en' : 'fr'); applyLang(); });
 for (const b of document.querySelectorAll('.tflag')) b.addEventListener('click', () => { setLang(b.dataset.lang); applyLang(); });
 
-// Écran titre : les liens du bas ouvrent un volet (commandes, bestiaire, arsenal, options) à la place du titre.
+// Écran titre : les entrées du menu ouvrent un volet (commandes, bestiaire, arsenal, cartes, options) à la place de
+// l'accueil ; le focus passe au bouton Fermer, puis revient à l'entrée qui l'a ouvert.
+let opener = null;
+export const panelOpen = () => $('titleScreen').classList.contains('panel');
 export function openPanel(id) {
   for (const p of document.querySelectorAll('.tpanel')) p.hidden = p.id !== id;
-  $('titleMain').hidden = !!id;
+  $('titleScreen').classList.toggle('panel', !!id);
+  if (id) { opener = document.activeElement; $(id).querySelector('.tclose').focus(); }
+  else if (opener) { opener.focus(); opener = null; }
+}
+// Flèches ou croix de la manette : entrée suivante ou précédente du menu, en boucle ; la première pression choisit Jouer.
+export function moveMenu(d) {
+  if (panelOpen()) return;
+  const items = [...document.querySelectorAll('#titleMenu button')], i = items.indexOf(document.activeElement);
+  items[i < 0 ? 0 : (i + d + items.length) % items.length].focus();
 }
 for (const b of document.querySelectorAll('[data-panel]')) b.addEventListener('click', () => openPanel(b.dataset.panel));
 for (const b of document.querySelectorAll('.tclose')) b.addEventListener('click', () => openPanel(''));

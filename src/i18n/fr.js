@@ -22,7 +22,7 @@ export default {
   fpsAria: 'Images par seconde', activeCards: 'Cartes actives',
   rollBtn: 'ROULER', rollAria: 'Roulade', swapBtn: 'ARME', swapAria: 'Arme suivante',
   lastRun: 'Dernière partie', bestRuns: 'Tes meilleures parties', play: 'Jouer',
-  startDesk: 'ou appuie sur <kbd>Entrée</kbd>', startPad: 'ou appuie sur A (✕)',
+  startDesk: '<kbd>Entrée</kbd> jouer · <kbd>↑</kbd> <kbd>↓</kbd> choisir', startPad: 'A (✕) valider · croix ↑ ↓ choisir',
   padHint: 'Une manette ? Appuie sur l\'un de ses boutons pour la connecter.',
   padBlocked: 'Ce navigateur bloque la manette dans cette page.',
   close: 'Fermer', infoAria: 'Informations',

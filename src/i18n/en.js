@@ -23,7 +23,7 @@ export default {
   fpsAria: 'Frames per second', activeCards: 'Active cards',
   rollBtn: 'ROLL', rollAria: 'Roll', swapBtn: 'WEAPON', swapAria: 'Next weapon',
   lastRun: 'Last run', bestRuns: 'Your best runs', play: 'Play',
-  startDesk: 'or press <kbd>Enter</kbd>', startPad: 'or press A (✕)',
+  startDesk: '<kbd>Enter</kbd> play · <kbd>↑</kbd> <kbd>↓</kbd> choose', startPad: 'A (✕) select · D-pad ↑ ↓ choose',
   padHint: 'Got a controller? Press any of its buttons to connect it.',
   padBlocked: 'This browser blocks controllers on this page.',
   close: 'Close', infoAria: 'Information',
