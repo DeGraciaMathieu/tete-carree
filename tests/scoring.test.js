@@ -69,3 +69,7 @@ test('Tout ou rien : un coup encaissé vide la cagnotte', () => {
   assert.equal(potAfterHit({ toutourien: 1 }, 4200), 0);
   assert.equal(potAfterHit({}, 4200), 4200);
 });
+
+test('Silence : chaque kill rapporte deux fois plus', () => {
+  assert.equal(killPoints('z', { silence: 1 }, 1), 100);
+});

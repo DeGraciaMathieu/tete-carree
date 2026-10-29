@@ -452,14 +452,15 @@ la fin de la vague, pas au kill ».
   actives.
 
 **Comportement.**
-- `#hud` reçoit une classe `silence` qui masque ses blocs (CSS) ; `updateHud` ne calcule plus les
-  textes masqués.
+- `#hud` reçoit une classe `silence` qui masque ses blocs (CSS, `visibility`) ; le panneau de vague et
+  le compteur de FPS restent.
+- Au tactile, les cases d'armes sont le seul moyen d'en changer : elles restent affichées, sans leurs
+  munitions. Avec une souris, la barre d'armes disparaît.
 - Restent visibles : bannières (vague, déblocage), écrans de choix, de pause et de fin, nombres
   flottants au-dessus des ennemis, boutons tactiles (indispensables). Les signaux du jeu restent :
   clignotement du joueur, son de vie basse, son du clic à vide.
-- Touches 1 à 9 et molette : inchangées. Le clic sur une case d'arme devient impossible (la barre est
-  masquée).
-- L'écran de pause affiche toujours les cartes actives et le score.
+- Touches 1 à 9 et molette : inchangées.
+- L'écran de pause affiche toujours les cartes actives, et le score sous Silence.
 
 **Impact.** `config` ; `rules/scoring.js` (`killPoints`) ; `render/hud.js` ; `src/style.css`.
 

@@ -76,6 +76,7 @@ export const MODS = [
   { id: 'toutourien', rar: 'm', max: 1, name: 'Tout ou rien', short: 'Tout ou rien', excl: ['fievre', 'quitte'], plus: () => `Un cran de multiplicateur tous les ${TOUTOURIEN_KILLS_PER_MULTIPLIER} kills au lieu de ${KILLS_PER_MULTIPLIER}`, minus: () => `Les points d'une vague ne comptent qu'à sa fin : un coup encaissé les fait tous perdre` },
   { id: 'sanspause', rar: 'm', max: 1, name: 'Pas de pause', short: 'Pas de pause', excl: ['repit'], plus: () => `Toutes les deux vagues, tu gagnes les trois cartes proposées (jamais de pacte)`, minus: () => `Plus de pause entre les vagues, et aucune carte après une vague impaire` },
   { id: 'specialiste', rar: 'm', max: 1, name: 'Spécialiste', short: 'Spécialiste', excl: ['fidele', 'rollammo'], plus: () => `L'arme que tu choisis devient infinie et fait ${SPECIALISTE_DAMAGE_MUL === 2 ? 'deux' : num(SPECIALISTE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `Tu ne pourras plus jamais changer d'arme` },
+  { id: 'silence', rar: 'm', max: 1, name: 'Silence', short: 'Silence', plus: () => `Points ×${SILENCE_POINTS_MUL} sur chaque kill`, minus: () => `Plus de HUD : santé, score, combo, armes et cartes disparaissent (score et cartes restent en pause)` },
 ];
 
 /* ---------- Effets des cartes ---------- */
@@ -118,6 +119,7 @@ export const MITRAILLE_CD_MUL = .5, MITRAILLE_AMMO_COST = 2, MITRAILLE_PISTOL_AM
 export const LOURDE_DAMAGE_MUL = 1.8, LOURDE_KNOCK_MUL = 2, LOURDE_SELF_PUSH = 8, LOURDE_SPREAD = .14;
 // Spécialiste : dégâts de l'arme choisie (tirs, explosions, PV des barricades) ; armes débloquées pour être proposé
 export const SPECIALISTE_DAMAGE_MUL = 2, SPECIALISTE_MIN_WEAPONS = 2;
+export const SILENCE_POINTS_MUL = 2; // Silence : points des kills
 export const SANSPAUSE_BREAK = 1.5; // Pas de pause : secondes entre deux vagues
 export const TOUTOURIEN_KILLS_PER_MULTIPLIER = 2; // Tout ou rien : kills par cran de multiplicateur
 export const ENTRAVE_SPEED_MUL = 1.3, ENTRAVE_DAMAGE_MUL = 1.5; // Sans échappatoire : déplacement, dégâts des tirs

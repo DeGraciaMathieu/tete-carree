@@ -45,6 +45,7 @@ const PATHS = {
   toutourien: '<path d="M4 20h16"/><path d="M6 20v-4h12v4"/><path d="M8 16l1-6h6l1 6"/><path d="M12 10V3M9 6l3-3 3 3"/>',
   sanspause: '<path d="M8 4v16M14 4v16"/><path d="M3 21L21 3"/>',
   specialiste: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/>',
+  silence: '<path d="M3 5h18v12H8l-5 4z"/><path d="M3 3l18 18"/>',
 };
 export function cardIcon(id) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${PATHS[id] || ''}</svg>`;

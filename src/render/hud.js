@@ -43,7 +43,7 @@ export function buildSlots() {
 }
 let modsSig = '';
 // Vide les caches du HUD pour forcer un redessin complet en début de partie.
-export function resetHud() { slotSig = []; hudCache = {}; modsSig = ''; }
+export function resetHud() { slotSig = []; hudCache = {}; modsSig = ''; $('pauseScore').textContent = ''; }
 function renderMods() {
   const act = MODS.filter(m => mod(m.id));
   const sig = act.map(m => m.id + mod(m.id)).join(',') + (S.souffleUsed ? 'u' : '');
@@ -52,6 +52,7 @@ function renderMods() {
   const html = act.map(m => `<span class="mchip r-${m.rar}">${m.short}${m.max > 1 ? ` <b>${mod(m.id)}</b>` : ''}${m.id === 'souffle' && S.souffleUsed ? ' <i>utilisé</i>' : ''}</span>`).join('');
   $('mods').innerHTML = html;
   $('pauseMods').innerHTML = html || `<span class="none">Aucune carte pour l'instant</span>`;
+  $('hud').classList.toggle('silence', !!mod('silence')); // Silence : le HUD s'efface, la pause montre le score
 }
 // Portrait : la tête carrée du héros, 13 × 13 pixels, encaisse avec lui. Quatre états : intact, blessé (sous 60 %
 // de la vie max : pansement, moue), critique (sous LOW_HP : yeux plissés, sang), mort (yeux en croix). Blanchit le temps
@@ -134,6 +135,7 @@ export function updateHud() {
   const low = player.hp < LOW_HP ? 'low' : '';
   if (hudCache.low !== low) { hudCache.low = low; $('hpBar').classList.toggle('low', !!low); }
   setText('score', fmt(S.score));
+  if (mod('silence') && hudCache.pauseScore !== S.score) { hudCache.pauseScore = S.score; $('pauseScore').textContent = `Score : ${fmt(S.score)}`; }
   const pot = mod('toutourien') ? S.pot : -1; // Tout ou rien : points en jeu pendant la vague
   if (hudCache.pot !== pot) { hudCache.pot = pot; $('pot').hidden = pot < 0; $('pot').innerHTML = `En jeu : <b>${fmt(Math.max(0, pot))}</b>`; }
   const rc = player.rollCharges <= 0 || !!player.roll;
