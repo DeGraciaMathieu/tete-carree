@@ -2,6 +2,8 @@
 
 /* ---------- Arène ---------- */
 export const T = 32, MW = 44, MH = 30;
+// Arènes choisies sur l'accueil, dans l'ordre du menu ; leurs plans sont dans state/arena.js.
+export const ARENAS = ['entrepot', 'fosse', 'colonnade', 'bunker', 'pont'];
 export const ZOOM_MIN = 0.72, ZOOM_MAX = 1.7;
 
 /* ---------- Armes ---------- */
@@ -278,6 +280,7 @@ export const STORAGE_OUTLINE = 'tete-carree-outline';
 // Dernière partie et meilleures parties, affichées sur l'accueil et l'écran de fin.
 export const STORAGE_RUNS = 'tete-carree-runs';
 export const STORAGE_LANG = 'tete-carree-lang'; // fr ou en, choisie sur l'accueil
+export const STORAGE_ARENA = 'tete-carree-arena'; // arène choisie sur l'accueil
 export const TOP_RUNS = 5;
 // Version publiée : compteur masqué tant que le joueur ne l'a pas activé lui-même.
 export const SHOW_FPS_BY_DEFAULT = false;

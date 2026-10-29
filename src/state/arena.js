@@ -9,24 +9,68 @@ export const map = new Uint8Array(MW * MH); // 0 sol, 1 mur, 2 caisse
 export const doors = [];
 export const doorSet = new Set();
 function rect(x, y, w, h, v) { for (let j = y; j < y + h; j++) for (let i = x; i < x + w; i++) map[j * MW + i] = v; }
-export function buildMap() {
+// rectangle reporté dans les quatre quarts de l'arène, par symétrie
+function rect4(x, y, w, h, v) { rect(x, y, w, h, v); rect(MW - x - w, y, w, h, v); rect(x, MH - y - h, w, h, v); rect(MW - x - w, MH - y - h, w, h, v); }
+function set4(x, y, v) { for (const [i, j] of [[x, y], [MW - 1 - x, y], [x, MH - 1 - y], [MW - 1 - x, MH - 1 - y]]) map[j * MW + i] = v; }
+// Plans des arènes, choisies sur l'accueil ; toutes gardent la bordure, les portes et une case de départ libre au centre.
+const PLANS = {
+  entrepot(cx, cy) {
+    rect(6, 5, 5, 1, 1); rect(6, 5, 1, 4, 1);
+    rect(MW - 11, 5, 5, 1, 1); rect(MW - 7, 5, 1, 4, 1);
+    rect(6, MH - 6, 5, 1, 1); rect(6, MH - 9, 1, 4, 1);
+    rect(MW - 11, MH - 6, 5, 1, 1); rect(MW - 7, MH - 9, 1, 4, 1);
+    rect(cx - 5, 4, 3, 1, 1); rect(cx + 2, 4, 3, 1, 1);
+    rect(cx - 5, MH - 5, 3, 1, 1); rect(cx + 2, MH - 5, 3, 1, 1);
+    rect(4, cy - 4, 1, 3, 1); rect(4, cy + 1, 1, 3, 1);
+    rect(MW - 5, cy - 4, 1, 3, 1); rect(MW - 5, cy + 1, 1, 3, 1);
+    for (const [x, y] of [[15,10],[16,10],[15,11],[28,10],[27,10],[28,11],[15,19],[15,18],[16,19],[28,19],[28,18],[27,19],[11,15],[32,14],[20,10],[23,19]]) map[y * MW + x] = 2;
+    // crevasses : le sol s'est effondré au nord et au sud, un pont étroit face à chaque porte
+    for (const y of [7, 8, MH - 9, MH - 8]) for (let x = 14; x <= 29; x++) if (x < cx - 1 || x > cx) map[y * MW + x] = 3;
+  },
+  // îlot central cerné d'un fossé, un pont de deux cases face à chaque porte
+  fosse(cx, cy) {
+    rect(11, 7, 22, 2, 3); rect(11, MH - 9, 22, 2, 3);
+    rect(11, 7, 2, 16, 3); rect(MW - 13, 7, 2, 16, 3);
+    rect(cx - 1, 7, 2, 2, 0); rect(cx - 1, MH - 9, 2, 2, 0);
+    rect(11, cy - 1, 2, 2, 0); rect(MW - 13, cy - 1, 2, 2, 0);
+    for (const [x, y] of [[15, 10], [16, 10], [15, 11]]) set4(x, y, 2);
+    rect4(4, 3, 3, 1, 1); rect4(4, 3, 1, 2, 1);
+  },
+  // champ régulier de piliers 2 × 2, des caisses à la place des quatre plus proches du centre
+  colonnade() {
+    for (const x of [5, 11, 17, 25, 31, 37]) for (const y of [4, 10, 16, 22]) {
+      if ((x === 17 || x === 25) && (y === 10 || y === 16)) { map[(y + 1) * MW + x] = 2; continue; }
+      rect(x, y + (y >= 16 ? 2 : 0), 2, 2, 1);
+    }
+  },
+  // casemate centrale ouverte par ses coins, lignes de caisses au-dehors
+  bunker(cx, cy) {
+    rect(14, 9, 16, 1, 1); rect(14, MH - 10, 16, 1, 1);
+    rect(14, 9, 1, 12, 1); rect(MW - 15, 9, 1, 12, 1);
+    for (const [x, y] of [[14, 9], [15, 9], [14, 10]]) set4(x, y, 0);
+    for (let x = 17; x <= 26; x += 3) { map[5 * MW + x] = 2; map[(MH - 6) * MW + x] = 2; }
+    for (let y = 11; y <= 18; y += 3) { map[y * MW + 6] = 2; map[y * MW + MW - 7] = 2; }
+    rect4(3, 3, 4, 1, 1);
+    map[(cy - 2) * MW + cx - 2] = 2; map[(cy + 1) * MW + cx + 1] = 2;
+  },
+  // chaussée est-ouest entre deux gouffres, un pont large au centre et une passerelle par rive
+  pont(cx, cy) {
+    rect(1, cy - 3, MW - 2, 2, 3); rect(1, cy + 2, MW - 2, 2, 3);
+    rect(cx - 2, cy - 3, 4, 2, 0); rect(cx - 2, cy + 2, 4, 2, 0);
+    rect(5, cy - 3, 1, 2, 0); rect(MW - 6, cy + 2, 1, 2, 0);
+    rect(cx - 6, cy - 1, 3, 2, 2); rect(cx + 3, cy - 1, 3, 2, 2);
+    rect4(7, 4, 1, 4, 1); rect4(7, 4, 5, 1, 1);
+    for (const [x, y] of [[cx - 6, 8], [cx + 5, 8], [cx - 6, MH - 9], [cx + 5, MH - 9]]) map[y * MW + x] = 2;
+  },
+};
+export function buildMap(id) {
   map.fill(0); doors.length = 0; doorSet.clear();
   rect(0, 0, MW, 1, 1); rect(0, MH - 1, MW, 1, 1); rect(0, 0, 1, MH, 1); rect(MW - 1, 0, 1, MH, 1);
   const cx = MW / 2 | 0, cy = MH / 2 | 0;
   for (const [x, y] of [[cx - 1, 0], [cx, 0], [cx - 1, MH - 1], [cx, MH - 1], [0, cy - 1], [0, cy], [MW - 1, cy - 1], [MW - 1, cy]]) {
     map[y * MW + x] = 0; doors.push([x, y]); doorSet.add(y * MW + x);
   }
-  rect(6, 5, 5, 1, 1); rect(6, 5, 1, 4, 1);
-  rect(MW - 11, 5, 5, 1, 1); rect(MW - 7, 5, 1, 4, 1);
-  rect(6, MH - 6, 5, 1, 1); rect(6, MH - 9, 1, 4, 1);
-  rect(MW - 11, MH - 6, 5, 1, 1); rect(MW - 7, MH - 9, 1, 4, 1);
-  rect(cx - 5, 4, 3, 1, 1); rect(cx + 2, 4, 3, 1, 1);
-  rect(cx - 5, MH - 5, 3, 1, 1); rect(cx + 2, MH - 5, 3, 1, 1);
-  rect(4, cy - 4, 1, 3, 1); rect(4, cy + 1, 1, 3, 1);
-  rect(MW - 5, cy - 4, 1, 3, 1); rect(MW - 5, cy + 1, 1, 3, 1);
-  for (const [x, y] of [[15,10],[16,10],[15,11],[28,10],[27,10],[28,11],[15,19],[15,18],[16,19],[28,19],[28,18],[27,19],[11,15],[32,14],[20,10],[23,19]]) map[y * MW + x] = 2;
-  // crevasses : le sol s'est effondré au nord et au sud, un pont étroit face à chaque porte
-  for (const y of [7, 8, MH - 9, MH - 8]) for (let x = 14; x <= 29; x++) if (x < cx - 1 || x > cx) map[y * MW + x] = 3;
+  (PLANS[id] || PLANS.entrepot)(cx, cy);
 }
 
 export function tileAt(tx, ty) { return Grid.tileAt(map, blocks, tx, ty); }

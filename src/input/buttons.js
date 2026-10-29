@@ -1,6 +1,6 @@
 // Boutons des écrans et des réglages.
 import { showMute } from '../audio/sfx.js';
-import { pause, resume, startGame } from '../game/flow.js';
+import { chooseArena, pause, resume, showArena, startGame } from '../game/flow.js';
 import { lang, setLang } from '../i18n/index.js';
 import { outlineOn, setOutline } from '../render/canvas.js';
 import { fpsOn, setFps } from '../render/fps.js';
@@ -12,13 +12,14 @@ $('playBtn').addEventListener('click', startGame);
 $('againBtn').addEventListener('click', startGame);
 $('resumeBtn').addEventListener('click', resume);
 $('restartBtn').addEventListener('click', startGame);
+$('arenaBtn').addEventListener('click', () => chooseArena(1));
 $('pauseBtn').addEventListener('click', () => { if (world.state === 'play') pause(); });
 for (const b of document.querySelectorAll('.optFps')) b.addEventListener('click', () => setFps(!fpsOn));
 for (const b of document.querySelectorAll('.optOl')) b.addEventListener('click', () => setOutline(!outlineOn));
 
 // Langue : réécrit l'accueil et les réglages ; le HUD et les cartes se construisent ensuite dans la langue courante.
 export function applyLang() {
-  translatePage(); buildArsenal(); buildCardsPanel(); renderRuns();
+  translatePage(); buildArsenal(); buildCardsPanel(); renderRuns(); showArena();
   setFps(fpsOn); setOutline(outlineOn); showMute();
 }
 for (const b of document.querySelectorAll('.optLang')) b.addEventListener('click', () => { setLang(lang === 'fr' ? 'en' : 'fr'); applyLang(); });

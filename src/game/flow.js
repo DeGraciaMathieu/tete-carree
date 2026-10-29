@@ -1,6 +1,6 @@
 // Enchaînement des écrans : titre, partie, pause, choix de carte, fin de partie.
 import { audio, sfx, silence } from '../audio/sfx.js';
-import { CONSTITUTION_HP, DIABLE_HP, MITRAILLE_PISTOL_AMMO, STORAGE_BEST, STORAGE_RUNS, TOP_RUNS, VERRE_HP, W } from '../config.js';
+import { ARENAS, CONSTITUTION_HP, DIABLE_HP, MITRAILLE_PISTOL_AMMO, STORAGE_ARENA, STORAGE_BEST, STORAGE_RUNS, TOP_RUNS, VERRE_HP, W } from '../config.js';
 import { tr } from '../i18n/index.js';
 import { pad } from '../input/gamepad.js';
 import { releaseFire } from '../input/keyboard.js';
@@ -21,6 +21,14 @@ export function newGame() {
 }
 // Partie de démo derrière l'écran titre : pilotée par game/demo.js, muette, sans record, relancée quand elle s'achève.
 export function startDemo() { newGame(); world.demo = true; world.state = 'title'; silence(true); }
+// Arène suivante (d = 1) ou précédente (d = -1) sur l'accueil : retenue, et la démo repart dessus pour la montrer.
+export function chooseArena(d) {
+  const i = ARENAS.indexOf(world.arena);
+  world.arena = ARENAS[(i + d + ARENAS.length) % ARENAS.length];
+  try { localStorage.setItem(STORAGE_ARENA, world.arena); } catch (e) {}
+  showArena(); startDemo();
+}
+export function showArena() { $('arenaBtn').textContent = tr.arenaBtn(tr.arenas[world.arena]); }
 export function startGame() {
   audio(); newGame(); world.demo = false; silence(false); world.state = 'play';
   $('titleScreen').hidden = true; $('overScreen').hidden = true; $('pauseScreen').hidden = true; $('hud').hidden = false;

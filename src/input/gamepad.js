@@ -1,7 +1,7 @@
 // Manette : sondage à chaque image (getGamepads protégé), vibrations, navigation dans les cartes.
 import { audio } from '../audio/sfx.js';
 import { PAD_AIM_DEADZONE, PAD_MOVE_DEADZONE } from '../config.js';
-import { choosePick, focusCard, pause, pickFocus, resume, startGame } from '../game/flow.js';
+import { chooseArena, choosePick, focusCard, pause, pickFocus, resume, startGame } from '../game/flow.js';
 import { tryRoll } from '../game/player.js';
 import { cycleWeapon } from '../game/weapons.js';
 import { moveMenu, openPanel, panelOpen } from './buttons.js';
@@ -57,6 +57,8 @@ export function pollPad() {
     if (panelOpen()) { if (hit(0) || hit(1)) openPanel(''); return; }
     if (hit(12) || flick === -2) moveMenu(-1);
     if (hit(13) || flick === 2) moveMenu(1);
+    if (hit(14) || flick === -1) chooseArena(-1);
+    if (hit(15) || flick === 1) chooseArena(1);
     const f = document.activeElement;
     if (hit(9) || (hit(0) && !(f && f.closest('#titleMenu')))) startGame();
     else if (hit(0)) f.click();
