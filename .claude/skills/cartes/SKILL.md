@@ -67,7 +67,7 @@ large, elles se couchent.
 | Ajout au score | `addScore(n)` (`game/score.js`) : seul point d'entrée, déclenche les déblocages d'armes |
 | Bonus de fin de vague | `WAVE_BONUS × vague`, dans `update` |
 | Record | `world.best`, enregistré par `gameOver` sous `STORAGE_BEST` (`tete-carree-best`, clé à ne jamais changer) |
-| Dernière partie et meilleures parties | `world.runs` (`{ last, top }`), classées par `rankRun` (`rules/records.js`, `TOP_RUNS`), enregistrées par `gameOver` sous `STORAGE_RUNS` (`tete-carree-runs`) ; affichées par `renderRuns` (`render/hud.js`) sur l'accueil et l'écran de fin |
+| Dernière partie et meilleures parties | `world.runs` (`{ last, top }`), classées par `rankRun` (`rules/records.js`, `TOP_RUNS`), enregistrées par `gameOver` sous `STORAGE_RUNS` (`tete-carree-runs`) ; affichées par `renderRuns` (`render/hud.js`) sur l'accueil (bloc masqué tant qu'aucune partie n'est enregistrée) et l'écran de fin |
 | Affichage | `updateHud` (`render/hud.js`) : `#comboNum`, `#comboKills`, `#comboFill`, `#score`, `#next`, puces `#mods` |
 
 ## Ajouter une carte

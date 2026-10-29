@@ -115,6 +115,7 @@ export function renderRuns() {
   const rows = top.map((r, i) => `<tr${last && r.t === last.t ? ' class="me"' : ''}><td class="rank">${i + 1}</td><td>${fmt(r.score)}</td>`
     + `<td>${r.wave ?? '—'}</td><td>${r.combo ?? '—'}</td><td>${runDate(r.t)}</td></tr>`).join('');
   const board = top.length ? `<table class="runs"><thead><tr><th></th><th>Score</th><th>Vague</th><th>Combo</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table>` : NONE;
+  $('records').hidden = !last && !top.length;
   $('runsTitle').innerHTML = board; $('runsOver').innerHTML = board;
   if (!last) { $('lastRun').innerHTML = NONE; return; }
   const chips = MODS.filter(m => last.mods[m.id]).map(m => `<span class="mchip r-${m.rar}">${m.short}${m.max > 1 ? ` <b>${last.mods[m.id]}</b>` : ''}</span>`).join('');
