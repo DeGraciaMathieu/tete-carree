@@ -52,7 +52,7 @@ export function killEnemy(e, dx, dy, fell) {
   gibs(e.x, e.y, 6, e.type === 'z' ? ['#b7c49c', '#7b8a6c', '#7a1512'] : e.type === 'b' ? ['#c9b86a', '#8fd14f', '#7a4a6a'] : e.type === 'r' ? ['#c9c6bb', '#c86a2a', '#7a1512'] : e.type === 's' ? ['#9d8fa6', '#d9d4c6', '#9ed14a'] : e.type === 'a' ? ['#2b3442', '#a9b49a', '#7a1512'] : ['#c4362d', '#4a1210', '#7a1512']);
   if (e.type === 'b') world.bursts.push({ x: e.x, y: e.y, t: .08 });
   stampBlood(e.x + dx * 6, e.y + dy * 6, 9 + Math.random() * 6, .7);
-  sfx('splat', 25);
+  sfx('splat', 25); sfx('kill', 30);
   const kind = rollDrop(e.type, isVoid(e.x, e.y), rng);
   if (kind) world.pickups.push({ x: e.x, y: e.y, kind, ph: Math.random() * 6 });
 }

@@ -42,7 +42,8 @@ Champs d'une arme dans `W` : `id`, `name` (bannières, HUD « Prochaine »), `sh
 | Déblocage au score | `addScore` (`game/score.js`) → `weaponsToUnlock`, `ammoOnUnlock` (`rules/unlock.js`, `UNLOCK_REFILLS`) |
 | Caisse de munitions | section « ramassage » de `update` : `AMMO_REFILL_WEAPONS` armes tirées au sort, `+W[i].refill` |
 | Changement d'arme | `selectWeapon(i)`, `cycleWeapon(dir)` ; clavier `Digit1`–`Digit9`, molette, `E`/`Q` ; manette LB/RB ; tactile ARME ; clic sur une case (`render/hud.js`) |
-| Aspect | `GUNS` (longueur du canon) et `drawGun(id)` dans `render/sprites.js` ; sons `SFX` de `audio/sfx.js` |
+| Aspect | `GUNS` (longueur du canon), `drawGun(id)` et `drawFlash(id)` (flash de bouche par arme) dans `render/sprites.js` ; sons `SFX` de `audio/sfx.js` (trois couches, hauteur `vary()`) |
+| Ressenti du tir | `recoil(camKick, gunKick)` dans `fireWeapon` : impulsion de caméra (`cam.kx/ky`) à l'opposé de la visée et recul de l'arme (`player.recoil`), ramenés par ressort en fin d'`update` ; `muzzleFx` (étincelles, fumée) et halo `drawMuzzleHalo` (`render/scene.js`) au point `aimMuzzle()` ; douilles `casing(id)` (table `CASINGS` de `render/effects.js`, cartouche du pompe différée par `player.shellT`) ; `world.shake` réservé aux explosions, aux coups reçus et, atténué, aux armes lourdes |
 
 ## Ajouter une arme
 

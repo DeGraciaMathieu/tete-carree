@@ -55,12 +55,12 @@ export function resetWorld() {
   rng = createRng(Math.random() * 4294967296);
   buildMap();
   S = { score: 0, wave: 0, waveActive: false, breakT: FIRST_BREAK, queue: [], spawnT: 0, combo: 0, comboT: 0, bestCombo: 0, kills: 0, time: 0, boxT: BOX_FIRST, fieldT: 0, overT: 0, mods: {}, wallCount: 0, souffleUsed: false, pickT: 0, repit: 0, legendNext: false };
-  player = { x: 22 * T, y: 15 * T + 4, r: PLAYER_RADIUS, hp: PLAYER_HP, fx: 0, fy: 1, cd: 0, weapon: 0, hurtT: 0, flash: 0, walk: 0, moving: false, muzzle: 0, lastHurt: -9, dead: false, roll: null, rollCd: 0, rollReady: 0, maxHp: PLAYER_HP, rollCharges: 1, invuln: 0 };
+  player = { x: 22 * T, y: 15 * T + 4, r: PLAYER_RADIUS, hp: PLAYER_HP, fx: 0, fy: 1, cd: 0, weapon: 0, hurtT: 0, flash: 0, walk: 0, moving: false, muzzle: 0, recoil: 0, recoilV: 0, shellT: 0, lastHurt: -9, dead: false, roll: null, rollCd: 0, rollReady: 0, maxHp: PLAYER_HP, rollCharges: 1, invuln: 0 };
   world.enemies = []; world.projs = []; world.grenades = []; world.rockets = []; world.parts = []; world.tracers = []; world.pops = []; world.booms = []; world.pickups = []; world.pending = []; world.bursts = []; world.fires = []; world.fallers = []; world.globs = []; world.puddles = [];
   blocks = new Map();
   unlocked = W.map(w => w.unlock === 0);
   ammo = W.map(w => w.unlock === 0 ? Infinity : 0);
-  cam = { x: player.x, y: player.y }; world.shake = 0; world.fieldDirty = true;
+  cam = { x: player.x, y: player.y, kx: 0, ky: 0, kvx: 0, kvy: 0 }; world.shake = 0; world.fieldDirty = true;
 }
 export function multiplier() { return Mods.multiplier(S.combo, S.mods, S.repit); }
 

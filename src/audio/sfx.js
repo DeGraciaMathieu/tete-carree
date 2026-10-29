@@ -34,21 +34,32 @@ export function sfx(name, gap = 0) {
   lastSfx[name] = now;
   SFX[name]();
 }
+// Hauteur tirée à ±6 % à chaque tir, pour casser la répétition
+const vary = () => .94 + Math.random() * .12;
+// À l'Uzi, la hauteur monte pendant une rafale et retombe dès qu'on relâche
+let uziHeat = 0, uziLast = 0;
+// Les tirs ont trois couches : claquement (aigu), corps (grave, le poids), mécanique (culasse, pompe, écho)
 const SFX = {
-  pistol() { nz(.09, 2200, .8, .4); tn(230, 70, .07, .12); },
-  uzi() { nz(.05, 2700, .9, .26); tn(280, 90, .04, .06); },
-  rifle() { nz(.08, 2000, .8, .36); tn(200, 60, .06, .1); },
-  shotgun() { nz(.24, 900, .6, .75, 'lowpass'); tn(150, 40, .16, .25); },
-  rail() { tn(2200, 120, .4, .14, 'sawtooth'); nz(.25, 4200, 2, .2, 'highpass'); },
+  pistol() { const p = vary(); nz(.09, 2200 * p, .8, .4); tn(230 * p, 70, .07, .12); tn(120 * p, 40, .1, .3, 'sine'); nz(.03, 1500 * p, 3, .07, 'bandpass', .12); },
+  uzi() {
+    const now = performance.now();
+    uziHeat = now - uziLast < 150 ? Math.min(1, uziHeat + .04) : 0; uziLast = now;
+    const p = vary() * (1 + uziHeat * .2);
+    nz(.05, 2700 * p, .9, .26); tn(280 * p, 90, .04, .06); tn(95 * p, 40, .05, .16, 'sine');
+  },
+  rifle() { const p = vary(); nz(.08, 2000 * p, .8, .36); tn(200 * p, 60, .06, .1); tn(100 * p, 35, .09, .28, 'sine'); nz(.12, 1400 * p, .7, .08, 'bandpass', .07); },
+  shotgun() { const p = vary(); nz(.24, 900 * p, .6, .75, 'lowpass'); tn(150 * p, 40, .16, .25); tn(68 * p, 26, .26, .5, 'sine'); nz(.05, 1800, 2, .18, 'bandpass', .28); nz(.06, 1100, 2, .22, 'bandpass', .38); },
+  rail() { const p = vary(); tn(2200 * p, 120, .4, .14, 'sawtooth'); nz(.25, 4200 * p, 2, .2, 'highpass'); tn(58, 24, .5, .5, 'sine'); nz(.6, 420, .5, .14, 'lowpass', .05); },
   boom() { nz(.9, 520, .5, 1, 'lowpass'); tn(95, 25, .6, .4, 'sine'); },
   thunk() { tn(170, 80, .09, .25, 'triangle'); nz(.07, 700, 1, .2); },
-  hit() { nz(.04, 600, 1.2, .25); },
+  hit() { nz(.04, 600 * vary(), 1.2, .25); },
+  kill() { tn(130 * vary(), 38, .14, .4, 'sine'); nz(.06, 260, 1, .2, 'lowpass'); },
   splat() { nz(.14, 380, .9, .4); tn(120, 60, .1, .1, 'triangle'); },
   pickup() { tn(520, 1040, .1, .12); tn(780, 1560, .12, .09, 'square', .08); },
   hurt() { tn(260, 80, .2, .2, 'sawtooth'); },
   unlock() { [1, 1.25, 1.5, 2].forEach((m, k) => tn(440 * m, 440 * m, .12, .1, 'square', k * .09)); },
   click() { tn(1100, 800, .03, .06); },
-  launch() { nz(.35, 1300, .7, .3); tn(300, 120, .3, .06, 'sawtooth'); },
+  launch() { const p = vary(); nz(.35, 1300 * p, .7, .3); tn(300 * p, 120, .3, .06, 'sawtooth'); tn(80 * p, 30, .3, .35, 'sine'); },
   fire() { nz(.25, 800, .6, .2, 'lowpass'); tn(320, 120, .2, .05, 'sawtooth'); },
   groan() { tn(100 + Math.random() * 40, 60, .7, .05, 'sawtooth'); },
   wave() { tn(520, 880, .32, .07, 'square'); tn(880, 520, .32, .07, 'square', .32); nz(.18, 120, 1, .25, 'lowpass'); },

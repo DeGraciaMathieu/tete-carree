@@ -12,7 +12,7 @@ import { pad } from '../input/gamepad.js';
 import { keys, mouseFire } from '../input/keyboard.js';
 import { aim } from '../input/touch.js';
 import { VH, VW, zoom } from '../render/canvas.js';
-import { addPart, dust, gibs, pop, sparks } from '../render/effects.js';
+import { addPart, casing, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood } from '../render/floor.js';
 import { banner } from '../render/hud.js';
 import { blastRadius, boxPeriod, fragShards, hpRate, repitBonus, speedMul, waveBreak } from '../rules/modifiers.js';
@@ -69,6 +69,8 @@ export function update(dt) {
     else if (rate < 0) player.hp = Math.max(Math.min(1, player.hp), player.hp + rate * dt); // Vampire ne prend jamais le dernier PV
   }
   player.flash -= dt; player.hurtT -= dt; player.muzzle -= dt; player.invuln -= dt;
+  // la cartouche du pompe sort au réarmement
+  if (player.shellT > 0 && (player.shellT -= dt) <= 0) casing('shotgun');
   if (playing && !player.dead && frenzy() && Math.random() < dt * 14) addPart({ t: 'spark', x: player.x + rnd(10), y: player.y + rnd(4), z: 8 + Math.random() * 22, vx: rnd(20), vy: rnd(20), vz: 50, life: .35, size: 1.8, color: '#f2c230' });
   if (player.dead && playing) { S.overT -= dt; if (S.overT <= 0 && !world.demo) gameOver(); } // la démo repart (loop/frame.js)
 
@@ -286,6 +288,7 @@ export function update(dt) {
     if (p.t === 'smoke') { p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; p.size += dt * 10; continue; }
     if (p.t === 'fire') { p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; p.vx *= .92; p.vy *= .92; continue; }
     p.vz -= 520 * dt; p.z += p.vz * dt; p.x += p.vx * dt; p.y += p.vy * dt;
+    if (p.vr) p.rot += p.vr * dt;
     if (p.z <= 0) {
       p.z = 0;
       if (isVoid(p.x, p.y)) { p.life = 0; continue; }
@@ -296,7 +299,7 @@ export function update(dt) {
         if (p.bounces > 2 || p.vz > -50) {
           if (p.t === 'gib') { fctx.fillStyle = p.color; fctx.fillRect(p.x - p.size / 2, p.y - p.size / 2, p.size, p.size * .7); }
           p.life = 0;
-        } else { p.vz = -p.vz * .35; p.vx *= .5; p.vy *= .5; }
+        } else { p.vz = -p.vz * .35; p.vx *= .5; p.vy *= .5; if (p.vr) p.vr *= .5; }
       } else p.life = 0;
     }
   }
@@ -314,4 +317,9 @@ export function update(dt) {
   cam.x = MW * T < hw * 2 ? MW * T / 2 : clamp(cam.x, hw - 20, MW * T - hw + 20);
   cam.y = MH * T < hh * 2 ? MH * T / 2 : clamp(cam.y, hh - 60, MH * T - hh + 20);
   world.shake *= Math.pow(.004, dt);
+  // ressorts du recul : la caméra et l'arme reviennent au repos
+  cam.kvx += (-260 * cam.kx - 18 * cam.kvx) * dt; cam.kvy += (-260 * cam.ky - 18 * cam.kvy) * dt;
+  cam.kx += cam.kvx * dt; cam.ky += cam.kvy * dt;
+  player.recoilV += (-500 * player.recoil - 30 * player.recoilV) * dt;
+  player.recoil = Math.max(0, player.recoil + player.recoilV * dt);
 }

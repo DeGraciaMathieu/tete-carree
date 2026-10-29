@@ -3,10 +3,10 @@ import { sfx } from '../audio/sfx.js';
 import { BARREL_DAMAGE, BARREL_HP, BARREL_RADIUS, EMPTY_SWAP_CD, FRAG_DAMAGE, FRAG_KNOCK, FRAG_RANGE, GRENADE_FUSE, GRENADE_SPEED, GROSBARIL_RADIUS_MUL, MH, MW, PLACE_FAIL_CD, ROCKET_LIFE, ROCKET_SPEED, SHOTS, T, TURRET_CD, TURRET_DAMAGE, TURRET_EVERY, TURRET_FIRST_CD, TURRET_IDLE_CD, TURRET_KNOCK, TURRET_RANGE, TURRET_WALL_HP, W, WALL_HP } from '../config.js';
 import { explosion, hurtEnemy } from './combat.js';
 import { rumble } from '../input/gamepad.js';
-import { casing, dust, gibs, sparks } from '../render/effects.js';
+import { casing, dust, gibs, muzzleFx, sparks } from '../render/effects.js';
 import { GUNS } from '../render/sprites.js';
 import { clearShot, doorSet, frontTile, map, moveCircle, shotTile } from '../state/arena.js';
-import { S, ammo, blocks, fireMul, jitter, mod, player, rng, unlocked, world } from '../state/world.js';
+import { S, ammo, blocks, cam, fireMul, jitter, mod, player, rng, unlocked, world } from '../state/world.js';
 import { shotDamageMul } from '../rules/modifiers.js';
 import { clamp } from '../util.js';
 
@@ -90,6 +90,10 @@ export function explodeBarrel(b) {
   blocks.delete(b.i); world.fieldDirty = true;
   explosion(b.tx * T + T / 2, b.ty * T + T / 2, BARREL_RADIUS * Math.pow(GROSBARIL_RADIUS_MUL, mod('grosbaril')), BARREL_DAMAGE, true);
 }
+// Recul ressenti : la caméra part à l'opposé de la visée (y écrasé par la vue 3/4), l'arme recule vers le héros
+function recoil(camKick, gunKick) {
+  cam.kvx -= player.fx * camKick; cam.kvy -= player.fy * camKick * .55; player.recoilV += gunKick;
+}
 export function fireWeapon() {
   const wi = player.weapon, w = W[wi];
   if (ammo[wi] <= 0) { sfx('click'); player.weapon = 0; player.cd = EMPTY_SWAP_CD; return; }
@@ -98,16 +102,16 @@ export function fireWeapon() {
   switch (w.id) {
     case 'pistol':
       shoot(ang + jitter(SHOTS.pistol.spread), SHOTS.pistol.speed, SHOTS.pistol.damage, 1 + mod('perce'), SHOTS.pistol.knock, { t: .07, w: 1.6, c: '255,236,170' }, mod('ricochet'));
-      player.muzzle = .05; world.shake = Math.min(16, world.shake + .8); sfx('pistol'); casing(); rumble(0, .14, 35); break;
+      player.muzzle = .05; recoil(80, 135); muzzleFx(3, 1); sfx('pistol'); casing('pistol'); rumble(0, .14, 35); break;
     case 'uzi':
       shoot(ang + jitter(SHOTS.uzi.spread), SHOTS.uzi.speed, SHOTS.uzi.damage, 1 + mod('perce'), SHOTS.uzi.knock, { t: .05, w: 1.3, c: '255,226,150' }, mod('ricochet'));
-      player.muzzle = .04; world.shake = Math.min(16, world.shake + .5); sfx('uzi'); casing(); rumble(0, .12, 30); break;
+      player.muzzle = .04; recoil(45, 90); muzzleFx(2, Math.random() < .3 ? 1 : 0); sfx('uzi'); casing('uzi'); rumble(0, .12, 30); break;
     case 'rifle':
       shoot(ang + jitter(SHOTS.rifle.spread), SHOTS.rifle.speed, SHOTS.rifle.damage, 1 + mod('perce'), SHOTS.rifle.knock, { t: .06, w: 1.5, c: '255,232,160' }, mod('ricochet'));
-      player.muzzle = .05; world.shake = Math.min(16, world.shake + .9); sfx('rifle'); casing(); rumble(0, .16, 40); break;
+      player.muzzle = .05; recoil(90, 135); muzzleFx(3, 1); sfx('rifle'); casing('rifle'); rumble(0, .16, 40); break;
     case 'shotgun':
       for (let k = 0; k < SHOTS.shotgun.pellets; k++) shoot(ang + jitter(SHOTS.shotgun.spread), SHOTS.shotgun.speed + rng() * SHOTS.shotgun.speedRand, SHOTS.shotgun.damage, 1, SHOTS.shotgun.knock * (1 + mod('calibre')), { t: .08, w: 1.2, c: '255,214,140' }, mod('ricochet'));
-      player.muzzle = .08; world.shake = Math.min(16, world.shake + 5); sfx('shotgun'); rumble(.35, .25, 90);
+      player.muzzle = .08; world.shake = Math.min(16, world.shake + 1.5); recoil(260, 270); muzzleFx(7, 3, '#ffc070'); sfx('shotgun'); player.shellT = .3; rumble(.35, .25, 90);
       moveCircle(player, -player.fx * 4, -player.fy * 4); break;
     case 'wall': ok = placeBlock('wall'); if (!ok) sfx('click'); break;
     case 'barrel': ok = placeBlock('barrel'); if (!ok) sfx('click'); break;
@@ -116,10 +120,10 @@ export function fireWeapon() {
       sfx('toss'); break;
     case 'rocket':
       world.rockets.push({ x: player.x + player.fx * 16, y: player.y + player.fy * 16, vx: player.fx * ROCKET_SPEED, vy: player.fy * ROCKET_SPEED, life: ROCKET_LIFE });
-      player.muzzle = .06; world.shake = Math.min(16, world.shake + 3); sfx('launch'); rumble(.25, .2, 90); break;
+      player.muzzle = .06; world.shake = Math.min(16, world.shake + 1); recoil(200, 225); muzzleFx(4, 4, '#ffc070'); sfx('launch'); rumble(.25, .2, 90); break;
     case 'rail':
       shoot(ang, SHOTS.rail.speed, SHOTS.rail.damage, Infinity, SHOTS.rail.knock, { t: .35, w: 4, c: '120,230,255' });
-      player.muzzle = .1; world.shake = Math.min(16, world.shake + 7); sfx('rail'); rumble(.45, .35, 120); break;
+      player.muzzle = .1; world.shake = Math.min(16, world.shake + 2.5); recoil(340, 310); muzzleFx(6, 2, '#c8f6ff'); sfx('rail'); casing('rail'); rumble(.45, .35, 120); break;
   }
   if (ok && ammo[wi] !== Infinity) ammo[wi]--;
   player.cd = ok ? w.cd * fireMul() : PLACE_FAIL_CD;

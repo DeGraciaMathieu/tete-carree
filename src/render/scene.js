@@ -2,10 +2,29 @@
 import { LOW_HP, MH, MW, T, W } from '../config.js';
 import { ctx, cv, dpr, outlined, zoom } from './canvas.js';
 import { floorC } from './floor.js';
-import { drawAcidGround, drawArmored, drawBloater, drawChar, drawGlobs, drawPlayerState, drawRunner, drawSpitter } from './sprites.js';
+import { aimMuzzle, drawAcidGround, drawArmored, drawBloater, drawChar, drawGlobs, drawPlayerState, drawRunner, drawSpitter } from './sprites.js';
 import { doorSet, frontTile, map, passable, tileAt } from '../state/arena.js';
 import { S, blocks, cam, mod, player, world } from '../state/world.js';
 import { rnd } from '../util.js';
+
+// Halo de bouche : un dégradé pré-rendu par teinte, posé en mode « lighter » (aucune allocation par image)
+function haloSprite(rgb) {
+  const c = document.createElement('canvas'); c.width = c.height = 128;
+  const g = c.getContext('2d'), gr = g.createRadialGradient(64, 64, 0, 64, 64, 64);
+  gr.addColorStop(0, `rgba(${rgb},.9)`); gr.addColorStop(.3, `rgba(${rgb},.4)`); gr.addColorStop(1, `rgba(${rgb},0)`);
+  g.fillStyle = gr; g.fillRect(0, 0, 128, 128);
+  return c;
+}
+const HALO_WARM = haloSprite('255,214,140'), HALO_RAIL = haloSprite('140,232,255');
+const HALO_R = { pistol: 26, uzi: 20, rifle: 28, shotgun: 46, rocket: 38, rail: 60 };
+function drawMuzzleHalo() {
+  const id = W[player.weapon].id, R = HALO_R[id];
+  if (player.dead || player.muzzle <= 0 || !R) return;
+  const m = aimMuzzle(), r = R * (.85 + Math.random() * .3);
+  ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = Math.min(1, player.muzzle * 20);
+  ctx.drawImage(id === 'rail' ? HALO_RAIL : HALO_WARM, m.x - r, m.y - m.h - r, r * 2, r * 2);
+  ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+}
 
 function drawMarkers() {
   const t = S.time, pulse = .5 + .5 * Math.sin(t * 6);
@@ -177,7 +196,7 @@ export function render() {
   ctx.fillStyle = '#1a1c1d'; ctx.fillRect(0, 0, cv.width, cv.height);
   const s = zoom * dpr;
   const sx = world.shake > .3 ? rnd(world.shake) : 0, sy = world.shake > .3 ? rnd(world.shake) : 0;
-  const ox = cv.width / 2 - (cam.x + sx) * s, oy = cv.height / 2 - (cam.y + sy) * s;
+  const ox = cv.width / 2 - (cam.x + cam.kx + sx) * s, oy = cv.height / 2 - (cam.y + cam.ky + sy) * s;
   ctx.setTransform(s, 0, 0, s, ox, oy);
   ctx.imageSmoothingEnabled = true;
   ctx.drawImage(floorC, 0, 0);
@@ -243,6 +262,7 @@ export function render() {
     }
   }
 
+  drawMuzzleHalo();
   // boules de feu
   for (const p of world.projs) {
     const g = ctx.createRadialGradient(p.x, p.y - 14, 1, p.x, p.y - 14, 10);
@@ -257,6 +277,10 @@ export function render() {
     } else if (p.t === 'fire') {
       const k = Math.max(0, p.life / p.max);
       ctx.fillStyle = `rgba(255,${120 + k * 120 | 0},${40 + k * 60 | 0},${k})`; ctx.beginPath(); ctx.arc(p.x, p.y - p.z, p.size * k + 1, 0, 7); ctx.fill();
+    } else if (p.t === 'casing') {
+      const hx = Math.cos(p.rot) * p.len / 2, hy = Math.sin(p.rot) * p.len / 2;
+      ctx.strokeStyle = p.color; ctx.lineWidth = p.size; ctx.lineCap = 'butt';
+      ctx.beginPath(); ctx.moveTo(p.x - hx, p.y - p.z - hy); ctx.lineTo(p.x + hx, p.y - p.z + hy); ctx.stroke();
     } else {
       ctx.fillStyle = p.color; ctx.fillRect(p.x - p.size / 2, p.y - p.z - p.size / 2, p.size, p.size);
     }

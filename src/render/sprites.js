@@ -377,6 +377,28 @@ function drawPlayerBody() {
 
 /* Joueur : survivant en veste bleue, gilet tactique, sac à dos et bandana rouge */
 export const GUNS = { pistol: 8, uzi: 12, rifle: 17, shotgun: 18, wall: 0, barrel: 0, grenade: 4, rocket: 16, rail: 18 };
+// Bout du canon du joueur dans le monde : y au sol, h hauteur au-dessus du sol (objet réutilisé, sans allocation)
+export const muzzleAt = { x: 0, y: 0, h: 16 };
+export function aimMuzzle() {
+  const reach = (GUNS[W[player.weapon].id] || 8) + 3 - player.recoil;
+  muzzleAt.x = player.x + player.fx * (10 + reach);
+  muzzleAt.y = player.y + player.fy * (5 + reach * .5);
+  return muzzleAt;
+}
+// Flash de bouche propre à chaque arme, dans le repère du canon (x vers l'avant)
+function drawFlash(id, tip) {
+  const x = tip + 2, j = Math.random();
+  if (id === 'rail') {
+    ctx.strokeStyle = '#9be8ff'; ctx.lineWidth = 1.6; ctx.beginPath(); ctx.arc(x + 3, 0, 3 + j * 4, 0, 7); ctx.stroke();
+    ctx.fillStyle = '#e6fbff'; ctx.beginPath(); ctx.arc(x + 1, 0, 2.5, 0, 7); ctx.fill();
+    return;
+  }
+  const len = id === 'shotgun' ? 13 : id === 'rifle' ? 11 : id === 'uzi' ? 6 : 8, w = id === 'shotgun' ? 4.5 : 2.2;
+  ctx.fillStyle = '#fff3c4';
+  ctx.beginPath(); ctx.moveTo(x, -w); ctx.lineTo(x + len * (.7 + j * .5), 0); ctx.lineTo(x, w); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + len * .45, -w * 1.7); ctx.lineTo(x + 2, 0); ctx.lineTo(x + len * .45, w * 1.7); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#ffd36a'; ctx.beginPath(); ctx.arc(x, 0, id === 'shotgun' ? 3 : 2, 0, 7); ctx.fill();
+}
 function drawGun(id, C) {
   const R = (c, x, y, w, h) => { ctx.fillStyle = C(c); ctx.fillRect(x, y, w, h); };
   switch (id) {
@@ -410,16 +432,14 @@ function drawPlayer(e) {
 
   const weapon = W[e.weapon].id, tip = GUNS[weapon];
   const arms = () => {
-    const hx = fx * 10, hy = -16 + U + fy * 5;
+    // le recul ramène l'arme et les mains vers le héros
+    const hx = fx * (10 - e.recoil), hy = -16 + U + fy * (5 - e.recoil * .5);
     const px = -fy, py = fx * .5;
     const k = Math.hypot(fx, fy * .5), a = Math.atan2(fy * .5, fx);
     if (tip) {
       ctx.save(); ctx.translate(hx, hy); ctx.rotate(a); ctx.scale(k, 1);
       drawGun(weapon, C);
-      if (e.muzzle > 0 && tip >= 8) {
-        ctx.fillStyle = '#fff3c4'; ctx.beginPath(); ctx.arc(tip + 3, 0, 3 + Math.random() * 3, 0, 7); ctx.fill();
-        ctx.fillStyle = '#ffd36a'; ctx.beginPath(); ctx.arc(tip + 2, 0, 2, 0, 7); ctx.fill();
-      }
+      if (e.muzzle > 0 && tip >= 8) drawFlash(weapon, tip);
       ctx.restore();
     }
     const shoulders = [[px * 6, -20 + U + py * 2], [-px * 6, -20 + U - py * 2]];
