@@ -71,6 +71,7 @@ export function openPick() {
   world.state = 'pick'; releaseFire();
   pickTimers.forEach(clearTimeout); pickTimers = []; pickLocked = false;
   $('pickWave').textContent = `Vague ${S.wave} terminée`;
+  $('pickHint').textContent = all ? 'Clique sur une carte ou appuie sur 1, 2 ou 3 pour les prendre toutes.' : 'Clique sur une carte ou appuie sur 1, 2 ou 3.';
   $('pickTitle').textContent = all ? `Tu gagnes ces ${pickChoices.length > 1 ? pickChoices.length + ' cartes' : 'cette carte'}` : 'Choisis une carte';
   const box = $('cards'); box.innerHTML = ''; box.classList.remove('weapons');
   pickChoices.forEach((m, i) => {
@@ -106,6 +107,7 @@ function openWeaponPick() {
   weaponChoices = W.map((w, i) => i).filter(i => unlocked[i]); pickLocked = false;
   $('pickWave').textContent = 'Pacte scellé : tu ne pourras plus en changer';
   $('pickTitle').textContent = 'Choisis ton arme';
+  $('pickHint').textContent = `Clique sur une arme ou appuie sur 1 à ${weaponChoices.length}.`;
   const box = $('cards'); box.innerHTML = ''; box.classList.add('weapons');
   weaponChoices.forEach((wi, k) => {
     const slot = document.createElement('div');
