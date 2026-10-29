@@ -12,6 +12,7 @@
   --r-r:#5aa9e6;
   --r-l:#f2c230;
   --r-p:#e0483d;
+  --r-m:#a66bff;
   --display:'Black Ops One', Impact, 'Arial Black', sans-serif;
   --mono:'Share Tech Mono', ui-monospace, 'SFMono-Regular', Menlo, monospace;
   color-scheme:dark;
@@ -91,6 +92,7 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .r-r{--rc:var(--r-r)}
 .r-l{--rc:var(--r-l)}
 .r-p{--rc:var(--r-p)}
+.r-m{--rc:var(--r-m)}
 @media (max-width:720px){ #mods{display:none} }
 .pmods{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 18px}
 .pmods .none{font-size:12px;color:var(--muted)}
@@ -103,7 +105,7 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .picktitle h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,6vw,40px);margin:2px 0 0;text-wrap:balance}
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,220px));gap:18px;justify-content:center}
 /* Carte à jouer : papier clair, cadre à la couleur de la rareté, niveau dans les coins ; distribuée face cachée */
-.r-c{--rd:#5d645c} .r-r{--rd:#2c6ea3} .r-l{--rd:#8a6a00} .r-p{--rd:var(--r-p)}
+.r-c{--rd:#5d645c} .r-r{--rd:#2c6ea3} .r-l{--rd:#8a6a00} .r-p{--rd:var(--r-p)} .r-m{--rd:var(--r-m)}
 .mslot{position:relative;perspective:900px;animation:cardin .32s ease-out backwards;transition:transform .3s ease-in,opacity .3s}
 .mslot.away{transform:translateY(-120%) rotate(-8deg);opacity:0}
 .mslot.chosen{transform:scale(1.06)}
@@ -114,6 +116,7 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .mcard::before{content:'';position:absolute;inset:6px;border:2px solid var(--rc);border-radius:5px;pointer-events:none}
 .mcard.r-l{background:linear-gradient(160deg,#fff4cf,#ecd58a)}
 .mcard.r-p{background:#2a1513;color:#f6dcd6}
+.mcard.r-m{background:linear-gradient(160deg,#2b1840,#140c1f);color:#ece0ff}
 .mcard:hover,.mcard:focus-visible,.mcard.focus{transform:translateY(-6px)}
 .mcard.focus{box-shadow:0 0 0 3px var(--rc),0 8px 0 -2px rgba(0,0,0,.45)}
 .mix{position:absolute;font-family:var(--display);font-size:22px;line-height:1;color:var(--rd)}
@@ -126,8 +129,8 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .mbody{display:flex;flex-direction:column;gap:4px;font-size:12.5px;line-height:1.4}
 .plus{color:#2f8f3c}
 .minus{color:#c43a2f}
-.mcard.r-p .plus{color:#8fe39a}
-.mcard.r-p .minus{color:#ff8f84}
+.mcard.r-p .plus,.mcard.r-m .plus{color:#8fe39a}
+.mcard.r-p .minus,.mcard.r-m .minus{color:#ff8f84}
 .mpips{display:flex;gap:4px;margin-top:auto;margin-bottom:8px}
 .mpips i{width:12px;height:5px;border:1px solid currentColor;opacity:.55}
 .mpips i.on{background:currentColor;opacity:1}

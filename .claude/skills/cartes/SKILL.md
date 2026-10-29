@@ -18,11 +18,12 @@ large, elles se couchent.
 | Champ | Rôle |
 | --- | --- |
 | `id` | clé dans `S.mods` (`{ id: niveau }`) ; lue par `mod('<id>')` (`state/world.js`) ou `modLevel(mods, '<id>')` (règles) |
-| `rar` | `c` Commune, `r` Rare, `l` Légendaire, `p` Pacte ; poids de tirage `RAR[rar].w` |
+| `rar` | `c` Commune, `r` Rare, `l` Légendaire, `p` Pacte, `m` Pacte majeur ; poids de tirage `RAR[rar].w` |
+| `excl` | pacte majeur : ids des cartes qu'il rend inutiles ; exclusion symétrique dans `rollCards` |
 | `max` | niveau maximal ; une carte au max n'est plus proposée |
 | `name`, `short` | titre de la carte ; libellé court du HUD (`#mods`) et de l'écran de pause |
 | `desc(n)` | texte d'une carte ordinaire au niveau `n` qu'elle donnerait |
-| `plus(n)`, `minus(n)` | pour un pacte (`rar: 'p'`) : avantage et contrepartie, à la place de `desc` |
+| `plus(n)`, `minus(n)` | pour un pacte (`isPact(m)` : `rar` `p` ou `m`) : avantage et contrepartie, à la place de `desc` |
 
 | Carte (`id`) | Où l'effet s'applique |
 | --- | --- |
@@ -55,6 +56,12 @@ large, elles se couchent.
 | `brulee` (pacte) | `rollCooldown` (`update`, `updateRoll`, jauge de `render/sprites.js`) ; `rollHpCost` dans `tryRoll` |
 | `diable` (pacte) | `choosePick` : vie max −`DIABLE_HP`, `S.legendNext` ; `rollCards(mods, rng, legend)` tire une Légendaire en premier et retire le pacte quand il n'en reste plus |
 | `verre` (pacte, vie) | `choosePick` : vie max −`VERRE_HP` |
+
+## Pactes majeurs
+
+Spécification : `docs/prd/pactes-majeurs.md`. `rollCards(mods, rng, legend, { wave, demo })` ne propose un
+pacte majeur qu'à partir de la fin de la vague `MAJOR_FROM_WAVE`, jamais en démo, et plus aucun dès
+qu'un pacte majeur est possédé (un seul par partie).
 
 ## Combo, multiplicateur, score
 

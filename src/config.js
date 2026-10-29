@@ -26,7 +26,7 @@ export const FRENZY_MULTIPLIER = 5; // Frénésie s'active à partir de ×5
 export const SOIF_MULTIPLIER = 3;   // Soif de sang soigne à partir de ×3
 
 /* ---------- Cartes de modificateurs ---------- */
-export const RAR = { c: { name: 'Commune', w: 55 }, r: { name: 'Rare', w: 28 }, l: { name: 'Légendaire', w: 9 }, p: { name: 'Pacte', w: 12 } };
+export const RAR = { c: { name: 'Commune', w: 55 }, r: { name: 'Rare', w: 28 }, l: { name: 'Légendaire', w: 9 }, p: { name: 'Pacte', w: 12 }, m: { name: 'Pacte majeur', w: 3 } };
 const pct = x => Math.round(x * 100) + ' %';
 const num = x => String(x).replace('.', ',');
 export const MODS = [
@@ -97,6 +97,8 @@ export const RACINE_DAMAGE_MUL = 2, RACINE_SPEED_MUL = .7;
 export const DIABLE_HP = 25;
 export const VERRE_DAMAGE_MUL = 1.5, VERRE_HP = 40;
 export const CARDS_PER_PICK = 3;
+// Pactes majeurs (rareté `m`) : proposés à partir de la fin de cette vague, un seul par partie.
+export const MAJOR_FROM_WAVE = 5;
 
 /* ---------- Joueur ---------- */
 export const PLAYER_HP = 100, PLAYER_RADIUS = 9;

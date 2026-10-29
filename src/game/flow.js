@@ -6,7 +6,7 @@ import { releaseFire } from '../input/keyboard.js';
 import { cardIcon } from '../render/cardIcons.js';
 import { paintFloor } from '../render/floor.js';
 import { banner, buildSlots, renderRuns, resetHud } from '../render/hud.js';
-import { rollCards } from '../rules/cards.js';
+import { isPact, rollCards } from '../rules/cards.js';
 import { waveBreak } from '../rules/modifiers.js';
 import { rankRun } from '../rules/records.js';
 import { S, comboTime, mod, player, resetWorld, rng, rollMax, world } from '../state/world.js';
@@ -41,7 +41,7 @@ let pickChoices = [], pickTimers = [], pickLocked = false;
 const DEAL_FIRST_MS = 350, DEAL_STEP_MS = 300, DEAL_LEGEND_MS = 250, DEAL_OUT_MS = 320;
 function cardHtml(m, i) {
   const n = mod(m.id) + 1, corner = m.max > 1 ? n : '★';
-  const body = m.rar === 'p'
+  const body = isPact(m)
     ? `<span class="plus">+ ${m.plus(n)}</span><span class="minus">− ${m.minus(n)}</span>`
     : `<span>${m.desc(n)}</span>`;
   const pips = Array.from({ length: m.max }, (_, k) => `<i class="${k < n ? 'on' : ''}${k === n - 1 ? ' new' : ''}"></i>`).join('');
@@ -63,7 +63,7 @@ function dealCards(slots) {
   });
 }
 export function openPick() {
-  pickChoices = rollCards(S.mods, rng, S.legendNext);
+  pickChoices = rollCards(S.mods, rng, S.legendNext, { wave: S.wave });
   if (!pickChoices.length) return;
   S.legendNext = false;
   world.state = 'pick'; releaseFire();
@@ -92,7 +92,7 @@ export function choosePick(i) {
   applyCard(m);
   for (let k = 0; k < slots.length; k++) slots[k].classList.add(k === i ? 'chosen' : 'away');
   sfx('unlock');
-  const sub = m.rar === 'p' ? 'Pacte scellé' : mod(m.id) > 1 ? `Niveau ${mod(m.id)}` : 'Carte obtenue';
+  const sub = isPact(m) ? 'Pacte scellé' : mod(m.id) > 1 ? `Niveau ${mod(m.id)}` : 'Carte obtenue';
   pickTimers.push(setTimeout(() => { $('pickScreen').hidden = true; world.state = 'play'; banner(m.name, sub); }, DEAL_OUT_MS));
 }
 // Effets d'une carte prise : niveau, et effet immédiat de certaines cartes.
@@ -109,7 +109,7 @@ function applyCard(m) {
 }
 // Démo : une des cartes qu'on aurait proposées, prise au hasard, sans écran de choix.
 export function demoPick() {
-  const cards = rollCards(S.mods, rng, S.legendNext);
+  const cards = rollCards(S.mods, rng, S.legendNext, { wave: S.wave, demo: true });
   S.legendNext = false;
   if (cards.length) applyCard(cards[rng() * cards.length | 0]);
 }

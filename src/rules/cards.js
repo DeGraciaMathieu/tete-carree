@@ -1,11 +1,22 @@
 // Tirage des trois cartes proposées entre deux vagues, pondéré par rareté.
-import { MODS, RAR, CARDS_PER_PICK } from '../config.js';
+import { MODS, RAR, CARDS_PER_PICK, MAJOR_FROM_WAVE } from '../config.js';
 import { modLevel } from './modifiers.js';
+
+// Pacte (avantage et contrepartie) : ordinaire ou majeur.
+export const isPact = m => m.rar === 'p' || m.rar === 'm';
+const hasMajor = mods => MODS.some(m => m.rar === 'm' && modLevel(mods, m.id));
+// Exclusions symétriques : une carte n'est pas proposée si une carte possédée l'exclut, ou si elle en exclut une.
+const excluded = (m, mods) => (m.excl && m.excl.some(id => modLevel(mods, id))) || MODS.some(o => o.excl && modLevel(mods, o.id) && o.excl.includes(m.id));
+// Pacte majeur : à partir de la fin de la vague MAJOR_FROM_WAVE, un seul par partie, jamais en démo.
+const majorOk = (mods, wave, demo) => !demo && wave >= MAJOR_FROM_WAVE && !hasMajor(mods);
 
 // Jusqu'à CARDS_PER_PICK cartes distinctes parmi celles qui n'ont pas atteint leur niveau max.
 // legend : Marché du diable a promis une Légendaire, tirée en premier. Le pacte n'est proposé que s'il en reste.
-export function rollCards(mods, rng, legend = false) {
-  const left = MODS.filter(m => modLevel(mods, m.id) < m.max), legends = left.filter(m => m.rar === 'l');
+// ctx : wave (vague qui vient de se terminer), demo.
+export function rollCards(mods, rng, legend = false, ctx = {}) {
+  const major = majorOk(mods, ctx.wave || 0, ctx.demo);
+  const left = MODS.filter(m => modLevel(mods, m.id) < m.max && !excluded(m, mods) && (m.rar !== 'm' || major));
+  const legends = left.filter(m => m.rar === 'l');
   const pool = legends.length ? left : left.filter(m => m.id !== 'diable'), out = [];
   if (legend && legends.length) { const m = legends[rng() * legends.length | 0]; out.push(m); pool.splice(pool.indexOf(m), 1); }
   while (out.length < CARDS_PER_PICK && pool.length) {

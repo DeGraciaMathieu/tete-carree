@@ -150,6 +150,19 @@ Ouvrir `index.html` par double-clic ne fonctionne plus (ESM natif non servi en `
 - La phrase de présentation du jeu a quitté l'accueil (absente de la maquette retenue) ; le bestiaire
   reste dans son volet.
 
+## Pactes majeurs
+
+Spécification : `docs/prd/pactes-majeurs.md`.
+
+- Rareté à part, `m` (« Pacte majeur », poids 3), plutôt que douze pactes de plus au poids 12, qui
+  auraient pesé près d'un tiers du tirage.
+- Proposés à partir de la fin de la vague `MAJOR_FROM_WAVE` (5), **un seul par partie** : pas de cumul
+  entre pactes majeurs, donc pas de liste de couples interdits entre eux ni de multiplicateurs de
+  points qui se composent. Choix « pour le moment », plus simple.
+- Exclusions symétriques (champ `excl`) : une carte que le pacte majeur rend inutile n'est plus
+  proposée, et le pacte n'est pas proposé si on la possède déjà.
+- La démo ne tire jamais de pacte majeur.
+
 ## Rules extracted
 
 | Rule | Module | Test | Notes |
