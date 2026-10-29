@@ -26,10 +26,16 @@ export function waveBreak(mods) { return WAVE_BREAK * (modLevel(mods, 'repit') ?
 export function boxPeriod(mods, r) { return (BOX_PERIOD_MIN + r * BOX_PERIOD_RAND) * (modLevel(mods, 'ravito') ? RAVITO_PERIOD_MUL : 1); }
 // Points de vie gagnés (> 0) ou perdus (< 0) par seconde hors des coups : régénération après REGEN_DELAY s sans
 // dégât, aucune sous Sans armure ; Vampire : perte quand le combo est retombé.
+// Plus de soins : aucune régénération.
 export function hpRate(mods, combo, sinceHurt) {
+  if (modLevel(mods, 'sanssoin')) return 0;
   if (modLevel(mods, 'vampire') && !combo) return -VAMPIRE_DRAIN;
   return !modLevel(mods, 'sansarmure') && sinceHurt > REGEN_DELAY ? REGEN_RATE : 0;
 }
+// Nature d'une caisse (r : tirage entre 0 et 1, hpChance : part des caisses de soin). Plus de soins : que des munitions.
+export function boxKind(mods, r, hpChance) { return r < hpChance && !modLevel(mods, 'sanssoin') ? 'hp' : 'ammo'; }
+// Vie après une vague terminée : Plus de soins la rend en entier.
+export function waveEndHp(mods, hp, maxHp) { return modLevel(mods, 'sanssoin') ? maxHp : hp; }
 export function rollMax(mods) { return 1 + modLevel(mods, 'double'); }
 // Terre brûlée : recharge de la roulade, et PV qu'elle coûte sans jamais prendre le dernier.
 export function rollCooldown(mods) { return ROLL.CD * (modLevel(mods, 'brulee') ? BRULEE_ROLL_CD_MUL : 1); }

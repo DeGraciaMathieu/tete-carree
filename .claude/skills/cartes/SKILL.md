@@ -56,6 +56,7 @@ large, elles se couchent.
 | `brulee` (pacte) | `rollCooldown` (`update`, `updateRoll`, jauge de `render/sprites.js`) ; `rollHpCost` dans `tryRoll` |
 | `diable` (pacte) | `choosePick` : vie max −`DIABLE_HP`, `S.legendNext` ; `rollCards(mods, rng, legend)` tire une Légendaire en premier et retire le pacte quand il n'en reste plus |
 | `verre` (pacte, vie) | `choosePick` : vie max −`VERRE_HP` |
+| `sanssoin` (pacte majeur) | `hpRate` (aucune régénération) ; `boxKind` (caisses larguées dans `update`, `rollDrop`) ; `waveEndHp` en fin de vague dans `update` |
 
 ## Pactes majeurs
 

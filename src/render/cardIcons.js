@@ -35,6 +35,7 @@ const PATHS = {
   racine: '<path d="M12 2v12"/><path d="M8 6h8"/><path d="M12 14l-6 6M12 14l6 6M12 14v8M9 17l-5 1M15 17l5 1"/>',
   diable: '<path d="M12 22V6"/><path d="M6 3v4a6 6 0 0 0 12 0V3"/><path d="M12 2v2"/>',
   verre: '<path d="M7 3h10l-1 7a4 4 0 0 1-8 0z"/><path d="M12 14v6M8 21h8"/><path d="M11 4l1 3-2 2"/>',
+  sanssoin: '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z"/><path d="M3 21L21 3"/>',
 };
 export function cardIcon(id) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${PATHS[id] || ''}</svg>`;

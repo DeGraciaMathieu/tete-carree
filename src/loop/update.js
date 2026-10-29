@@ -15,7 +15,7 @@ import { VH, VW, zoom } from '../render/canvas.js';
 import { addPart, casing, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood } from '../render/floor.js';
 import { banner } from '../render/hud.js';
-import { blastRadius, boxPeriod, fragShards, hpRate, repitBonus, speedMul, waveBreak } from '../rules/modifiers.js';
+import { blastRadius, boxKind, boxPeriod, fragShards, hpRate, repitBonus, speedMul, waveBreak, waveEndHp } from '../rules/modifiers.js';
 import * as Waves from '../rules/waves.js';
 import { computeField, dist, isVoid, los, moveCircle, nextStep, openT, passable, shotTile, unstick, walkLine } from '../state/arena.js';
 import { S, ammo, blocks, cam, frenzy, jitter, mod, player, rng, rollCooldown, rollMax, unlocked, world } from '../state/world.js';
@@ -91,6 +91,8 @@ export function update(dt) {
         S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = PICK_DELAY; S.repit = repitBonus(S.mods, S.repit);
         const bonus = WAVE_BONUS * S.wave; addScore(bonus);
         banner('Vague terminée', 'Bonus +', 'end', bonus);
+        const hp = waveEndHp(S.mods, player.hp, player.maxHp);
+        if (hp > player.hp && !player.dead) { player.hp = hp; pop(player.x, player.y - 46, 'Vie restaurée', '#62c46e'); }
       }
     }
     // combo
@@ -104,7 +106,7 @@ export function update(dt) {
           const tx = 2 + rng() * (MW - 4) | 0, ty = 2 + rng() * (MH - 4) | 0;
           const x = tx * T + T / 2, y = ty * T + T / 2;
           if (!openT(tx, ty) || Math.hypot(x - player.x, y - player.y) < BOX_MIN_DIST || dist[ty * MW + tx] > 1e8) continue;
-          world.pickups.push({ x, y, kind: rng() < BOX_HP_CHANCE ? 'hp' : 'ammo', ph: Math.random() * 6 });
+          world.pickups.push({ x, y, kind: boxKind(S.mods, rng(), BOX_HP_CHANCE), ph: Math.random() * 6 });
           if (mod('ravito')) for (let k = 0; k < RAVITO_ZOMBIES; k++) spawnEnemy('z');
           break;
         }

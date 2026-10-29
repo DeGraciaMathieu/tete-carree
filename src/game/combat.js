@@ -53,7 +53,7 @@ export function killEnemy(e, dx, dy, fell) {
   if (e.type === 'b') world.bursts.push({ x: e.x, y: e.y, t: .08 });
   stampBlood(e.x + dx * 6, e.y + dy * 6, 9 + Math.random() * 6, .7);
   sfx('splat', 25); sfx('kill', 30);
-  const kind = rollDrop(e.type, isVoid(e.x, e.y), rng);
+  const kind = rollDrop(e.type, isVoid(e.x, e.y), rng, S.mods);
   if (kind) world.pickups.push({ x: e.x, y: e.y, kind, ph: Math.random() * 6 });
 }
 

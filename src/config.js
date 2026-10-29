@@ -65,6 +65,8 @@ export const MODS = [
   { id: 'racine', rar: 'p', max: 1, name: 'Enraciné', short: 'Enraciné', plus: () => `Tes tirs font ${num(RACINE_DAMAGE_MUL)} fois plus de dégâts quand tu es immobile`, minus: () => `Déplacement −${pct(1 - RACINE_SPEED_MUL)}` },
   { id: 'diable', rar: 'p', max: 1, name: 'Marché du diable', short: 'Marché du diable', plus: () => `Une carte Légendaire garantie au prochain choix`, minus: () => `−${DIABLE_HP} PV max, définitivement` },
   { id: 'verre', rar: 'p', max: 1, name: 'Canon de verre', short: 'Canon de verre', plus: () => `Tes tirs font ${num(VERRE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `−${VERRE_HP} PV max` },
+  // Pactes majeurs : un seul par partie, `excl` liste les cartes qu'ils rendent inutiles (docs/prd/pactes-majeurs.md).
+  { id: 'sanssoin', rar: 'm', max: 1, name: 'Plus de soins', short: 'Plus de soins', excl: ['vampire', 'soif', 'sansarmure'], plus: () => `Chaque vague terminée te rend toute ta vie`, minus: () => `Plus aucune régénération ni caisse de soin` },
 ];
 
 /* ---------- Effets des cartes ---------- */

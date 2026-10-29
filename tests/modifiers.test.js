@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, repitBonus, waveBreak,
-  boxPeriod, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
+  boxPeriod, boxKind, waveEndHp, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
 } from '../src/rules/modifiers.js';
 
 test('le multiplicateur gagne un cran tous les 5 kills enchaînés', () => {
@@ -143,4 +143,15 @@ test('Poudre noire : explosions du joueur 50 % plus larges, et deux fois plus do
   assert.equal(ownBlastRadius({ poudre: 1 }, 80), 120);
   assert.equal(ownBlastSelfMul({}), 1);
   assert.equal(ownBlastSelfMul({ poudre: 1 }), 2);
+});
+
+test('Plus de soins : aucune régénération, même longtemps après le dernier coup', () => {
+  assert.equal(hpRate({ sanssoin: 1 }, 0, 60), 0);
+});
+
+test('Plus de soins : plus aucune caisse de soin, chaque vague terminée rend toute la vie', () => {
+  assert.equal(boxKind({}, 0, .35), 'hp');
+  assert.equal(boxKind({ sanssoin: 1 }, 0, .35), 'ammo');
+  assert.equal(waveEndHp({ sanssoin: 1 }, 12, 100), 100);
+  assert.equal(waveEndHp({}, 12, 100), 12);
 });
