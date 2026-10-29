@@ -1,5 +1,6 @@
 // Clavier et souris ; pause automatique sur perte de focus ou onglet masqué.
 import { choosePick, pause, resume, startGame } from '../game/flow.js';
+import { openPanel } from './buttons.js';
 import { tryRoll } from '../game/player.js';
 import { cycleWeapon, selectWeapon } from '../game/weapons.js';
 import { cv } from '../render/canvas.js';
@@ -13,7 +14,12 @@ const PREVENT = new Set(['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'Spa
 addEventListener('keydown', e => {
   if (PREVENT.has(e.code)) e.preventDefault();
   keys[e.code] = true;
-  if (world.state === 'title' && (e.code === 'Enter' || e.code === 'Space')) { startGame(); return; }
+  if (world.state === 'title') {
+    if (e.code === 'Escape') openPanel('');
+    // un bouton qui a le focus traite lui-même Entrée et Espace
+    else if ((e.code === 'Enter' || e.code === 'Space') && !(e.target instanceof HTMLButtonElement)) startGame();
+    return;
+  }
   if (world.state === 'over' && e.code === 'Enter') { startGame(); return; }
   if (world.state === 'pick') { const m = /^(Digit|Numpad)([1-3])$/.exec(e.code); if (m) choosePick(+m[2] - 1); return; }
   if (e.code === 'KeyP' || e.code === 'Escape') { if (world.state === 'play') pause(); else if (world.state === 'pause') resume(); return; }

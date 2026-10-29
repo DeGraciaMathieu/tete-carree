@@ -129,6 +129,27 @@ Ouvrir `index.html` par double-clic ne fonctionne plus (ESM natif non servi en `
 - Le rendu alloue ~0,2 Mo/s (liste de tri, fermetures de `outlined`, couleurs de particules) : laissé
   tel quel, le gain serait invisible.
 
+## Écran titre : partie de démo
+
+- Derrière le titre, une vraie partie tourne (`world.demo`, `game/demo.js`) : même simulation, même
+  rendu, avec un pilote automatique à la place des entrées. `world.state` reste `'title'` : les entrées,
+  la pause automatique et le HUD l'ignorent ; `update` la traite comme une partie en cours.
+- Choix validés : démo muette (`silence` dans `audio/sfx.js`, sans toucher au réglage Son), sans
+  vibration ni bannière, cartes prises au hasard parmi celles proposées, jamais de record. Le joueur
+  peut mourir : la démo repart à sa mort ou à la fin de la vague `DEMO_WAVES`.
+- Le pilote n'utilise que les armes à feu (pas de construction ni d'explosif, qui le blesseraient).
+
+## Écran titre : dernière partie et meilleures parties
+
+- Par-dessus la démo, l'accueil montre la dernière partie (score, vague, kills, meilleur combo, cartes
+  prises) et les `TOP_RUNS` meilleures ; l'écran de fin montre aussi ce classement, partie jouée
+  surlignée. Les deux panneaux s'affichent vides avant la première partie.
+- Stockés sous une nouvelle clé `STORAGE_RUNS` (`tete-carree-runs`, JSON `{ last, top }`) ;
+  `STORAGE_BEST` reste écrit tel quel. Un joueur qui n'a que l'ancien record le voit entrer seul au
+  classement, sans vague, combo ni date.
+- La phrase de présentation du jeu a quitté l'accueil (absente de la maquette retenue) ; le bestiaire
+  reste dans son volet.
+
 ## Rules extracted
 
 | Rule | Module | Test | Notes |

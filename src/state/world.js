@@ -1,6 +1,6 @@
 // État de la partie en cours (session, joueur, collections d'entités), création d'une nouvelle partie
 // et accès aux modificateurs et au combo de la session.
-import { BOX_FIRST, FIRST_BREAK, PLAYER_HP, PLAYER_RADIUS, STORAGE_BEST, T, W } from '../config.js';
+import { BOX_FIRST, FIRST_BREAK, PLAYER_HP, PLAYER_RADIUS, STORAGE_BEST, STORAGE_RUNS, T, W } from '../config.js';
 import * as Mods from '../rules/modifiers.js';
 import { createRng } from '../rules/rng.js';
 import * as Waves from '../rules/waves.js';
@@ -39,11 +39,16 @@ export const world = {
   shake: undefined,
   fieldDirty: true,
   best: 0,
+  runs: { last: null, top: [] }, // dernière partie et meilleures parties { score, wave, kills, combo, mods, t }
+  demo: false, // partie de démo derrière l'écran titre (game/demo.js)
 };
 
 export let S, player, blocks, unlocked, ammo, cam;
 
 try { world.best = +localStorage.getItem(STORAGE_BEST) || 0; } catch (e) {}
+try { const r = JSON.parse(localStorage.getItem(STORAGE_RUNS)); if (r && Array.isArray(r.top)) world.runs = r; } catch (e) {}
+// Joueur d'avant le classement : son record y entre seul, sans le détail de la partie.
+if (!world.runs.top.length && world.best) world.runs.top = [{ score: world.best }];
 
 // Remet la partie à zéro : graine, arène, session, joueur, entités.
 export function resetWorld() {

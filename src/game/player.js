@@ -30,9 +30,10 @@ function rollClears(dx, dy) {
   }
   return over && !circleTouchesVoid(o, 4);
 }
-export function tryRoll() {
-  if (world.state !== 'play' || player.dead || player.roll || player.rollCharges <= 0) return;
-  let [mx, my] = moveInput(), l = Math.hypot(mx, my);
+// dirX, dirY : direction imposée (pilote de la démo) ; sinon celle de la marche
+export function tryRoll(dirX = 0, dirY = 0) {
+  if ((world.state !== 'play' && !world.demo) || player.dead || player.roll || player.rollCharges <= 0) return;
+  let [mx, my] = dirX || dirY ? [dirX, dirY] : moveInput(), l = Math.hypot(mx, my);
   if (l < .2) { mx = player.fx; my = player.fy; l = Math.hypot(mx, my) || 1; }
   const dx = mx / l, dy = my / l;
   const sgn = Math.abs(dx) > .2 ? Math.sign(dx) : (player.fx >= 0 ? 1 : -1);

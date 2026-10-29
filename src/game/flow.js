@@ -1,13 +1,14 @@
 // Enchaînement des écrans : titre, partie, pause, choix de carte, fin de partie.
-import { audio, sfx } from '../audio/sfx.js';
-import { CONSTITUTION_HP, DIABLE_HP, RAR, STORAGE_BEST, VERRE_HP } from '../config.js';
+import { audio, sfx, silence } from '../audio/sfx.js';
+import { CONSTITUTION_HP, DIABLE_HP, RAR, STORAGE_BEST, STORAGE_RUNS, TOP_RUNS, VERRE_HP } from '../config.js';
 import { pad } from '../input/gamepad.js';
 import { releaseFire } from '../input/keyboard.js';
 import { cardIcon } from '../render/cardIcons.js';
 import { paintFloor } from '../render/floor.js';
-import { banner, buildSlots, resetHud } from '../render/hud.js';
+import { banner, buildSlots, renderRuns, resetHud } from '../render/hud.js';
 import { rollCards } from '../rules/cards.js';
 import { waveBreak } from '../rules/modifiers.js';
+import { rankRun } from '../rules/records.js';
 import { S, comboTime, mod, player, resetWorld, rng, rollMax, world } from '../state/world.js';
 import { $, clamp, fmt } from '../util.js';
 
@@ -17,12 +18,10 @@ export function newGame() {
   resetHud();
   buildSlots();
 }
-export function showBest() {
-  const t = world.best ? `Record : ${fmt(world.best)} points` : '';
-  $('bestTitle').textContent = t; $('bestOver').textContent = t;
-}
+// Partie de démo derrière l'écran titre : pilotée par game/demo.js, muette, sans record, relancée quand elle s'achève.
+export function startDemo() { newGame(); world.demo = true; world.state = 'title'; silence(true); }
 export function startGame() {
-  audio(); newGame(); world.state = 'play';
+  audio(); newGame(); world.demo = false; silence(false); world.state = 'play';
   $('titleScreen').hidden = true; $('overScreen').hidden = true; $('pauseScreen').hidden = true; $('hud').hidden = false;
 }
 export function pause() { world.state = 'pause'; $('pauseScreen').hidden = false; }
@@ -32,7 +31,10 @@ export function gameOver() {
   if (S.score > world.best) { world.best = S.score; try { localStorage.setItem(STORAGE_BEST, String(world.best)); } catch (e) {} }
   $('ovScore').textContent = fmt(S.score); $('ovWave').textContent = S.wave; $('ovCombo').textContent = S.bestCombo;
   $('overLine').textContent = `Tombé pendant la vague ${S.wave}, après ${S.kills} éliminations.`;
-  showBest(); $('overScreen').hidden = false;
+  const run = { score: S.score, wave: S.wave, kills: S.kills, combo: S.bestCombo, mods: { ...S.mods }, t: Date.now() };
+  world.runs = { last: run, top: rankRun(world.runs.top, run, TOP_RUNS) };
+  try { localStorage.setItem(STORAGE_RUNS, JSON.stringify(world.runs)); } catch (e) {}
+  renderRuns(); $('overScreen').hidden = false;
 }
 let pickChoices = [], pickTimers = [], pickLocked = false;
 // Distribution : les cartes arrivent face cachée puis se retournent une à une, la Légendaire en dernier.
@@ -87,6 +89,14 @@ export function choosePick(i) {
   // une carte encore face cachée ne se choisit pas
   if (!m || world.state !== 'pick' || pickLocked || slots[i].firstChild.classList.contains('down')) return;
   pickLocked = true;
+  applyCard(m);
+  for (let k = 0; k < slots.length; k++) slots[k].classList.add(k === i ? 'chosen' : 'away');
+  sfx('unlock');
+  const sub = m.rar === 'p' ? 'Pacte scellé' : mod(m.id) > 1 ? `Niveau ${mod(m.id)}` : 'Carte obtenue';
+  pickTimers.push(setTimeout(() => { $('pickScreen').hidden = true; world.state = 'play'; banner(m.name, sub); }, DEAL_OUT_MS));
+}
+// Effets d'une carte prise : niveau, et effet immédiat de certaines cartes.
+function applyCard(m) {
   S.mods[m.id] = mod(m.id) + 1;
   if (m.id === 'constitution') { player.maxHp += CONSTITUTION_HP; player.hp = Math.min(player.maxHp, player.hp + CONSTITUTION_HP); }
   if (m.id === 'double') player.rollCharges = Math.min(rollMax(), player.rollCharges + 1);
@@ -96,10 +106,12 @@ export function choosePick(i) {
   // Marché du diable, Canon de verre : la vie max baisse, la vie suit sans tomber sous 1
   const lost = m.id === 'diable' ? DIABLE_HP : m.id === 'verre' ? VERRE_HP : 0;
   if (lost) { player.maxHp -= lost; player.hp = Math.max(1, Math.min(player.hp, player.maxHp)); }
-  for (let k = 0; k < slots.length; k++) slots[k].classList.add(k === i ? 'chosen' : 'away');
-  sfx('unlock');
-  const sub = m.rar === 'p' ? 'Pacte scellé' : mod(m.id) > 1 ? `Niveau ${mod(m.id)}` : 'Carte obtenue';
-  pickTimers.push(setTimeout(() => { $('pickScreen').hidden = true; world.state = 'play'; banner(m.name, sub); }, DEAL_OUT_MS));
+}
+// Démo : une des cartes qu'on aurait proposées, prise au hasard, sans écran de choix.
+export function demoPick() {
+  const cards = rollCards(S.mods, rng, S.legendNext);
+  S.legendNext = false;
+  if (cards.length) applyCard(cards[rng() * cards.length | 0]);
 }
 export let pickFocus = 0;
 export function focusCard(i) {

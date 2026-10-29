@@ -22,7 +22,7 @@ function toast(msg) {
   clearTimeout(toastT); toastT = setTimeout(() => el.classList.remove('on'), 2200);
 }
 export function rumble(strong, weak, ms) {
-  if (!pad.on) return;
+  if (!pad.on || world.demo) return;
   const now = performance.now(); if (now < rumbleT) return; rumbleT = now + 40;
   try {
     const gp = navigator.getGamepads()[pad.idx], va = gp && gp.vibrationActuator;

@@ -3,7 +3,8 @@ import { sfx } from '../audio/sfx.js';
 import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, ACID_TICK_RESET, AIMANT_RANGE, AIMANT_SPEED, AMMO_NO_WEAPON_BONUS, AMMO_REFILL_WEAPONS, ARMOR_SHOVE, BARBELES_DAMAGE, BLOATER_FUSE, BLOATER_FUSE_SPEED, BLOATER_TRIGGER_REACH, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_MIN_DIST, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_HIT_REACH, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MELEE_REACH, MH, MW, PICKUP_RADIUS, PICK_DELAY, PLAYER_SPEED, RAVITO_ZOMBIES, ROCKET_DAMAGE, ROCKET_HIT_REACH, ROCKET_RADIUS, SPITTER_BACKOFF, SPITTER_HOLD, SPITTER_HOLD_SPEED, SPITTER_MIN_RANGE, SPITTER_SIGHT, SPITTER_TOO_CLOSE, SPITTER_WINDUP, T, W, WAVE_BONUS } from '../config.js';
 import { explosion, hurtEnemy, hurtPlayer, killEnemy, toxicBurst } from '../game/combat.js';
 import { spawnEnemy, spit, startWave, updateGlobs } from '../game/enemies.js';
-import { gameOver, openPick } from '../game/flow.js';
+import { DEMO_BREAK, ctl, demoControl } from '../game/demo.js';
+import { demoPick, gameOver, openPick } from '../game/flow.js';
 import { moveInput, updateFires, updateRoll } from '../game/player.js';
 import { addScore } from '../game/score.js';
 import { damageBlock, explodeBarrel, fireWeapon, fragments, updateTurret } from '../game/weapons.js';
@@ -22,7 +23,7 @@ import { clamp, rnd } from '../util.js';
 
 export function update(dt) {
   S.time += dt;
-  const playing = world.state === 'play';
+  const playing = world.state === 'play' || world.demo;
 
   // flaques d'acide
   player.inAcid = false;
@@ -45,11 +46,12 @@ export function update(dt) {
     let ay = (keys.ArrowDown ? 1 : 0) - (keys.ArrowUp ? 1 : 0);
     if (aim.id !== null && Math.hypot(aim.x, aim.y) > .3) { ax = aim.x; ay = aim.y; }
     if (pad.on && (pad.ax || pad.ay)) { ax = pad.ax; ay = pad.ay; }
+    if (world.demo) { demoControl(); mx = ctl.mx; my = ctl.my; ax = ctl.ax; ay = ctl.ay; }
     const al = Math.hypot(ax, ay), aiming = al > .3;
     if (aiming) { player.fx = ax / al; player.fy = ay / al; }
     let l = Math.hypot(mx, my);
     player.moving = l > .2;
-    player.strafe = aiming || !!(keys.ShiftLeft || keys.ShiftRight);
+    player.strafe = aiming || (!world.demo && !!(keys.ShiftLeft || keys.ShiftRight));
     if (player.moving) {
       if (!player.strafe) {
         const a = Math.round(Math.atan2(my, mx) / (Math.PI / 4)) * (Math.PI / 4);
@@ -61,19 +63,19 @@ export function update(dt) {
       player.walk += dt * 14;
     }
     player.cd -= dt;
-    if ((aiming || mouseFire || pad.fire) && player.cd <= 0) fireWeapon();
+    if ((aiming || (!world.demo && (mouseFire || pad.fire))) && player.cd <= 0) fireWeapon();
     const rate = hpRate(S.mods, S.combo, S.time - player.lastHurt);
     if (rate > 0) player.hp = Math.min(player.maxHp, player.hp + rate * dt);
     else if (rate < 0) player.hp = Math.max(Math.min(1, player.hp), player.hp + rate * dt); // Vampire ne prend jamais le dernier PV
   }
   player.flash -= dt; player.hurtT -= dt; player.muzzle -= dt; player.invuln -= dt;
   if (playing && !player.dead && frenzy() && Math.random() < dt * 14) addPart({ t: 'spark', x: player.x + rnd(10), y: player.y + rnd(4), z: 8 + Math.random() * 22, vx: rnd(20), vy: rnd(20), vz: 50, life: .35, size: 1.8, color: '#f2c230' });
-  if (player.dead && playing) { S.overT -= dt; if (S.overT <= 0) gameOver(); }
+  if (player.dead && playing) { S.overT -= dt; if (S.overT <= 0 && !world.demo) gameOver(); } // la démo repart (loop/frame.js)
 
   if (playing) {
     // vagues
     if (!S.waveActive) {
-      if (S.pickT > 0) { S.pickT -= dt; if (S.pickT <= 0) openPick(); }
+      if (S.pickT > 0) { S.pickT -= dt; if (S.pickT <= 0) { if (world.demo) demoPick(); else openPick(); } }
       else { S.breakT -= dt; if (S.breakT <= 0) startWave(); }
     }
     else {
@@ -84,7 +86,7 @@ export function update(dt) {
         S.spawnT = Waves.spawnGap(S.wave);
       }
       if (!S.queue.length && world.enemies.length === 0) {
-        S.waveActive = false; S.breakT = waveBreak(S.mods); S.pickT = PICK_DELAY; S.repit = repitBonus(S.mods, S.repit);
+        S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = PICK_DELAY; S.repit = repitBonus(S.mods, S.repit);
         const bonus = WAVE_BONUS * S.wave; addScore(bonus);
         banner('Vague terminée', 'Bonus +', 'end', bonus);
       }

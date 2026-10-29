@@ -10,5 +10,13 @@ $('againBtn').addEventListener('click', startGame);
 $('resumeBtn').addEventListener('click', resume);
 $('restartBtn').addEventListener('click', startGame);
 $('pauseBtn').addEventListener('click', () => { if (world.state === 'play') pause(); });
-$('fpsBtn').addEventListener('click', () => setFps(!fpsOn));
-$('olBtn').addEventListener('click', () => setOutline(!outlineOn));
+for (const b of document.querySelectorAll('.optFps')) b.addEventListener('click', () => setFps(!fpsOn));
+for (const b of document.querySelectorAll('.optOl')) b.addEventListener('click', () => setOutline(!outlineOn));
+
+// Écran titre : les liens du bas ouvrent un volet (commandes, bestiaire, arsenal, options) à la place du titre.
+export function openPanel(id) {
+  for (const p of document.querySelectorAll('.tpanel')) p.hidden = p.id !== id;
+  $('titleMain').hidden = !!id;
+}
+for (const b of document.querySelectorAll('[data-panel]')) b.addEventListener('click', () => openPanel(b.dataset.panel));
+for (const b of document.querySelectorAll('.tclose')) b.addEventListener('click', () => openPanel(''));

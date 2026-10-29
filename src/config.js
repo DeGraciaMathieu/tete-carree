@@ -243,5 +243,8 @@ export const PAD_MOVE_DEADZONE = .22, PAD_AIM_DEADZONE = .25;
 export const STORAGE_BEST = 'tete-carree-best';
 export const STORAGE_FPS = 'tete-carree-fps';
 export const STORAGE_OUTLINE = 'tete-carree-outline';
+// Dernière partie et meilleures parties, affichées sur l'accueil et l'écran de fin.
+export const STORAGE_RUNS = 'tete-carree-runs';
+export const TOP_RUNS = 5;
 // Version publiée : compteur masqué tant que le joueur ne l'a pas activé lui-même.
 export const SHOW_FPS_BY_DEFAULT = false;

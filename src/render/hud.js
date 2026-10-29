@@ -1,4 +1,5 @@
-// HUD DOM : bannières, santé, score, combo, emplacements d'armes, cartes actives.
+// HUD DOM : bannières, santé, score, combo, emplacements d'armes, cartes actives ; écrans d'accueil et de fin
+// (arsenal, dernière partie, meilleures parties).
 import { sfx } from '../audio/sfx.js';
 import { LOW_HP, MODS, W } from '../config.js';
 import { selectWeapon } from '../game/weapons.js';
@@ -9,6 +10,7 @@ const bannerEl = $('banner');
 let bannerCount = 0;
 // kind : 'start' (début de vague), 'end' (fin de vague), 'info' (le reste) ; count : nombre qui défile dans la ligne du bas
 export function banner(m, s = '', kind = 'info', count = 0) {
+  if (world.demo) return;
   bannerEl.querySelector('.m').textContent = m;
   const sub = bannerEl.querySelector('.s');
   sub.textContent = s;
@@ -54,6 +56,7 @@ function renderMods() {
 // Portrait : la tête carrée du héros, 13 × 13 pixels, encaisse avec lui. Quatre états : intact, blessé (sous 60 %
 // de la vie max : pansement, moue), critique (sous LOW_HP : yeux plissés, sang), mort (yeux en croix). Blanchit le temps
 // du flash d'un coup ; cligne des yeux de temps en temps. Redessiné seulement quand son apparence change.
+// La même tête, en grand, sert de mascotte à l'écran titre.
 const FACE_HURT = .6, faceCtx = $('face').getContext('2d');
 function renderFace() {
   const mood = player.dead || player.hp <= 0 ? 'dead' : player.hp < LOW_HP ? 'crit' : player.hp < player.maxHp * FACE_HURT ? 'hurt' : 'ok';
@@ -61,7 +64,11 @@ function renderFace() {
   const sig = mood + (flash ? 'f' : '') + (blink ? 'b' : '');
   if (hudCache.face === sig) return;
   hudCache.face = sig;
-  const c = faceCtx, P = (col, x, y, w = 1, h = 1) => { c.fillStyle = flash ? '#ffffff' : col; c.fillRect(x, y, w, h); };
+  drawFace(faceCtx, mood, flash, blink);
+}
+// mood : 'ok', 'hurt', 'crit' ou 'dead' ; dessin sur un canvas de 13 × 13
+export function drawFace(c, mood, flash = false, blink = false) {
+  const P = (col, x, y, w = 1, h = 1) => { c.fillStyle = flash ? '#ffffff' : col; c.fillRect(x, y, w, h); };
   c.clearRect(0, 0, 13, 13);
   P('#1b1b1b', 1, 1, 11, 12); P('#e2b48a', 2, 2, 9, 10); P('#4f3322', 2, 1, 9, 2);
   P('#c23a2e', 2, 3, 9, 1); P('#c23a2e', 0, 3, 2, 1); P('#c23a2e', 0, 4, 1, 1); // bandeau
@@ -91,6 +98,29 @@ function renderHp() {
   const tick = (25 / player.maxHp * 100).toFixed(2) + '%'; // un repère tous les 25 PV
   if (hudCache.hpTick !== tick) { hudCache.hpTick = tick; $('hpTicks').style.setProperty('--tick', tick); }
   setText('hpNum', String(Math.ceil(Math.max(0, player.hp))));
+}
+// Volet Arsenal de l'écran titre : les armes dans l'ordre de leurs touches, avec leur score de déblocage.
+export function buildArsenal() {
+  $('arsenalList').innerHTML = W.map(w => `<li><span class="n">${w.name}</span><span class="u">${w.unlock ? fmt(w.unlock) + ' points' : 'de départ'}</span></li>`).join('');
+}
+const NONE = `<p class="none">Aucune partie pour l'instant</p>`;
+function runDate(t) {
+  if (!t) return '—';
+  const d = new Date(t);
+  return d.toDateString() === new Date().toDateString() ? "aujourd'hui" : d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+}
+// Dernière partie (accueil) et meilleures parties (accueil et fin), la dernière surlignée dans le classement.
+export function renderRuns() {
+  const { last, top } = world.runs;
+  const rows = top.map((r, i) => `<tr${last && r.t === last.t ? ' class="me"' : ''}><td class="rank">${i + 1}</td><td>${fmt(r.score)}</td>`
+    + `<td>${r.wave ?? '—'}</td><td>${r.combo ?? '—'}</td><td>${runDate(r.t)}</td></tr>`).join('');
+  const board = top.length ? `<table class="runs"><thead><tr><th></th><th>Score</th><th>Vague</th><th>Combo</th><th>Date</th></tr></thead><tbody>${rows}</tbody></table>` : NONE;
+  $('runsTitle').innerHTML = board; $('runsOver').innerHTML = board;
+  if (!last) { $('lastRun').innerHTML = NONE; return; }
+  const chips = MODS.filter(m => last.mods[m.id]).map(m => `<span class="mchip r-${m.rar}">${m.short}${m.max > 1 ? ` <b>${last.mods[m.id]}</b>` : ''}</span>`).join('');
+  $('lastRun').innerHTML = `<b class="lscore">${fmt(last.score)}</b>`
+    + `<div class="stats"><div><b>${last.wave}</b><span>Vague</span></div><div><b>${fmt(last.kills)}</b><span>Kills</span></div><div><b>${last.combo}</b><span>Combo</span></div></div>`
+    + `<h3 class="rlabel">Cartes prises</h3><div class="lmods">${chips || '<span class="none">Aucune</span>'}</div>`;
 }
 export function updateHud() {
   renderFace();

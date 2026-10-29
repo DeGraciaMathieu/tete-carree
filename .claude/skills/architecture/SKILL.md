@@ -17,7 +17,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | Module | Rôle | Dépendances clés |
 | --- | --- | --- |
 | `index.html` | écrans (titre, choix de carte, pause, fin), HUD, contrôles tactiles, textes des contrôles et du bestiaire | `./src/style.css`, `./src/main.js` |
-| `src/main.js` | point d'entrée : importe les modules d'entrée, `resize`, `setOutline`, `setFps`, `newGame`, `showBest`, lance `frame` | tout |
+| `src/main.js` | point d'entrée : importe les modules d'entrée, `resize`, `setOutline`, `setFps`, `startDemo`, `renderRuns`, `buildArsenal`, lance `frame` | tout |
 | `src/config.js` | constantes : arène (`T`, `MW`, `MH`), armes `W`, `SHOTS`, cartes `MODS`, raretés `RAR`, ennemis `ENEMY_STATS`…, vagues `WAVE_UNITS`…, stockage `STORAGE_*`, `SHOW_FPS_BY_DEFAULT` | — |
 | `src/util.js` | `$` (getElementById), `rnd` (aléa cosmétique), `clamp`, `fmt` | — |
 | `src/rules/rng.js` | `createRng(seed)` (LCG) | — |
@@ -28,22 +28,24 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/rules/cards.js` | `rollCards(mods, rng)` | config, modifiers |
 | `src/rules/waves.js` | `waveQueue`, `queueCount`, `spawnBurst`, `spawnGap` | config, modifiers |
 | `src/rules/scoring.js` | `killPoints`, `soifHeal`, `rollDrop` | config, modifiers |
+| `src/rules/records.js` | `rankRun` (classement des meilleures parties) | — |
 | `src/rules/damage.js` | `resolveEnemyHit`, `playerProtected`, `secondWind` | config, modifiers |
-| `src/state/world.js` | `world` (écran, collections, `shake`, `fieldDirty`, `best`), `S` (session), `player`, `blocks`, `unlocked`, `ammo`, `cam`, `rng`, `jitter`, raccourcis `mod`/`frenzy`/`fireMul`…, `resetWorld` | config, rules, arena |
+| `src/state/world.js` | `world` (écran, collections, `shake`, `fieldDirty`, `best`, `runs`), `S` (session), `player`, `blocks`, `unlocked`, `ammo`, `cam`, `rng`, `jitter`, raccourcis `mod`/`frenzy`/`fireMul`…, `resetWorld` | config, rules, arena |
 | `src/state/arena.js` | `map`, `doors`, `doorSet`, `buildMap`, collisions (`moveCircle`, `unstick`), wrappers des règles de grille liés à l'état, `dist` + `computeField`/`nextStep`, `frontTile`, `clearShot` | rules/map, rules/pathfield |
 | `src/game/combat.js` | `hurtEnemy`, `killEnemy`, `hurtPlayer`, `shockwave`, `explosion`, `toxicBurst` | rules/damage, rules/scoring, render/effects |
 | `src/game/weapons.js` | `fireWeapon`, `selectWeapon`, `cycleWeapon`, constructions (`placeBlock`, `damageBlock`, `explodeBarrel`), `updateTurret` | combat |
 | `src/game/enemies.js` | `spawnEnemy`, `startWave`, `spit`, `updateGlobs` | rules/waves |
 | `src/game/player.js` | `moveInput`, `tryRoll`, `updateRoll`, `updateFires` (traînée de feu) | input, combat |
 | `src/game/score.js` | `addScore` (+ déblocage des armes) | rules/unlock |
-| `src/game/flow.js` | `newGame`, `startGame`, `pause`, `resume`, `gameOver`, `openPick`, `choosePick`, `focusCard`, `showBest` | rules/cards, render |
+| `src/game/flow.js` | `newGame`, `startDemo`, `startGame`, `pause`, `resume`, `gameOver`, `openPick`, `choosePick`, `demoPick`, `focusCard` ; `gameOver` enregistre la partie dans `world.runs` | rules/cards, render |
+| `src/game/demo.js` | partie de démo de l'écran titre : `demoControl` (pilote automatique, commandes dans `ctl`), `demoOver`, `DEMO_WAVES`, `DEMO_BREAK` | state, game/player, game/weapons |
 | `src/render/canvas.js` | `cv`, `ctx` (liaison vivante), `resize`, `zoom`, passe de contour `outlined` + proxy `OLP`, `setOutline` | — |
 | `src/render/floor.js` | sol peint hors écran (`floorC`, `fctx`), `paintFloor`, `stampBlood`, `stampScorch` | arena |
 | `src/render/effects.js` | particules : `addPart`, `blood`, `gibs`, `sparks`, `dust`, `pop`, `casing` | world |
 | `src/render/cardIcons.js` | `cardIcon(id)` : pictogramme SVG d'une carte de modificateur | rien |
 | `src/render/sprites.js` | `drawChar`, `drawBloater`, `drawRunner`, `drawSpitter`, `drawArmored`, `drawPlayerState`, `GUNS`… | canvas |
 | `src/render/scene.js` | `render()` : caméra, sol, tri en profondeur, entités, projectiles, effets | sprites, floor |
-| `src/render/hud.js` | `buildSlots`, `updateHud`, `resetHud`, `banner` | world |
+| `src/render/hud.js` | `buildSlots`, `updateHud`, `resetHud`, `banner`, `drawFace`, `buildArsenal`, `renderRuns` (dernière partie et meilleures parties) | world |
 | `src/render/fps.js` | `fpsOn`, `setFps`, `tickFps` | config (`SHOW_FPS_BY_DEFAULT`) |
 | `src/audio/sfx.js` | `audio()` (démarrage au premier geste), `sfx(name)`, bouton son | — |
 | `src/input/keyboard.js` | `keys`, `mouseFire`, `releaseFire`, raccourcis, pause sur `blur`/`visibilitychange` | game |

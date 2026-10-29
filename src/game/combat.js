@@ -58,7 +58,7 @@ export function killEnemy(e, dx, dy, fell) {
 }
 
 export function hurtPlayer(dmg, soft) {
-  if (player.dead || world.state !== 'play') return;
+  if (player.dead || (world.state !== 'play' && !world.demo)) return;
   if (playerProtected(player)) return;
   player.hp -= dmg; player.hurtT = .35; player.flash = .08; player.lastHurt = S.time;
   if (!soft) { world.shake = Math.min(16, world.shake + 4); S.comboT = comboAfterHit(S.mods, S.comboT); }

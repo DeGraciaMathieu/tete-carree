@@ -1,7 +1,8 @@
 // Sons synthétisés à la volée (Web Audio), démarrés au premier geste du joueur.
-import { $ } from '../util.js';
 
-let AC = null, master = null, nbuf = null, muted = false;
+let AC = null, master = null, nbuf = null, muted = false, silent = false;
+// Démo de l'écran titre : aucun son, sans toucher au réglage du joueur.
+export function silence(v) { silent = v; }
 const lastSfx = {};
 export function audio() {
   if (AC) { if (AC.state === 'suspended') AC.resume(); return; }
@@ -13,21 +14,21 @@ export function audio() {
   } catch (e) { AC = null; }
 }
 function nz(dur, f, q, vol, type = 'bandpass', delay = 0) {
-  if (!AC || muted) return;
+  if (!AC || muted || silent) return;
   const t = AC.currentTime + delay, s = AC.createBufferSource(), fl = AC.createBiquadFilter(), g = AC.createGain();
   s.buffer = nbuf; fl.type = type; fl.frequency.value = f; fl.Q.value = q;
   g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
   s.connect(fl).connect(g).connect(master); s.start(t, Math.random() * .4); s.stop(t + dur + .05);
 }
 function tn(f0, f1, dur, vol, type = 'square', delay = 0) {
-  if (!AC || muted) return;
+  if (!AC || muted || silent) return;
   const t = AC.currentTime + delay, o = AC.createOscillator(), g = AC.createGain();
   o.type = type; o.frequency.setValueAtTime(f0, t); o.frequency.exponentialRampToValueAtTime(Math.max(1, f1), t + dur);
   g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.001, t + dur);
   o.connect(g).connect(master); o.start(t); o.stop(t + dur + .05);
 }
 export function sfx(name, gap = 0) {
-  if (!AC || muted) return;
+  if (!AC || muted || silent) return;
   const now = performance.now();
   if (gap && now - (lastSfx[name] || 0) < gap) return;
   lastSfx[name] = now;
@@ -67,4 +68,7 @@ const SFX = {
   fuse() { nz(.7, 3200, 1, .2, 'highpass'); tn(420, 1500, .7, .05, 'square'); },
   gloop() { tn(70 + Math.random() * 30, 40, .9, .07, 'sawtooth'); nz(.3, 250, 2, .08); },
 };
-$('muteBtn').addEventListener('click', () => { muted = !muted; $('muteBtn').textContent = 'Son : ' + (muted ? 'coupé' : 'activé'); });
+for (const b of document.querySelectorAll('.optMute')) b.addEventListener('click', () => {
+  muted = !muted;
+  for (const o of document.querySelectorAll('.optMute')) o.textContent = 'Son : ' + (muted ? 'coupé' : 'activé');
+});

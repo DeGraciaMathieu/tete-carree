@@ -64,6 +64,7 @@ export function outlined(ent, draw) {
   draw();
 }
 export function setOutline(v) {
-  outlineOn = v; $('olBtn').textContent = 'Contours : ' + (v ? 'activés' : 'désactivés');
+  outlineOn = v;
+  for (const b of document.querySelectorAll('.optOl')) b.textContent = 'Contours : ' + (v ? 'activés' : 'désactivés');
   try { localStorage.setItem(STORAGE_OUTLINE, v ? '1' : '0'); } catch (e) {}
 }
