@@ -1,4 +1,5 @@
 // Sons synthétisés à la volée (Web Audio), démarrés au premier geste du joueur.
+import { tr } from '../i18n/index.js';
 
 let AC = null, master = null, nbuf = null, muted = false, silent = false;
 // Démo de l'écran titre : aucun son, sans toucher au réglage du joueur.
@@ -79,7 +80,6 @@ const SFX = {
   fuse() { nz(.7, 3200, 1, .2, 'highpass'); tn(420, 1500, .7, .05, 'square'); },
   gloop() { tn(70 + Math.random() * 30, 40, .9, .07, 'sawtooth'); nz(.3, 250, 2, .08); },
 };
-for (const b of document.querySelectorAll('.optMute')) b.addEventListener('click', () => {
-  muted = !muted;
-  for (const o of document.querySelectorAll('.optMute')) o.textContent = 'Son : ' + (muted ? 'coupé' : 'activé');
-});
+// Libellé des boutons Son, dans la langue courante.
+export function showMute() { for (const o of document.querySelectorAll('.optMute')) o.textContent = tr.optMute(muted); }
+for (const b of document.querySelectorAll('.optMute')) b.addEventListener('click', () => { muted = !muted; showMute(); });

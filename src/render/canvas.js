@@ -1,5 +1,6 @@
 // Canvas principal : contexte, redimensionnement, passe de contour sombre autour des silhouettes.
 import { STORAGE_OUTLINE, T, ZOOM_MAX, ZOOM_MIN } from '../config.js';
+import { tr } from '../i18n/index.js';
 import { $, clamp } from '../util.js';
 export const cv = document.getElementById('cv');
 export let ctx = cv.getContext('2d');
@@ -65,6 +66,6 @@ export function outlined(ent, draw) {
 }
 export function setOutline(v) {
   outlineOn = v;
-  for (const b of document.querySelectorAll('.optOl')) b.textContent = 'Contours : ' + (v ? 'activés' : 'désactivés');
+  for (const b of document.querySelectorAll('.optOl')) b.textContent = tr.optOutline(v);
   try { localStorage.setItem(STORAGE_OUTLINE, v ? '1' : '0'); } catch (e) {}
 }

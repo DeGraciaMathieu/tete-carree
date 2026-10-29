@@ -286,6 +286,11 @@ kbd{font:13px var(--mono);border:1px solid rgba(255,255,255,.35);border-bottom-w
 .tlink{font:14px var(--mono);color:#d4d8cf;text-shadow:0 1px 2px #000;letter-spacing:.12em;text-transform:uppercase;background:none;border:0;padding:6px 2px;cursor:pointer}
 .tlink:hover{color:var(--hazard)}
 .tlink:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
+.tflags{display:flex;gap:10px;align-items:center}
+.tflag{background:none;border:0;padding:4px 2px;cursor:pointer;line-height:0;opacity:.4;filter:grayscale(.6);transition:opacity .15s,filter .15s}
+.tflag svg{height:14px;width:auto;box-shadow:0 1px 3px #000}
+.tflag:hover,.tflag[aria-pressed=true]{opacity:1;filter:none}
+.tflag:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 
 /* Contrôles tactiles */
 #touch{display:none}

@@ -6,15 +6,15 @@ export const ZOOM_MIN = 0.72, ZOOM_MAX = 1.7;
 
 /* ---------- Armes ---------- */
 export const W = [
-  { id: 'pistol',  name: 'Pistolet',  short: 'Pistolet',  unlock: 0,     cd: .26, refill: 0 },
-  { id: 'uzi',     name: 'Uzi',       short: 'Uzi',       unlock: 1000,  cd: .07, refill: 120 },
-  { id: 'rifle',   name: 'Fusil d\'assaut', short: 'Assaut', unlock: 2000, cd: .14, refill: 60 },
-  { id: 'shotgun', name: 'Fusil à pompe', short: 'Pompe', unlock: 3500,  cd: .62, refill: 22 },
-  { id: 'wall',    name: 'Barricade', short: 'Barricade', unlock: 7000,  cd: .22, refill: 6 },
-  { id: 'barrel',  name: 'Baril',     short: 'Baril',     unlock: 11000, cd: .22, refill: 5 },
-  { id: 'grenade', name: 'Grenade',   short: 'Grenade',   unlock: 17000, cd: .55, refill: 8 },
-  { id: 'rocket',  name: 'Lance-roquettes', short: 'Roquette', unlock: 26000, cd: .85, refill: 6 },
-  { id: 'rail',    name: 'Railgun',   short: 'Railgun',   unlock: 38000, cd: 1.1, refill: 5 },
+  { id: 'pistol',  unlock: 0,     cd: .26, refill: 0 },
+  { id: 'uzi',     unlock: 1000,  cd: .07, refill: 120 },
+  { id: 'rifle',   unlock: 2000,  cd: .14, refill: 60 },
+  { id: 'shotgun', unlock: 3500,  cd: .62, refill: 22 },
+  { id: 'wall',    unlock: 7000,  cd: .22, refill: 6 },
+  { id: 'barrel',  unlock: 11000, cd: .22, refill: 5 },
+  { id: 'grenade', unlock: 17000, cd: .55, refill: 8 },
+  { id: 'rocket',  unlock: 26000, cd: .85, refill: 6 },
+  { id: 'rail',    unlock: 38000, cd: 1.1, refill: 5 },
 ];
 
 /* ---------- Combo ---------- */
@@ -26,58 +26,57 @@ export const FRENZY_MULTIPLIER = 5; // Frénésie s'active à partir de ×5
 export const SOIF_MULTIPLIER = 3;   // Soif de sang soigne à partir de ×3
 
 /* ---------- Cartes de modificateurs ---------- */
-export const RAR = { c: { name: 'Commune', w: 55 }, r: { name: 'Rare', w: 28 }, l: { name: 'Légendaire', w: 9 }, p: { name: 'Pacte', w: 12 }, m: { name: 'Pacte majeur', w: 3 } };
-const pct = x => Math.round(x * 100) + ' %';
-const num = x => String(x).replace('.', ',');
+export const RAR = { c: { w: 55 }, r: { w: 28 }, l: { w: 9 }, p: { w: 12 }, m: { w: 3 } };
+// Noms et textes des armes, raretés et cartes : src/i18n/ (fr.js, en.js), repérés par `id`.
 export const MODS = [
-  { id: 'perce', rar: 'c', max: 3, name: 'Balles perforantes', short: 'Perforantes', desc: n => `Les balles du pistolet, de l'Uzi et du fusil d'assaut traversent ${n} ennemi${n > 1 ? 's' : ''} de plus.` },
-  { id: 'ricochet', rar: 'r', max: 2, name: 'Ricochet', short: 'Ricochet', desc: n => `Balles et plombs rebondissent ${n > 1 ? n + ' fois' : 'une fois'} sur les murs.` },
-  { id: 'cadence', rar: 'c', max: 3, name: 'Gâchette nerveuse', short: 'Cadence', desc: n => `Toutes les armes tirent plus vite : +${pct(Math.pow(1.25, n) - 1)} de cadence au total.` },
-  { id: 'calibre', rar: 'c', max: 2, name: 'Gros calibre', short: 'Gros calibre', desc: n => `Le fusil à pompe repousse les ennemis ${n > 1 ? 'trois' : 'deux'} fois plus loin.` },
-  { id: 'double', rar: 'r', max: 1, name: 'Double roulade', short: 'Double roulade', desc: () => `Deux roulades d'affilée avant la recharge.` },
-  { id: 'rollboom', rar: 'r', max: 2, name: 'Roulade explosive', short: 'Roulade explosive', desc: n => n > 1 ? `L'onde de choc de la roulade est plus large et plus forte.` : `Chaque roulade libère une onde de choc qui blesse et repousse la horde.` },
-  { id: 'rollammo', rar: 'c', max: 3, name: 'Roulade tactique', short: 'Roulade tactique', desc: n => `Chaque roulade rend ${pct(ROLLAMMO_SHARE * n)} d'une caisse de munitions à l'arme en main, sans dépasser une caisse pleine.` },
-  { id: 'firetrail', rar: 'r', max: 2, name: 'Traînée de feu', short: 'Traînée de feu', desc: n => n > 1 ? `Les flammes de la roulade brûlent deux fois plus fort.` : `La roulade laisse une ligne de flammes qui brûle la horde.` },
-  { id: 'tenace', rar: 'c', max: 2, name: 'Combo tenace', short: 'Combo tenace', desc: n => `Le combo tient ${(COMBO_T + 1.4 * n).toFixed(1).replace('.', ',')} s au lieu de ${(COMBO_T + 1.4 * (n - 1)).toFixed(1).replace('.', ',')} s.` },
-  { id: 'soif', rar: 'r', max: 3, name: 'Soif de sang', short: 'Soif de sang', desc: n => `À partir de ×3, chaque kill te rend ${n} point${n > 1 ? 's' : ''} de vie.` },
-  { id: 'frenesie', rar: 'l', max: 1, name: 'Frénésie', short: 'Frénésie', desc: () => `À partir de ×5 : déplacement +25 % et cadence de tir +33 %.` },
-  { id: 'barbeles', rar: 'c', max: 3, name: 'Barbelés', short: 'Barbelés', desc: n => `Tes barricades blessent les zombies qui les frappent : ${14 * n} dégâts par coup.` },
-  { id: 'grosbaril', rar: 'c', max: 2, name: 'Gros barils', short: 'Gros barils', desc: n => `Rayon d'explosion des barils +${pct(Math.pow(1.4, n) - 1)}.` },
-  { id: 'tourelle', rar: 'l', max: 1, name: 'Tourelle', short: 'Tourelle', desc: () => `Une barricade sur trois porte une tourelle qui tire toute seule sur la horde.` },
-  { id: 'constitution', rar: 'c', max: 4, name: 'Constitution', short: 'Constitution', desc: n => `+25 points de vie max (${100 + 25 * n} au total), et soigne de 25.` },
-  { id: 'aimant', rar: 'c', max: 2, name: 'Aimant', short: 'Aimant', desc: n => `Les caisses glissent vers toi dans un rayon de ${5 * n} cases.` },
-  { id: 'souffle', rar: 'l', max: 1, name: 'Second souffle', short: 'Second souffle', desc: () => `Une fois par partie, un coup mortel te laisse à 40 % de vie et repousse la horde.` },
-  { id: 'prime', rar: 'p', max: 2, name: 'Prime de risque', short: 'Prime de risque', plus: n => `+${pct(Math.pow(PRIME_POINTS_MUL, n) - 1)} de points sur chaque kill${n > 1 ? ' au total' : ''}`, minus: n => `Les meutes de coureurs comptent ${PRIME_PACK_BONUS * n} coureurs de plus` },
-  { id: 'chair', rar: 'p', max: 2, name: 'Chair à canon', short: 'Chair à canon', plus: n => `Les Gonflés rapportent ${{ 2: 'deux', 4: 'quatre' }[Math.pow(CHAIR_POINTS_MUL, n)] || Math.pow(CHAIR_POINTS_MUL, n)} fois plus de points`, minus: n => `Leur explosion est ${pct(Math.pow(CHAIR_RADIUS_MUL, n) - 1)} plus large` },
-  { id: 'sansarmure', rar: 'p', max: 1, name: 'Sans armure', short: 'Sans armure', plus: () => `Cadence de tir doublée`, minus: () => `Plus aucune régénération de santé` },
-  { id: 'epaule', rar: 'r', max: 2, name: "Coup d'épaule", short: "Coup d'épaule", desc: n => n > 1 ? `La roulade projette les ennemis traversés encore plus loin.` : `La roulade bouscule les ennemis traversés : poussés dans une crevasse, ils y tombent.` },
-  { id: 'frag', rar: 'r', max: 2, name: 'Fragmentation', short: 'Fragmentation', desc: n => `Chaque grenade projette ${FRAG_SHARDS * n} éclats en explosant.` },
-  { id: 'artificier', rar: 'c', max: 2, name: 'Artificier', short: 'Artificier', desc: n => `Rayon d'explosion des grenades et des roquettes +${pct(Math.pow(ARTIFICIER_RADIUS_MUL, n) - 1)}.` },
-  { id: 'fievre', rar: 'p', max: 1, name: 'Fièvre', short: 'Fièvre', plus: () => `Un cran de multiplicateur tous les ${FIEVRE_KILLS_PER_MULTIPLIER} kills au lieu de ${KILLS_PER_MULTIPLIER}`, minus: () => `La fenêtre de combo est réduite de ${pct(1 - FIEVRE_COMBO_MUL)}` },
-  { id: 'quitte', rar: 'p', max: 1, name: 'Quitte ou double', short: 'Quitte ou double', plus: () => `Points ×${QUITTE_POINTS_MUL} sur chaque kill`, minus: () => `Un coup encaissé remet le combo à zéro` },
-  { id: 'poudre', rar: 'p', max: 1, name: 'Poudre noire', short: 'Poudre noire', plus: () => `Rayon d'explosion des barils, grenades et roquettes +${pct(POUDRE_RADIUS_MUL - 1)}`, minus: () => `Leurs explosions te blessent ${POUDRE_SELF_MUL === 2 ? 'deux' : POUDRE_SELF_MUL} fois plus` },
-  { id: 'portant', rar: 'p', max: 1, name: 'Bout portant', short: 'Bout portant', plus: () => `Tes tirs font ${num(PORTANT_NEAR_MUL)} fois plus de dégâts à moins de ${PORTANT_RANGE} cases`, minus: () => `Au-delà, ils n'en font plus que ${pct(PORTANT_FAR_MUL)}` },
-  { id: 'ravito', rar: 'p', max: 1, name: 'Ravitaillement', short: 'Ravitaillement', plus: () => `Les caisses de ravitaillement tombent deux fois plus souvent`, minus: () => `Chaque caisse larguée fait entrer ${RAVITO_ZOMBIES > 1 ? RAVITO_ZOMBIES + ' zombies' : 'un zombie'} dans l'arène` },
-  { id: 'repit', rar: 'p', max: 1, name: 'Sans répit', short: 'Sans répit', plus: () => `+1 cran de multiplicateur à chaque vague terminée, jusqu'à +${REPIT_MAX}`, minus: () => `Pause entre les vagues réduite de ${pct(1 - REPIT_BREAK_MUL)}` },
-  { id: 'fidele', rar: 'p', max: 1, name: 'Fidélité', short: 'Fidélité', plus: () => `Dégâts du pistolet ×${FIDELE_PISTOL_MUL}`, minus: () => `Les caisses de munitions ne rechargent plus les autres armes` },
-  { id: 'vampire', rar: 'p', max: 1, name: 'Vampire', short: 'Vampire', plus: () => `Chaque kill rend ${VAMPIRE_HEAL} PV, et Soif de sang agit dès ×1`, minus: () => `Sans combo, tu perds ${VAMPIRE_DRAIN} PV par seconde au lieu de régénérer (jamais le dernier)` },
-  { id: 'brulee', rar: 'p', max: 1, name: 'Terre brûlée', short: 'Terre brûlée', plus: () => `La roulade se recharge deux fois plus vite`, minus: () => `Chaque roulade coûte ${BRULEE_ROLL_HP} PV (jamais le dernier)` },
-  { id: 'racine', rar: 'p', max: 1, name: 'Enraciné', short: 'Enraciné', plus: () => `Tes tirs font ${num(RACINE_DAMAGE_MUL)} fois plus de dégâts quand tu es immobile`, minus: () => `Déplacement −${pct(1 - RACINE_SPEED_MUL)}` },
-  { id: 'diable', rar: 'p', max: 1, name: 'Marché du diable', short: 'Marché du diable', plus: () => `Une carte Légendaire garantie au prochain choix`, minus: () => `−${DIABLE_HP} PV max, définitivement` },
-  { id: 'verre', rar: 'p', max: 1, name: 'Canon de verre', short: 'Canon de verre', plus: () => `Tes tirs font ${num(VERRE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `−${VERRE_HP} PV max` },
+  { id: 'perce', rar: 'c', max: 3 },
+  { id: 'ricochet', rar: 'r', max: 2 },
+  { id: 'cadence', rar: 'c', max: 3 },
+  { id: 'calibre', rar: 'c', max: 2 },
+  { id: 'double', rar: 'r', max: 1 },
+  { id: 'rollboom', rar: 'r', max: 2 },
+  { id: 'rollammo', rar: 'c', max: 3 },
+  { id: 'firetrail', rar: 'r', max: 2 },
+  { id: 'tenace', rar: 'c', max: 2 },
+  { id: 'soif', rar: 'r', max: 3 },
+  { id: 'frenesie', rar: 'l', max: 1 },
+  { id: 'barbeles', rar: 'c', max: 3 },
+  { id: 'grosbaril', rar: 'c', max: 2 },
+  { id: 'tourelle', rar: 'l', max: 1 },
+  { id: 'constitution', rar: 'c', max: 4 },
+  { id: 'aimant', rar: 'c', max: 2 },
+  { id: 'souffle', rar: 'l', max: 1 },
+  { id: 'prime', rar: 'p', max: 2 },
+  { id: 'chair', rar: 'p', max: 2 },
+  { id: 'sansarmure', rar: 'p', max: 1 },
+  { id: 'epaule', rar: 'r', max: 2 },
+  { id: 'frag', rar: 'r', max: 2 },
+  { id: 'artificier', rar: 'c', max: 2 },
+  { id: 'fievre', rar: 'p', max: 1 },
+  { id: 'quitte', rar: 'p', max: 1 },
+  { id: 'poudre', rar: 'p', max: 1 },
+  { id: 'portant', rar: 'p', max: 1 },
+  { id: 'ravito', rar: 'p', max: 1 },
+  { id: 'repit', rar: 'p', max: 1 },
+  { id: 'fidele', rar: 'p', max: 1 },
+  { id: 'vampire', rar: 'p', max: 1 },
+  { id: 'brulee', rar: 'p', max: 1 },
+  { id: 'racine', rar: 'p', max: 1 },
+  { id: 'diable', rar: 'p', max: 1 },
+  { id: 'verre', rar: 'p', max: 1 },
   // Pactes majeurs : un seul par partie, `excl` liste les cartes qu'ils rendent inutiles (docs/prd/pactes-majeurs.md).
-  { id: 'sanssoin', rar: 'm', max: 1, name: 'Plus de soins', short: 'Plus de soins', excl: ['vampire', 'soif', 'sansarmure'], plus: () => `Chaque vague terminée te rend toute ta vie`, minus: () => `Plus aucune régénération ni caisse de soin` },
-  { id: 'unevie', rar: 'm', max: 1, name: 'Une seule vie', short: 'Une seule vie', excl: ['constitution', 'souffle', 'vampire', 'soif', 'verre', 'diable', 'brulee', 'sansarmure'], plus: () => `Points ×${UNEVIE_POINTS_MUL} sur chaque kill et sur le bonus de fin de vague`, minus: () => `Le premier coup encaissé te tue, et plus aucune caisse de soin` },
-  { id: 'sablier', rar: 'm', max: 1, name: 'Sablier', short: 'Sablier', excl: ['vampire', 'sansarmure'], plus: () => `Points ×${SABLIER_POINTS_MUL} sur chaque kill`, minus: () => `Pendant une vague, tu perds ${SABLIER_DRAIN} PV par seconde jusqu'à la mort ; chaque kill arrête la perte ${num(SABLIER_HOLD)} s` },
-  { id: 'elite', rar: 'm', max: 1, name: 'Élite', short: 'Élite', plus: () => `Points ×${ELITE_POINTS_MUL} sur chaque kill`, minus: () => `Deux fois moins d'ennemis par vague, mais ${num(ELITE_HP_MUL)} fois plus de PV et ${pct(ELITE_SPEED_MUL - 1)} plus rapides` },
-  { id: 'entrave', rar: 'm', max: 1, name: 'Sans échappatoire', short: 'Sans échappatoire', excl: ['double', 'rollboom', 'rollammo', 'firetrail', 'epaule', 'brulee'], plus: () => `Déplacement +${pct(ENTRAVE_SPEED_MUL - 1)}, et tes tirs font ${num(ENTRAVE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `Plus aucune roulade : les crevasses deviennent infranchissables` },
-  { id: 'mitraille', rar: 'm', max: 1, name: 'Mitraille', short: 'Mitraille', excl: ['fidele'], plus: () => `Tes armes à feu tirent deux fois plus vite`, minus: () => `Chaque tir coûte ${MITRAILLE_AMMO_COST} munitions, et le pistolet n'est plus infini : ${MITRAILLE_PISTOL_AMMO} balles, rechargé par les caisses` },
-  { id: 'lourde', rar: 'm', max: 1, name: 'Main lourde', short: 'Main lourde', plus: () => `Tes tirs font ${num(LOURDE_DAMAGE_MUL)} fois plus de dégâts et repoussent ${LOURDE_KNOCK_MUL === 2 ? 'deux' : num(LOURDE_KNOCK_MUL)} fois plus loin`, minus: () => `Chaque tir te fait reculer et dévie ta visée, railgun compris` },
-  { id: 'toutourien', rar: 'm', max: 1, name: 'Tout ou rien', short: 'Tout ou rien', excl: ['fievre', 'quitte'], plus: () => `Un cran de multiplicateur tous les ${TOUTOURIEN_KILLS_PER_MULTIPLIER} kills au lieu de ${KILLS_PER_MULTIPLIER}`, minus: () => `Les points d'une vague ne comptent qu'à sa fin : un coup encaissé les fait tous perdre` },
-  { id: 'sanspause', rar: 'm', max: 1, name: 'Pas de pause', short: 'Pas de pause', excl: ['repit'], plus: () => `Toutes les deux vagues, tu gagnes les trois cartes proposées (jamais de pacte)`, minus: () => `Plus de pause entre les vagues, et aucune carte après une vague impaire` },
-  { id: 'specialiste', rar: 'm', max: 1, name: 'Spécialiste', short: 'Spécialiste', excl: ['fidele', 'rollammo'], plus: () => `L'arme que tu choisis devient infinie et fait ${SPECIALISTE_DAMAGE_MUL === 2 ? 'deux' : num(SPECIALISTE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `Tu ne pourras plus jamais changer d'arme` },
-  { id: 'silence', rar: 'm', max: 1, name: 'Silence', short: 'Silence', plus: () => `Points ×${SILENCE_POINTS_MUL} sur chaque kill`, minus: () => `Plus de HUD : santé, score, combo, armes et cartes disparaissent (score et cartes restent en pause)` },
-  { id: 'aveugle', rar: 'm', max: 1, name: 'Aveugle', short: 'Aveugle', plus: () => `Tes tirs font ${AVEUGLE_DAMAGE_MUL === 2 ? 'deux' : num(AVEUGLE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `Tu ne vois plus rien au-delà de ${AVEUGLE_SIGHT} cases` },
+  { id: 'sanssoin', rar: 'm', max: 1, excl: ['vampire', 'soif', 'sansarmure'] },
+  { id: 'unevie', rar: 'm', max: 1, excl: ['constitution', 'souffle', 'vampire', 'soif', 'verre', 'diable', 'brulee', 'sansarmure'] },
+  { id: 'sablier', rar: 'm', max: 1, excl: ['vampire', 'sansarmure'] },
+  { id: 'elite', rar: 'm', max: 1 },
+  { id: 'entrave', rar: 'm', max: 1, excl: ['double', 'rollboom', 'rollammo', 'firetrail', 'epaule', 'brulee'] },
+  { id: 'mitraille', rar: 'm', max: 1, excl: ['fidele'] },
+  { id: 'lourde', rar: 'm', max: 1 },
+  { id: 'toutourien', rar: 'm', max: 1, excl: ['fievre', 'quitte'] },
+  { id: 'sanspause', rar: 'm', max: 1, excl: ['repit'] },
+  { id: 'specialiste', rar: 'm', max: 1, excl: ['fidele', 'rollammo'] },
+  { id: 'silence', rar: 'm', max: 1 },
+  { id: 'aveugle', rar: 'm', max: 1 },
 ];
 
 /* ---------- Effets des cartes ---------- */
@@ -278,6 +277,7 @@ export const STORAGE_FPS = 'tete-carree-fps';
 export const STORAGE_OUTLINE = 'tete-carree-outline';
 // Dernière partie et meilleures parties, affichées sur l'accueil et l'écran de fin.
 export const STORAGE_RUNS = 'tete-carree-runs';
+export const STORAGE_LANG = 'tete-carree-lang'; // fr ou en, choisie sur l'accueil
 export const TOP_RUNS = 5;
 // Version publiée : compteur masqué tant que le joueur ne l'a pas activé lui-même.
 export const SHOW_FPS_BY_DEFAULT = false;

@@ -8,6 +8,7 @@ import { demoPick, gameOver, openPick } from '../game/flow.js';
 import { moveInput, updateFires, updateRoll } from '../game/player.js';
 import { addScore } from '../game/score.js';
 import { damageBlock, explodeBarrel, fireWeapon, fragments, updateTurret } from '../game/weapons.js';
+import { tr } from '../i18n/index.js';
 import { pad } from '../input/gamepad.js';
 import { keys, mouseFire } from '../input/keyboard.js';
 import { aim } from '../input/touch.js';
@@ -92,9 +93,9 @@ export function update(dt) {
       if (!S.queue.length && world.enemies.length === 0) {
         S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = pickAfter(S.mods, S.wave) ? PICK_DELAY : 0; S.repit = repitBonus(S.mods, S.repit);
         const bonus = waveBonus(S.wave, S.mods) + S.pot; S.pot = 0; addScore(bonus); // Tout ou rien : la cagnotte est versée
-        banner('Vague terminée', 'Bonus +', 'end', bonus);
+        banner(tr.waveCleared, tr.waveBonus, 'end', bonus);
         const hp = waveEndHp(S.mods, player.hp, player.maxHp);
-        if (hp > player.hp && !player.dead) { player.hp = hp; pop(player.x, player.y - 46, 'Vie restaurée', '#62c46e'); }
+        if (hp > player.hp && !player.dead) { player.hp = hp; pop(player.x, player.y - 46, tr.lifeRestored, '#62c46e'); }
       }
     }
     // combo
@@ -269,14 +270,14 @@ export function update(dt) {
     }
     if (Math.hypot(p.x - player.x, p.y - player.y) < PICKUP_RADIUS) {
       p.taken = true; sfx('pickup');
-      if (p.kind === 'hp') { player.hp = Math.min(player.maxHp, player.hp + MEDKIT_HP); pop(p.x, p.y - 30, `+${MEDKIT_HP} santé`, '#62c46e'); }
+      if (p.kind === 'hp') { player.hp = Math.min(player.maxHp, player.hp + MEDKIT_HP); pop(p.x, p.y - 30, tr.medkit(MEDKIT_HP), '#62c46e'); }
       else {
         const pool = mod('fidele') || S.special >= 0 ? [] : W.map((w, i) => i).filter(i => (i > 0 || mod('mitraille')) && unlocked[i]); // Fidélité, Spécialiste : plus aucune recharge ; Mitraille : le pistolet aussi
         if (!pool.length) { addScore(AMMO_NO_WEAPON_BONUS); pop(p.x, p.y - 30, `+${AMMO_NO_WEAPON_BONUS}`, '#ffffff'); }
         else {
           const picks = pool.sort(() => rng() - .5).slice(0, AMMO_REFILL_WEAPONS);
           for (const i of picks) ammo[i] += refillOf(S.mods, i);
-          pop(p.x, p.y - 30, picks.map(i => `+${refillOf(S.mods, i)} ${W[i].short}`).join(' · '), '#f2c230');
+          pop(p.x, p.y - 30, picks.map(i => `+${refillOf(S.mods, i)} ${tr.weapons[W[i].id].short}`).join(' · '), '#f2c230');
         }
       }
     }

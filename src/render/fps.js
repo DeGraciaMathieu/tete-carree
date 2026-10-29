@@ -1,5 +1,6 @@
 // Compteur de FPS (masqué par défaut dans la version publiée, cf. SHOW_FPS_BY_DEFAULT).
 import { SHOW_FPS_BY_DEFAULT, STORAGE_FPS } from '../config.js';
+import { tr } from '../i18n/index.js';
 import { $ } from '../util.js';
 
 const fpsEl = $('fps'), fpsTxt = $('fpsTxt'), fpsCtx = $('fpsCv').getContext('2d');
@@ -8,7 +9,7 @@ export let ftI = 0, fpsAcc = 0, fpsN = 0, fpsT = 0, fpsOn = SHOW_FPS_BY_DEFAULT;
 try { const saved = localStorage.getItem(STORAGE_FPS); if (saved !== null) fpsOn = saved !== '0'; } catch (e) {}
 export function setFps(v) {
   fpsOn = v; fpsEl.hidden = !v;
-  for (const b of document.querySelectorAll('.optFps')) b.textContent = 'FPS : ' + (v ? 'affichés' : 'masqués');
+  for (const b of document.querySelectorAll('.optFps')) b.textContent = tr.optFps(v);
   try { localStorage.setItem(STORAGE_FPS, v ? '1' : '0'); } catch (e) {}
 }
 export function tickFps(ms, now) {

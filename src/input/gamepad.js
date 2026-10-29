@@ -5,6 +5,7 @@ import { choosePick, focusCard, pause, pickFocus, resume, startGame } from '../g
 import { tryRoll } from '../game/player.js';
 import { cycleWeapon } from '../game/weapons.js';
 import { root } from './touch.js';
+import { tr } from '../i18n/index.js';
 import { S, world } from '../state/world.js';
 import { $ } from '../util.js';
 
@@ -32,14 +33,14 @@ export function rumble(strong, weak, ms) {
 export function pollPad() {
   let list;
   try { list = navigator.getGamepads ? navigator.getGamepads() : []; }
-  catch (e) { if (!pad.blocked) { pad.blocked = true; $('padHint').textContent = 'Ce navigateur bloque la manette dans cette page.'; } return; }
+  catch (e) { if (!pad.blocked) { pad.blocked = true; const hint = $('padHint'); hint.dataset.i18n = 'padBlocked'; hint.textContent = tr.padBlocked; } return; }
   let gp = null;
   for (const g of list || []) if (g && g.connected && g.axes.length >= 2) { gp = g; break; }
   if (!gp) {
-    if (pad.on) { pad.on = false; pad.mx = pad.my = pad.ax = pad.ay = 0; pad.fire = false; root.classList.remove('has-pad'); toast('Manette déconnectée'); if (world.state === 'play') pause(); }
+    if (pad.on) { pad.on = false; pad.mx = pad.my = pad.ax = pad.ay = 0; pad.fire = false; root.classList.remove('has-pad'); toast(tr.padOff); if (world.state === 'play') pause(); }
     return;
   }
-  if (!pad.on) { pad.on = true; root.classList.add('has-pad'); toast('Manette connectée : ' + (gp.id.split('(')[0].trim() || 'manette')); audio(); }
+  if (!pad.on) { pad.on = true; root.classList.add('has-pad'); toast(tr.padOn(gp.id.split('(')[0].trim())); audio(); }
   pad.idx = gp.index;
   const ax = gp.axes, btn = i => !!(gp.buttons[i] && (gp.buttons[i].pressed || gp.buttons[i].value > .5));
   const now = gp.buttons.map((_, i) => btn(i));

@@ -1,6 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { MODS } from '../src/config.js';
+import { LANGS } from '../src/i18n/index.js';
 import { createRng } from '../src/rules/rng.js';
 import { isPact, rollCards } from '../src/rules/cards.js';
 import { cardIcon } from '../src/render/cardIcons.js';
@@ -78,7 +79,7 @@ test('une carte qu\'un pacte majeur rend inutile n\'est plus proposée, et inver
 });
 
 test('un pacte majeur s\'affiche comme un pacte : avantage et contrepartie', () => {
-  for (const m of majors) assert.ok(isPact(m) && m.plus(1) && m.minus(1), m.id);
+  for (const m of majors) for (const l in LANGS) assert.ok(isPact(m) && LANGS[l].cards[m.id].plus(1) && LANGS[l].cards[m.id].minus(1), `${l} ${m.id}`);
 });
 
 test('Pas de pause : les cartes gagnées d\'office ne sont jamais des pactes', () => {

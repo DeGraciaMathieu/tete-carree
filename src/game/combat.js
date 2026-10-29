@@ -3,6 +3,7 @@ import { sfx } from '../audio/sfx.js';
 import { BARREL_CHAIN_DELAY, BLAST_BLOCK_DAMAGE, BLAST_BLOCK_REACH, BLAST_FALLOFF, BLAST_KNOCK, BLAST_SELF_DAMAGE, BLAST_SELF_FALLOFF, BLAST_SELF_RANGE, BLOATER_DAMAGE, BLOATER_RADIUS, CHAIR_RADIUS_MUL, SECOND_WIND_SHOCK_DAMAGE, SECOND_WIND_SHOCK_KNOCK, SECOND_WIND_SHOCK_RADIUS, T } from '../config.js';
 import { addScore } from './score.js';
 import { damageBlock } from './weapons.js';
+import { tr } from '../i18n/index.js';
 import { rumble } from '../input/gamepad.js';
 import { addPart, blood, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood, stampScorch } from '../render/floor.js';
@@ -28,7 +29,7 @@ export function hurtEnemy(e, dmg, dx, dy, knock, kind) {
     if (e.shield <= 0) {
       e.shield = 0;
       gibs(e.x + e.fx * 10, e.y + e.fy * 5, 9, ['#8fa3b5', '#5f7385', '#c9d6e0']);
-      sfx('shieldbreak'); pop(e.x, e.y - 48, 'Bouclier brisé', '#dfe8ef');
+      sfx('shieldbreak'); pop(e.x, e.y - 48, tr.shieldBroken, '#dfe8ef');
     }
     if (e.hp <= 0) killEnemy(e, dx, dy);
     return 'blocked';
@@ -45,7 +46,7 @@ export function killEnemy(e, dx, dy, fell) {
   const m = multiplier(), pts = killPoints(e.type, S.mods, m), heal = soifHeal(S.mods, m);
   if (heal && !player.dead) player.hp = Math.min(player.maxHp, player.hp + heal);
   if (potsKill(S.mods, S.waveActive)) S.pot += pts; else addScore(pts);
-  pop(e.x, e.y - 40, (fell ? 'Chute ! +' : '+') + fmt(pts), m > 1 || fell ? '#f2c230' : '#ffffff');
+  pop(e.x, e.y - 40, (fell ? tr.fall : '+') + fmt(pts), m > 1 || fell ? '#f2c230' : '#ffffff');
   const cEl = $('comboNum'); cEl.classList.add('bump'); setTimeout(() => cEl.classList.remove('bump'), 90);
   if (fell) { world.fallers.push({ e, t: 0 }); sfx('fall'); return; }
   blood(e.x, e.y, 12, dx, dy, 120);
@@ -70,7 +71,7 @@ export function hurtPlayer(dmg, soft) {
   if (revive) {
     S.souffleUsed = true; player.hp = revive.hp; player.invuln = revive.invuln;
     shockwave(player.x, player.y, SECOND_WIND_SHOCK_RADIUS, SECOND_WIND_SHOCK_DAMAGE);
-    banner('Second souffle', 'Tu te relèves'); sfx('unlock');
+    banner(tr.cards.souffle.name, tr.getUp); sfx('unlock');
     return;
   }
   if (player.hp <= 0) {

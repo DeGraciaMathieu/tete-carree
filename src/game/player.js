@@ -2,6 +2,7 @@
 import { sfx } from '../audio/sfx.js';
 import { EPAULE_DAMAGE, EPAULE_REACH, FIRETRAIL_DAMAGE, FIRETRAIL_LIFE, FIRETRAIL_RADIUS, FIRETRAIL_TICK, ROLL, ROLLBOOM_DAMAGE, ROLLBOOM_DAMAGE_LVL, ROLLBOOM_RADIUS, ROLLBOOM_RADIUS_LVL, W } from '../config.js';
 import { hurtEnemy, shockwave } from './combat.js';
+import { tr } from '../i18n/index.js';
 import { pad, rumble } from '../input/gamepad.js';
 import { keys } from '../input/keyboard.js';
 import { stick } from '../input/touch.js';
@@ -47,7 +48,7 @@ function rollPerks() {
   const lb = mod('rollboom');
   if (lb) shockwave(player.x, player.y, ROLLBOOM_RADIUS + ROLLBOOM_RADIUS_LVL * lb, ROLLBOOM_DAMAGE + ROLLBOOM_DAMAGE_LVL * lb);
   const wi = player.weapon, w = W[wi], n = rollAmmo(S.mods, refillOf(S.mods, wi), ammo[wi]);
-  if (n) { ammo[wi] += n; pop(player.x, player.y - 46, `+${n} ${w.short}`, '#f2c230'); }
+  if (n) { ammo[wi] += n; pop(player.x, player.y - 46, `+${n} ${tr.weapons[w.id].short}`, '#f2c230'); }
 }
 // Coup d'épaule : chaque ennemi traversé est bousculé une fois par roulade, loin du joueur
 function shove(r, knock) {

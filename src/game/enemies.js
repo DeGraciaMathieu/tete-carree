@@ -3,6 +3,7 @@ import { sfx } from '../audio/sfx.js';
 import { ACID_SPLASH_DAMAGE, ACID_SPLASH_RADIUS, ENEMY_FIRST_ATTACK, ENEMY_STATS, MH, MW, PUDDLE_LIFE, PUDDLE_RADIUS, SPIT_CD, SPIT_CD_RAND, SPIT_LEAD, SPIT_LEAD_MIN, SPIT_LEAD_RAND, T, WAVE_FIRST_SPAWN } from '../config.js';
 import { hurtPlayer } from './combat.js';
 import { moveInput } from './player.js';
+import { tr } from '../i18n/index.js';
 import { addPart } from '../render/effects.js';
 import { fctx } from '../render/floor.js';
 import { banner } from '../render/hud.js';
@@ -42,7 +43,7 @@ export function startWave() {
   S.waveActive = true; S.spawnT = WAVE_FIRST_SPAWN;
   S.lastKill = S.time + WAVE_FIRST_SPAWN; // Sablier : la perte ne commence qu'après la première apparition
   world.shake = Math.min(16, world.shake + 6);
-  banner(`Vague ${n}`, n === 2 ? 'Les Gonflés arrivent : ils explosent' : n === 3 ? 'Les diables arrivent' : n === 4 ? 'Des coureurs arrivent en meute' : n === 5 ? 'Des cracheurs arrivent : sors de l\'acide' : n === 6 ? 'Des blindés arrivent : prends-les à revers' : `${queueCount()} ennemis`, 'start');
+  banner(tr.waveN(n), tr.waveIntro[n] || tr.enemiesN(queueCount()), 'start');
   sfx('wave');
 }
 /* Coureur : zombie maigre en survêtement, penché en avant */

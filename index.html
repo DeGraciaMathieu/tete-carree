@@ -14,7 +14,7 @@
       <div class="hpRow">
         <canvas id="face" width="13" height="13" aria-hidden="true"></canvas>
         <div class="hpCol">
-          <div class="hpHead"><span class="label">Santé</span><span id="hpNum">100</span></div>
+          <div class="hpHead"><span class="label" data-i18n="health"></span><span id="hpNum">100</span></div>
           <div class="bar hp" id="hpBar"><i id="hpGhost"></i><i id="hpFill"></i><b id="hpTicks"></b></div>
         </div>
       </div>
@@ -23,23 +23,23 @@
       <div id="next"></div>
     </div>
     <div class="panel wave">
-      <div class="label">Vague</div>
+      <div class="label" data-i18n="wave"></div>
       <div id="waveNum">1</div>
       <div id="left">—</div>
     </div>
     <div class="right">
       <div class="panel combo">
-        <div class="label">Combo</div>
+        <div class="label" data-i18n="combo"></div>
         <div id="comboNum">×1</div>
         <div id="comboKills">0 kill</div>
         <div class="bar"><i id="comboFill" style="width:0"></i></div>
       </div>
-      <button id="pauseBtn" aria-label="Pause"><span></span></button>
+      <button id="pauseBtn" data-i18n-aria="pause"><span></span></button>
     </div>
   </div>
   <div id="weapons"></div>
-  <div id="fps" aria-label="Images par seconde"><canvas id="fpsCv" width="192" height="52"></canvas><span id="fpsTxt">— fps</span></div>
-  <div id="mods" aria-label="Cartes actives"></div>
+  <div id="fps" data-i18n-aria="fpsAria"><canvas id="fpsCv" width="192" height="52"></canvas><span id="fpsTxt">— fps</span></div>
+  <div id="mods" data-i18n-aria="activeCards"></div>
 </div>
 
 <div id="touch">
@@ -47,8 +47,8 @@
   <div id="aimZone"></div>
   <div class="stickBase" id="stickBase"><div class="stickKnob" id="stickKnob"></div></div>
   <div class="stickBase aim" id="aimBase"><div class="stickKnob" id="aimKnob"></div></div>
-  <button id="rollBtn" aria-label="Roulade">ROULER</button>
-  <button id="swapBtn" aria-label="Arme suivante">ARME</button>
+  <button id="rollBtn" data-i18n="rollBtn" data-i18n-aria="rollAria"></button>
+  <button id="swapBtn" data-i18n="swapBtn" data-i18n-aria="swapAria"></button>
 </div>
 
 <div id="banner"><div class="m"></div><div class="s"></div></div>
@@ -60,113 +60,118 @@
     <h1 class="logo">Tête <em>Carrée</em></h1>
     <div class="stripe"></div>
     <div class="records" id="records">
-      <section class="rpanel"><h2 class="rlabel">Dernière partie</h2><div id="lastRun"></div></section>
-      <section class="rpanel"><h2 class="rlabel">Tes meilleures parties</h2><div id="runsTitle"></div></section>
+      <section class="rpanel"><h2 class="rlabel" data-i18n="lastRun"></h2><div id="lastRun"></div></section>
+      <section class="rpanel"><h2 class="rlabel" data-i18n="bestRuns"></h2><div id="runsTitle"></div></section>
     </div>
-    <button class="btn" id="playBtn">Jouer</button>
-    <p class="starthint only-desk">ou appuie sur <kbd>Entrée</kbd></p>
-    <p class="starthint only-pad">ou appuie sur A (✕)</p>
-    <p class="padhint nopad" id="padHint">Une manette ? Appuie sur l'un de ses boutons pour la connecter.</p>
+    <button class="btn" id="playBtn" data-i18n="play"></button>
+    <p class="starthint only-desk" data-i18n-html="startDesk"></p>
+    <p class="starthint only-pad" data-i18n="startPad"></p>
+    <p class="padhint nopad" id="padHint" data-i18n="padHint"></p>
   </div>
   <div class="card tpanel" id="panelCtrl" hidden>
-    <h2>Commandes</h2>
+    <h2 data-i18n="controls"></h2>
     <dl class="keys only-desk">
-      <dt>Bouger</dt><dd>ZQSD (WASD sur un clavier QWERTY)</dd>
-      <dt>Tirer</dt><dd>Flèches : le tir part dans leur direction, diagonales comprises</dd>
-      <dt>Roulade</dt><dd>Espace ou Ctrl, dans le sens de la marche</dd>
-      <dt>Armes</dt><dd>1 à 9, molette ou E</dd>
-      <dt>Pause</dt><dd>P ou Échap</dd>
-      <dt>FPS</dt><dd>F pour afficher ou masquer le compteur</dd>
-      <dt>Vague</dt><dd>Entrée entre deux vagues pour lancer la suivante</dd>
+      <dt data-i18n="kMove"></dt><dd data-i18n="deskMove"></dd>
+      <dt data-i18n="kShoot"></dt><dd data-i18n="deskShoot"></dd>
+      <dt data-i18n="kRoll"></dt><dd data-i18n="deskRoll"></dd>
+      <dt data-i18n="kWeapons"></dt><dd data-i18n="deskWeapons"></dd>
+      <dt data-i18n="pause"></dt><dd data-i18n="deskPause"></dd>
+      <dt data-i18n="kFps"></dt><dd data-i18n="deskFps"></dd>
+      <dt data-i18n="kWave"></dt><dd data-i18n="deskWave"></dd>
     </dl>
     <dl class="keys only-pad">
-      <dt>Bouger</dt><dd>Stick gauche</dd>
-      <dt>Tirer</dt><dd>Stick droit, ou gâchette droite pour tirer droit devant</dd>
-      <dt>Roulade</dt><dd>A (✕) ou gâchette gauche</dd>
-      <dt>Armes</dt><dd>LB et RB, ou croix gauche et droite</dd>
-      <dt>Vague</dt><dd>Y (△) entre deux vagues pour lancer la suivante</dd>
-      <dt>Pause</dt><dd>Start</dd>
+      <dt data-i18n="kMove"></dt><dd data-i18n="padMove"></dd>
+      <dt data-i18n="kShoot"></dt><dd data-i18n="padShoot"></dd>
+      <dt data-i18n="kRoll"></dt><dd data-i18n="padRoll"></dd>
+      <dt data-i18n="kWeapons"></dt><dd data-i18n="padWeapons"></dd>
+      <dt data-i18n="kWave"></dt><dd data-i18n="padWave"></dd>
+      <dt data-i18n="pause"></dt><dd data-i18n="padPause"></dd>
     </dl>
     <dl class="keys only-touch">
-      <dt>Bouger</dt><dd>Pouce gauche, n'importe où</dd>
-      <dt>Tirer</dt><dd>Pouce droit : glisse dans une direction pour y tirer</dd>
-      <dt>Roulade</dt><dd>Bouton ROULER, dans le sens du pouce gauche</dd>
-      <dt>Armes</dt><dd>Bouton ARME ou les cases en haut</dd>
+      <dt data-i18n="kMove"></dt><dd data-i18n="touchMove"></dd>
+      <dt data-i18n="kShoot"></dt><dd data-i18n="touchShoot"></dd>
+      <dt data-i18n="kRoll"></dt><dd data-i18n="touchRoll"></dd>
+      <dt data-i18n="kWeapons"></dt><dd data-i18n="touchWeapons"></dd>
     </dl>
-    <button class="btn ghost tclose">Fermer</button>
+    <button class="btn ghost tclose" data-i18n="close"></button>
   </div>
   <div class="card tpanel" id="panelBeasts" hidden>
-    <h2>Bestiaire</h2>
-    <p>Le déplacement et le tir sont séparés : on peut reculer en arrosant la horde. Pendant une roulade, rien ne te touche et tu traverses la horde. Les Gonflés explosent à leur mort comme à ton contact : abats-les au cœur de la horde, pas à bout portant. Les coureurs déboulent en meute : rapides, mais une balle suffit. Les cracheurs restent à distance et lancent de l'acide : sors de la flaque, ou traverse-la en roulade. Les blindés encaissent les balles de face : contourne-les, fais-les sauter, ou brise leur bouclier. Entre deux vagues, choisis une carte parmi trois pour renforcer ton survivant. Une balle fait sauter un baril, une barricade retient la horde le temps qu'elle la casse. Les crevasses arrêtent la horde, pas tes balles : une explosion peut y précipiter les zombies, et une roulade bien placée les franchit.</p>
-    <button class="btn ghost tclose">Fermer</button>
+    <h2 data-i18n="bestiary"></h2>
+    <p data-i18n="bestiaryText"></p>
+    <button class="btn ghost tclose" data-i18n="close"></button>
   </div>
   <div class="card tpanel" id="panelArsenal" hidden>
-    <h2>Arsenal</h2>
-    <p>Chaque palier de score débloque une arme, avec deux recharges de munitions. Son numéro est sa touche.</p>
+    <h2 data-i18n="arsenal"></h2>
+    <p data-i18n="arsenalText"></p>
     <ol class="arsenal" id="arsenalList"></ol>
-    <button class="btn ghost tclose">Fermer</button>
+    <button class="btn ghost tclose" data-i18n="close"></button>
   </div>
   <div class="card tpanel" id="panelCards" hidden>
-    <h2>Cartes</h2>
-    <p>Entre deux vagues, choisis une carte parmi trois. Les pactes donnent un avantage contre une contrepartie ; un seul pacte majeur par partie, à partir de la vague 5.</p>
+    <h2 data-i18n="cardsTitle"></h2>
+    <p data-i18n="cardsText"></p>
     <div id="cardsList"></div>
-    <button class="btn ghost tclose">Fermer</button>
+    <button class="btn ghost tclose" data-i18n="close"></button>
   </div>
   <div class="card tpanel" id="panelOpts" hidden>
-    <h2>Options</h2>
+    <h2 data-i18n="options"></h2>
     <div class="btns opts">
-      <button class="btn ghost optMute">Son : activé</button>
-      <button class="btn ghost optFps">FPS : affichés</button>
-      <button class="btn ghost optOl">Contours : activés</button>
+      <button class="btn ghost optMute"></button>
+      <button class="btn ghost optFps"></button>
+      <button class="btn ghost optOl"></button>
+      <button class="btn ghost optLang" data-i18n="optLang"></button>
     </div>
-    <button class="btn ghost tclose">Fermer</button>
+    <button class="btn ghost tclose" data-i18n="close"></button>
   </div>
-  <nav class="tlinks" aria-label="Informations">
-    <button class="tlink" data-panel="panelCtrl">Commandes</button>
-    <button class="tlink" data-panel="panelBeasts">Bestiaire</button>
-    <button class="tlink" data-panel="panelArsenal">Arsenal</button>
-    <button class="tlink" data-panel="panelCards">Cartes</button>
-    <button class="tlink" data-panel="panelOpts">Options</button>
+  <nav class="tlinks" data-i18n-aria="infoAria">
+    <button class="tlink" data-panel="panelCtrl" data-i18n="controls"></button>
+    <button class="tlink" data-panel="panelBeasts" data-i18n="bestiary"></button>
+    <button class="tlink" data-panel="panelArsenal" data-i18n="arsenal"></button>
+    <button class="tlink" data-panel="panelCards" data-i18n="cardsTitle"></button>
+    <button class="tlink" data-panel="panelOpts" data-i18n="options"></button>
+    <span class="tflags">
+      <button class="tflag" data-lang="fr" aria-label="Français" lang="fr"><svg viewBox="0 0 3 2" aria-hidden="true"><path fill="#002395" d="M0 0h1v2H0z"/><path fill="#fff" d="M1 0h1v2H1z"/><path fill="#ed2939" d="M2 0h1v2H2z"/></svg></button>
+      <button class="tflag" data-lang="en" aria-label="English" lang="en"><svg viewBox="0 0 60 30" aria-hidden="true"><clipPath id="ukClip"><path d="M30 15h30v15zv15H0zH0V0zV0h30z"/></clipPath><path fill="#012169" d="M0 0h60v30H0z"/><path stroke="#fff" stroke-width="6" d="M0 0l60 30m0-30L0 30"/><path stroke="#c8102e" stroke-width="4" clip-path="url(#ukClip)" d="M0 0l60 30m0-30L0 30"/><path stroke="#fff" stroke-width="10" d="M30 0v30M0 15h60"/><path stroke="#c8102e" stroke-width="6" d="M30 0v30M0 15h60"/></svg></button>
+    </span>
   </nav>
 </div>
 
 <div class="overlay pick" id="pickScreen" hidden>
   <div class="pickwrap">
-    <div class="picktitle"><span id="pickWave">Vague terminée</span><h2 id="pickTitle">Choisis une carte</h2></div>
+    <div class="picktitle"><span id="pickWave"></span><h2 id="pickTitle"></h2></div>
     <div class="cards" id="cards"></div>
-    <p class="pickhint only-desk" id="pickHint">Clique sur une carte ou appuie sur 1, 2 ou 3.</p>
-    <p class="pickhint only-pad">Croix directionnelle ou stick gauche pour choisir, A (✕) pour valider.</p>
+    <p class="pickhint only-desk" id="pickHint"></p>
+    <p class="pickhint only-pad" data-i18n="pickHintPad"></p>
   </div>
 </div>
 
 <div class="overlay" id="pauseScreen" hidden>
   <div class="card">
-    <h2>Pause</h2>
-    <div class="label">Cartes actives</div>
+    <h2 data-i18n="pause"></h2>
+    <div class="label" data-i18n="activeCards"></div>
     <div id="pauseMods" class="pmods"></div>
     <p id="pauseScore" class="pickhint"></p>
     <div class="btns">
-      <button class="btn" id="resumeBtn">Reprendre</button>
-      <button class="btn ghost optMute">Son : activé</button>
-      <button class="btn ghost optFps">FPS : affichés</button>
-      <button class="btn ghost optOl">Contours : activés</button>
-      <button class="btn ghost" id="restartBtn">Recommencer</button>
+      <button class="btn" id="resumeBtn" data-i18n="resume"></button>
+      <button class="btn ghost optMute"></button>
+      <button class="btn ghost optFps"></button>
+      <button class="btn ghost optOl"></button>
+      <button class="btn ghost" id="restartBtn" data-i18n="restart"></button>
     </div>
   </div>
 </div>
 
 <div class="overlay" id="overScreen" hidden>
   <div class="card">
-    <h2>Submergé</h2>
-    <p id="overLine">La horde a eu raison de toi.</p>
+    <h2 data-i18n="overTitle"></h2>
+    <p id="overLine"></p>
     <div class="stats">
-      <div><b id="ovScore">0</b><span>Score</span></div>
-      <div><b id="ovWave">0</b><span>Vague</span></div>
-      <div><b id="ovCombo">0</b><span>Meilleur combo</span></div>
+      <div><b id="ovScore">0</b><span data-i18n="score"></span></div>
+      <div><b id="ovWave">0</b><span data-i18n="wave"></span></div>
+      <div><b id="ovCombo">0</b><span data-i18n="bestCombo"></span></div>
     </div>
-    <h3 class="rlabel">Tes meilleures parties</h3>
+    <h3 class="rlabel" data-i18n="bestRuns"></h3>
     <div id="runsOver"></div>
-    <div class="btns"><button class="btn" id="againBtn">Rejouer</button></div>
+    <div class="btns"><button class="btn" id="againBtn" data-i18n="again"></button></div>
   </div>
 </div>
 
