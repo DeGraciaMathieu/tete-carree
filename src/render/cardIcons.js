@@ -41,6 +41,7 @@ const PATHS = {
   elite: '<path d="M3 18h18"/><path d="M4 18L3 7l5 4 4-7 4 7 5-4-1 11"/><circle cx="12" cy="14" r="1.5"/>',
   entrave: '<circle cx="7" cy="17" r="3"/><circle cx="17" cy="17" r="3"/><path d="M10 17h4"/><path d="M12 3v8M9 8l3 3 3-3"/>',
   mitraille: '<path d="M4 4v6M8 4v6M12 4v6M16 4v6M20 4v6"/><path d="M3 14h18v6H3z"/><path d="M7 14v6M12 14v6M17 14v6"/>',
+  lourde: '<path d="M3 9h12v5H8l-1 6H4l1-6H3z"/><path d="M15 10h3M18 7v7"/><path d="M21 6l-2 2M21 15l-2-2"/>',
 };
 export function cardIcon(id) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${PATHS[id] || ''}</svg>`;

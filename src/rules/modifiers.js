@@ -8,6 +8,7 @@ import {
   REPIT_MAX, REPIT_BREAK_MUL, FIDELE_PISTOL_MUL, VAMPIRE_DRAIN, BRULEE_ROLL_CD_MUL, BRULEE_ROLL_HP, RACINE_DAMAGE_MUL,
   RACINE_SPEED_MUL, VERRE_DAMAGE_MUL, SABLIER_DRAIN, SABLIER_HOLD, ELITE_HP_MUL, ELITE_SPEED_MUL,
   ENTRAVE_SPEED_MUL, ENTRAVE_DAMAGE_MUL, MITRAILLE_CD_MUL, MITRAILLE_AMMO_COST, MITRAILLE_PISTOL_REFILL, W,
+  LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL, LOURDE_SELF_PUSH, LOURDE_SPREAD,
 } from '../config.js';
 
 export const modLevel = (mods, id) => (mods && mods[id]) || 0;
@@ -49,9 +50,14 @@ export function enemyHpMul(mods) { return modLevel(mods, 'elite') ? ELITE_HP_MUL
 export function enemySpeedMul(mods) { return modLevel(mods, 'elite') ? ELITE_SPEED_MUL : 1; }
 // Armes à feu : celles dont les tirs sont « tes tirs » (balles, plombs, railgun).
 const GUNS = ['pistol', 'uzi', 'rifle', 'shotgun', 'rail'];
+export const isGun = weapon => GUNS.includes(weapon);
 // Mitraille : délai entre deux tirs et munitions consommées par tir d'une arme à feu.
-export function weaponCdMul(mods, weapon) { return modLevel(mods, 'mitraille') && GUNS.includes(weapon) ? MITRAILLE_CD_MUL : 1; }
-export function ammoCost(mods, weapon) { return modLevel(mods, 'mitraille') && GUNS.includes(weapon) ? MITRAILLE_AMMO_COST : 1; }
+export function weaponCdMul(mods, weapon) { return modLevel(mods, 'mitraille') && isGun(weapon) ? MITRAILLE_CD_MUL : 1; }
+export function ammoCost(mods, weapon) { return modLevel(mods, 'mitraille') && isGun(weapon) ? MITRAILLE_AMMO_COST : 1; }
+// Main lourde : recul infligé par tes tirs, recul subi (px) et dispersion ajoutée (rad) à chaque tir d'une arme à feu.
+export function shotKnockMul(mods) { return modLevel(mods, 'lourde') ? LOURDE_KNOCK_MUL : 1; }
+export function selfPush(mods, weapon) { return modLevel(mods, 'lourde') && isGun(weapon) ? LOURDE_SELF_PUSH : 0; }
+export function extraSpread(mods, weapon) { return modLevel(mods, 'lourde') && isGun(weapon) ? LOURDE_SPREAD : 0; }
 // Munitions d'une caisse pour l'arme i : le pistolet, infini d'ordinaire, en reçoit sous Mitraille.
 export function refillOf(mods, i) { return i === 0 && modLevel(mods, 'mitraille') ? MITRAILLE_PISTOL_REFILL : W[i].refill; }
 // Enraciné, Sans échappatoire : vitesse de déplacement.
@@ -62,6 +68,7 @@ export function shotDamageMul(mods, weapon, d, still) {
   if (weapon === 'pistol' && modLevel(mods, 'fidele')) m *= FIDELE_PISTOL_MUL;
   if (modLevel(mods, 'verre')) m *= VERRE_DAMAGE_MUL;
   if (modLevel(mods, 'entrave')) m *= ENTRAVE_DAMAGE_MUL;
+  if (modLevel(mods, 'lourde')) m *= LOURDE_DAMAGE_MUL;
   if (modLevel(mods, 'portant')) m *= d < PORTANT_RANGE * T ? PORTANT_NEAR_MUL : PORTANT_FAR_MUL;
   if (still && modLevel(mods, 'racine')) m *= RACINE_DAMAGE_MUL;
   return m;

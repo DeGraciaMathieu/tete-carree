@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, repitBonus, waveBreak,
-  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
+  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
 } from '../src/rules/modifiers.js';
 
 test('le multiplicateur gagne un cran tous les 5 kills enchaînés', () => {
@@ -199,4 +199,16 @@ test('Mitraille : une caisse recharge aussi le pistolet', () => {
   assert.equal(refillOf({ mitraille: 1 }, 0), 60);
   assert.equal(refillOf({}, 0), 0);
   assert.equal(refillOf({ mitraille: 1 }, 1), 120);
+});
+
+test('Main lourde : tes tirs font 1,8 fois plus de dégâts et repoussent deux fois plus loin', () => {
+  assert.equal(shotDamageMul({ lourde: 1 }, 'rifle', 300, false), 1.8);
+  assert.equal(shotKnockMul({ lourde: 1 }), 2);
+  assert.equal(shotKnockMul({}), 1);
+});
+
+test('Main lourde : chaque tir d\'arme à feu fait reculer le joueur et dévie sa visée, railgun compris, pas une grenade', () => {
+  assert.ok(selfPush({ lourde: 1 }, 'uzi') > 0 && extraSpread({ lourde: 1 }, 'rail') > 0);
+  assert.equal(selfPush({ lourde: 1 }, 'grenade') + extraSpread({ lourde: 1 }, 'wall'), 0);
+  assert.equal(selfPush({}, 'uzi') + extraSpread({}, 'rail'), 0);
 });

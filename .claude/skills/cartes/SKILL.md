@@ -62,6 +62,7 @@ large, elles se couchent.
 | `elite` (pacte majeur) | `waveQueue` (`ELITE_COUNT_MUL`, `ELITE_PACK_MIN`) ; `enemyHpMul`, `enemySpeedMul` dans `spawnEnemy` ; `killPoints` |
 | `entrave` (pacte majeur) | `rollMax` rend 0 (charges vidées dans `applyCard`, clic à vide dans `tryRoll`) ; `speedMul` ; `shotDamageMul` |
 | `mitraille` (pacte majeur) | `weaponCdMul` et `ammoCost` dans `fireWeapon` (armes à feu seulement) ; munitions du pistolet dans `applyCard`, `refillOf` au ramassage et dans `rollPerks` ; `loadedWeapon` quand l'arme en main est vide |
+| `lourde` (pacte majeur) | `shotDamageMul` ; `shotKnockMul` dans `shoot` ; `extraSpread` (un tirage `jitter` de plus) et `selfPush` dans `fireWeapon` ; recul cosmétique ×1,5 dans `recoil` |
 
 ## Pactes majeurs
 

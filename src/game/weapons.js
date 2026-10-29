@@ -7,7 +7,7 @@ import { casing, dust, gibs, muzzleFx, sparks } from '../render/effects.js';
 import { GUNS } from '../render/sprites.js';
 import { clearShot, doorSet, frontTile, map, moveCircle, shotTile } from '../state/arena.js';
 import { S, ammo, blocks, cam, fireMul, jitter, mod, player, rng, unlocked, world } from '../state/world.js';
-import { ammoCost, shotDamageMul, weaponCdMul } from '../rules/modifiers.js';
+import { ammoCost, extraSpread, selfPush, shotDamageMul, shotKnockMul, weaponCdMul } from '../rules/modifiers.js';
 import { clamp } from '../util.js';
 
 // pierce : nombre d'ennemis que le tir peut toucher (Infinity pour le railgun) ; bounce : rebonds restants
@@ -31,10 +31,10 @@ function shoot(ang, range, dmg, pierce, knock, look, bounce = 0, from = null, pa
   }
   hits.sort((a, b) => a[0] - b[0]);
   if (hits.length >= pierce) { hits.length = pierce; endT = Math.max(0, hits[pierce - 1][0]); hitB = null; wallHit = false; }
-  const wid = W[player.weapon].id, still = !player.moving;
+  const wid = W[player.weapon].id, still = !player.moving, kmul = pact ? shotKnockMul(S.mods) : 1;
   for (let k = 0; k < hits.length; k++) {
     const e = hits[k][1], mul = pact ? shotDamageMul(S.mods, wid, Math.hypot(e.x - player.x, e.y - player.y), still) : 1;
-    if (hurtEnemy(e, dmg * mul, dx, dy, knock, pierce === Infinity ? 'ap' : 'bullet') === 'blocked') {
+    if (hurtEnemy(e, dmg * mul, dx, dy, knock * kmul, pierce === Infinity ? 'ap' : 'bullet') === 'blocked') {
       endT = Math.max(0, hits[k][0] - 8); hitB = null; wallHit = false; break;
     }
   }
@@ -91,13 +91,15 @@ export function explodeBarrel(b) {
   explosion(b.tx * T + T / 2, b.ty * T + T / 2, BARREL_RADIUS * Math.pow(GROSBARIL_RADIUS_MUL, mod('grosbaril')), BARREL_DAMAGE, true);
 }
 // Recul ressenti : la caméra part à l'opposé de la visée (y écrasé par la vue 3/4), l'arme recule vers le héros
+// Main lourde : recul une fois et demie plus fort.
 function recoil(camKick, gunKick) {
+  if (mod('lourde')) { camKick *= 1.5; gunKick *= 1.5; }
   cam.kvx -= player.fx * camKick; cam.kvy -= player.fy * camKick * .55; player.recoilV += gunKick;
 }
 export function fireWeapon() {
   const wi = player.weapon, w = W[wi];
   if (ammo[wi] <= 0) { sfx('click'); player.weapon = loadedWeapon(); player.cd = EMPTY_SWAP_CD; return; }
-  const ang = Math.atan2(player.fy, player.fx);
+  const spread = extraSpread(S.mods, w.id), ang = Math.atan2(player.fy, player.fx) + (spread ? jitter(spread) : 0);
   let ok = true;
   switch (w.id) {
     case 'pistol':
@@ -125,6 +127,8 @@ export function fireWeapon() {
       shoot(ang, SHOTS.rail.speed, SHOTS.rail.damage, Infinity, SHOTS.rail.knock, { t: .35, w: 4, c: '120,230,255' });
       player.muzzle = .1; world.shake = Math.min(16, world.shake + 2.5); recoil(340, 310); muzzleFx(6, 2, '#c8f6ff'); sfx('rail'); casing('rail'); rumble(.45, .35, 120); break;
   }
+  const push = selfPush(S.mods, w.id);
+  if (push) moveCircle(player, -player.fx * push, -player.fy * push);
   if (ok && ammo[wi] !== Infinity) ammo[wi] = Math.max(0, ammo[wi] - ammoCost(S.mods, w.id));
   player.cd = ok ? w.cd * fireMul() * weaponCdMul(S.mods, w.id) : PLACE_FAIL_CD;
 }
