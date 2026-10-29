@@ -153,6 +153,13 @@ Maquettes comparées avant de choisir (proposition 1 retenue sur trois : carte c
   partie comme avant. Un volet ouvert prend le focus sur Fermer, A ou B le referme, et le focus revient
   à l'entrée qui l'a ouvert.
 
+## Écran titre : volet Cartes
+
+- Une ligne par carte sur deux colonnes (une seule sur téléphone), groupées par rareté avec un liseré à sa couleur :
+  pictogramme, nom, niveau maximal, texte du premier niveau. Retenue parmi trois maquettes (petites cartes avec
+  détail au survol, onglets par rareté) : tout le texte reste lisible sans interaction, pour environ 30 % de
+  hauteur en moins que les cartes de l'écran de choix en petit.
+
 ## Écran titre : dernière partie et meilleures parties
 
 - Par-dessus la démo, l'accueil montre la dernière partie (score, vague, kills, meilleur combo, cartes
