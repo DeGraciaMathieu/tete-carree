@@ -8,12 +8,12 @@ import './input/gamepad.js';
 import { frame } from './loop/frame.js';
 import { outlineOn, resize, setOutline } from './render/canvas.js';
 import { fpsOn, setFps } from './render/fps.js';
-import { buildArsenal, drawFace, renderRuns } from './render/hud.js';
+import { buildArsenal, buildCardsPanel, drawFace, renderRuns } from './render/hud.js';
 import { $ } from './util.js';
 
 addEventListener('resize', resize); resize();
 setOutline(outlineOn);
 setFps(fpsOn);
 startDemo(); renderRuns();
-buildArsenal(); drawFace($('mascot').getContext('2d'), 'ok');
+buildArsenal(); buildCardsPanel(); drawFace($('mascot').getContext('2d'), 'ok');
 requestAnimationFrame(frame);

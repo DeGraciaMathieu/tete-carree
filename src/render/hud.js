@@ -1,9 +1,10 @@
 // HUD DOM : bannières, santé, score, combo, emplacements d'armes, cartes actives ; écrans d'accueil et de fin
 // (arsenal, dernière partie, meilleures parties).
 import { sfx } from '../audio/sfx.js';
-import { LOW_HP, MODS, SABLIER_HOLD, W } from '../config.js';
+import { LOW_HP, MODS, RAR, SABLIER_HOLD, W } from '../config.js';
 import { selectWeapon } from '../game/weapons.js';
 import { S, ammo, comboTime, frenzy, mod, multiplier, player, queueCount, unlocked, world } from '../state/world.js';
+import { cardIcon } from './cardIcons.js';
 import { $, fmt } from '../util.js';
 
 const bannerEl = $('banner');
@@ -105,6 +106,18 @@ function renderHp() {
 // Volet Arsenal de l'écran titre : les armes dans l'ordre de leurs touches, avec leur score de déblocage.
 export function buildArsenal() {
   $('arsenalList').innerHTML = W.map(w => `<li><span class="n">${w.name}</span><span class="u">${w.unlock ? fmt(w.unlock) + ' points' : 'de départ'}</span></li>`).join('');
+}
+// Volet Cartes de l'écran titre : toutes les cartes par rareté, au texte de leur premier niveau.
+const RAR_GROUPS = { c: 'Communes', r: 'Rares', l: 'Légendaires', p: 'Pactes', m: 'Pactes majeurs' };
+export function buildCardsPanel() {
+  $('cardsList').innerHTML = Object.keys(RAR_GROUPS).map(r => {
+    const cards = MODS.filter(m => m.rar === r).map(m => {
+      const body = m.plus ? `<span class="plus">+ ${m.plus(1)}</span><span class="minus">− ${m.minus(1)}</span>` : `<span>${m.desc(1)}</span>`;
+      return `<div class="mcard r-${r}"><span class="rar">${RAR[r].name}</span><span class="mico">${cardIcon(m.id)}</span><span class="mname">${m.name}</span>`
+        + `<span class="mbody">${body}</span><span class="lv">${m.max > 1 ? `jusqu'au niveau ${m.max}` : 'Unique'}</span></div>`;
+    }).join('');
+    return `<h3 class="rgroup r-${r}">${RAR_GROUPS[r]} · ${MODS.filter(m => m.rar === r).length}</h3><div class="cgrid">${cards}</div>`;
+  }).join('');
 }
 const NONE = `<p class="none">Aucune partie pour l'instant</p>`;
 function runDate(t) {

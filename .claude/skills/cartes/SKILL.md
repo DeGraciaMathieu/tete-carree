@@ -105,6 +105,9 @@ qu'un pacte majeur est possédé (un seul par partie).
 7. Dessine son pictogramme dans `src/render/cardIcons.js` (SVG au trait 24 × 24, clé = `id`) :
    `tests/cards.test.js` échoue sinon.
 
+Volet « Cartes » de l'accueil : `buildCardsPanel` (`render/hud.js`) dessine toutes les cartes de `MODS` par rareté, au
+texte de leur premier niveau ; une nouvelle carte y apparaît sans rien ajouter.
+
 Réserve d'idées de cartes non implémentées : `docs/idees-cartes.md`.
 
 ## Pièges
