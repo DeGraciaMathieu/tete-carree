@@ -1,0 +1,53 @@
+name: Deploy to itch.io
+
+on:
+  release:
+    types: [published]
+
+# Évite que deux déploiements se marchent dessus
+concurrency:
+  group: itch-deploy
+  cancel-in-progress: false
+
+env:
+  ITCH_TARGET: 857wpwth/tete-carree:html5 # user/jeu:channel
+  BUILD_DIR: dist                          # dossier qui contient index.html
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Étape de build, seulement si le projet a un package.json
+      - uses: actions/setup-node@v4
+        if: hashFiles('package.json') != ''
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Build
+        if: hashFiles('package.json') != ''
+        run: |
+          npm ci
+          npm run build
+
+      - name: Zip du jeu
+        run: |
+          test -f "$BUILD_DIR/index.html" || { echo "index.html introuvable dans $BUILD_DIR"; exit 1; }
+          # index.html doit être à la racine du zip pour itch
+          cd "$BUILD_DIR" && zip -r "$GITHUB_WORKSPACE/tete-carree.zip" .
+
+      - name: Installer butler
+        run: |
+          curl -sSL -o butler.zip https://broth.itch.zone/butler/linux-amd64/LATEST/archive/default
+          unzip -q butler.zip -d butler
+          chmod +x butler/butler
+          ./butler/butler -V
+
+      - name: Push sur itch.io
+        env:
+          BUTLER_API_KEY: ${{ secrets.BUTLER_API_KEY }}
+        run: |
+          ./butler/butler push tete-carree.zip "$ITCH_TARGET" \
+            --userversion "${{ github.event.release.tag_name }}"
