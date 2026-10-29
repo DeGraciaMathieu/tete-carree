@@ -55,7 +55,7 @@ Champs d'un ennemi : `type`, `r`, `hp`, `sp` (vitesse), `x`, `y`, `vx`, `vy`, `f
 
 | Concept | Implémentation |
 | --- | --- |
-| Grille | `map` (`Uint8Array(MW × MH)`, `state/arena.js`) : `0` sol, `1` mur, `2` caisse, `3` crevasse ; plan fixe dans `buildMap()` |
+| Grille | `map` (`Uint8Array(MW × MH)`, `state/arena.js`) : `0` sol, `1` mur, `2` caisse, `3` crevasse ; plan choisi sur l'accueil (`world.arena`, liste `ARENAS` de `config.js`), construit par `buildMap(id)` à partir de `PLANS` ; toutes les arènes gardent la bordure, les huit portes et la case de départ (22, 15) |
 | Portes d'apparition | `doors`, `doorSet` (milieu de chaque bord) |
 | Constructions posées | `blocks` (`Map` indexée par tuile, `state/world.js`) |
 | Requêtes de tuiles | `rules/map.js` (pur, `map`/`blocks` en paramètres) ; wrappers liés à l'état dans `state/arena.js` |

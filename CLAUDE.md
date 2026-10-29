@@ -47,7 +47,7 @@ et les questions ouvertes : lis-le avant tout changement structurel.
   `input/`, `loop/`. L'aléatoire arrive en paramètre `rng`, le temps en `dt`.
 - **Pas de valeur d'équilibrage en dur** hors de `config.js` (PV, dégâts, rayons, cadences, délais,
   portées, vitesses, composition des vagues, effets des cartes). Restent en place, par choix : couleurs,
-  particules, tremblement d'écran, vibrations, sons, plan de l'arène (`buildMap`).
+  particules, tremblement d'écran, vibrations, sons, plans des arènes (`PLANS` de `state/arena.js`).
 - **Pas de `Math.random` pour le gameplay** : utilise `rng()` / `jitter()` de `state/world.js`
   (graine tirée par `resetWorld`). `Math.random` et `rnd` (`util.js`) sont réservés au cosmétique.
 - **Ne réaffecte pas une liaison importée** : un état réaffecté depuis plusieurs modules devient une
@@ -55,8 +55,8 @@ et les questions ouvertes : lis-le avant tout changement structurel.
   `cam` ne sont réaffectés que par `resetWorld`.
 - **Un module qui pose des écouteurs à l'import doit être importé dans `src/main.js`** — sinon il
   n'est jamais exécuté (c'est arrivé : boutons des écrans morts).
-- **Ne change pas** les clés `localStorage` (`STORAGE_BEST`, `STORAGE_FPS`, `STORAGE_OUTLINE`, `STORAGE_RUNS`, `STORAGE_LANG` :
-  `tete-carree-best`, `tete-carree-fps`, `tete-carree-outline`, `tete-carree-runs`, `tete-carree-lang`), ni `base: './'` dans
+- **Ne change pas** les clés `localStorage` (`STORAGE_BEST`, `STORAGE_FPS`, `STORAGE_OUTLINE`, `STORAGE_RUNS`, `STORAGE_LANG`, `STORAGE_ARENA` :
+  `tete-carree-best`, `tete-carree-fps`, `tete-carree-outline`, `tete-carree-runs`, `tete-carree-lang`, `tete-carree-arena`), ni `base: './'` dans
   `vite.config.js`, ni les chemins relatifs (`./src/…`) de `index.html`.
 - **Ne retire pas** les protections navigateur : son démarré au premier geste, pause sur `blur` et
   `visibilitychange`, `navigator.getGamepads` sous `try/catch`, accès `localStorage` sous `try/catch`.

@@ -18,7 +18,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | --- | --- | --- |
 | `index.html` | écrans (titre, choix de carte, pause, fin), HUD, contrôles tactiles ; textes fixes repérés par `data-i18n`, `data-i18n-html`, `data-i18n-aria` | `./src/style.css`, `./src/main.js` |
 | `src/main.js` | point d'entrée : importe les modules d'entrée, `resize`, `startDemo`, `applyLang`, lance `frame` | tout |
-| `src/config.js` | constantes : arène (`T`, `MW`, `MH`), armes `W`, `SHOTS`, cartes `MODS`, raretés `RAR`, ennemis `ENEMY_STATS`…, vagues `WAVE_UNITS`…, stockage `STORAGE_*`, `SHOW_FPS_BY_DEFAULT` | — |
+| `src/config.js` | constantes : arène (`T`, `MW`, `MH`, liste `ARENAS`), armes `W`, `SHOTS`, cartes `MODS`, raretés `RAR`, ennemis `ENEMY_STATS`…, vagues `WAVE_UNITS`…, stockage `STORAGE_*`, `SHOW_FPS_BY_DEFAULT` | — |
 | `src/util.js` | `$` (getElementById), `rnd` (aléa cosmétique), `clamp`, `fmt` (nombres au format de la langue) | i18n |
 | `src/i18n/index.js` | `tr` (dictionnaire courant, liaison vivante), `lang`, `setLang`, `LANGS` ; langue lue dans `STORAGE_LANG`, sinon celle du navigateur (français si `fr…`, anglais sinon) | config |
 | `src/i18n/fr.js`, `src/i18n/en.js` | tous les textes du jeu, mêmes clés : interface, `weapons`, `rar`, `rarGroups`, `cards` (`name`, `short`, `desc`/`plus`/`minus`), `waveIntro` | config |
@@ -32,14 +32,14 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/rules/scoring.js` | `killPoints`, `soifHeal`, `rollDrop` | config, modifiers |
 | `src/rules/records.js` | `rankRun` (classement des meilleures parties) | — |
 | `src/rules/damage.js` | `resolveEnemyHit`, `playerProtected`, `secondWind` | config, modifiers |
-| `src/state/world.js` | `world` (écran, collections, `shake`, `fieldDirty`, `best`, `runs`), `S` (session), `player`, `blocks`, `unlocked`, `ammo`, `cam`, `rng`, `jitter`, raccourcis `mod`/`frenzy`/`fireMul`…, `resetWorld` | config, rules, arena |
-| `src/state/arena.js` | `map`, `doors`, `doorSet`, `buildMap`, collisions (`moveCircle`, `unstick`), wrappers des règles de grille liés à l'état, `dist` + `computeField`/`nextStep`, `frontTile`, `clearShot` | rules/map, rules/pathfield |
+| `src/state/world.js` | `world` (écran, collections, `shake`, `fieldDirty`, `best`, `runs`, `arena`), `S` (session), `player`, `blocks`, `unlocked`, `ammo`, `cam`, `rng`, `jitter`, raccourcis `mod`/`frenzy`/`fireMul`…, `resetWorld` | config, rules, arena |
+| `src/state/arena.js` | `map`, `doors`, `doorSet`, plans des arènes (`PLANS`), `buildMap(id)`, collisions (`moveCircle`, `unstick`), wrappers des règles de grille liés à l'état, `dist` + `computeField`/`nextStep`, `frontTile`, `clearShot` | rules/map, rules/pathfield |
 | `src/game/combat.js` | `hurtEnemy`, `killEnemy`, `hurtPlayer`, `shockwave`, `explosion`, `toxicBurst` | rules/damage, rules/scoring, render/effects |
 | `src/game/weapons.js` | `fireWeapon`, `selectWeapon`, `cycleWeapon`, constructions (`placeBlock`, `damageBlock`, `explodeBarrel`), `updateTurret` | combat |
 | `src/game/enemies.js` | `spawnEnemy`, `startWave`, `spit`, `updateGlobs` | rules/waves |
 | `src/game/player.js` | `moveInput`, `tryRoll`, `updateRoll`, `updateFires` (traînée de feu) | input, combat |
 | `src/game/score.js` | `addScore` (+ déblocage des armes) | rules/unlock |
-| `src/game/flow.js` | `newGame`, `startDemo`, `startGame`, `pause`, `resume`, `gameOver`, `openPick`, `choosePick`, `demoPick`, `focusCard` ; `gameOver` enregistre la partie dans `world.runs` | rules/cards, render |
+| `src/game/flow.js` | `newGame`, `startDemo`, `chooseArena`, `showArena`, `startGame`, `pause`, `resume`, `gameOver`, `openPick`, `choosePick`, `demoPick`, `focusCard` ; `gameOver` enregistre la partie dans `world.runs` | rules/cards, render |
 | `src/game/demo.js` | partie de démo de l'écran titre : `demoControl` (pilote automatique, commandes dans `ctl`), `demoOver`, `DEMO_WAVES`, `DEMO_BREAK` | state, game/player, game/weapons |
 | `src/render/canvas.js` | `cv`, `ctx` (liaison vivante), `resize`, `zoom`, passe de contour `outlined` + proxy `OLP`, `setOutline` | — |
 | `src/render/floor.js` | sol peint hors écran (`floorC`, `fctx`), `paintFloor`, `stampBlood`, `stampScorch` | arena |

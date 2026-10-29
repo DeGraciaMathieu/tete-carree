@@ -98,8 +98,10 @@ Ouvrir `index.html` par double-clic ne fonctionne plus (ESM natif non servi en `
   ainsi que les constantes internes d'algorithmes (coût diagonal 1,414 et décalage 1000 des zones
   coupées dans `pathfield.js`).
 - Les textes des cartes (`MODS[].desc`) gardent leurs nombres en clair : ce sont des libellés.
-- Le plan de l'arène (murs, caisses, crevasses, portes dans `buildMap`) et la position de départ du
+- Les plans des arènes (murs, caisses, crevasses dans `PLANS`, portes dans `buildMap`) et la position de départ du
   joueur restent dans `state/arena.js` et `state/world.js` : ce sont des données de niveau, pas des réglages.
+  Seule la liste des identifiants (`ARENAS`) est dans `config.js`, pour que `world.js` la lise au chargement
+  sans dépendre de l'ordre d'évaluation du cycle `world.js` ↔ `arena.js`.
 
 ## Vérification de non-régression
 
@@ -144,7 +146,7 @@ Ouvrir `index.html` par double-clic ne fonctionne plus (ESM natif non servi en `
 Maquettes comparées avant de choisir (proposition 1 retenue sur trois : carte centrale, barres haut et bas).
 
 - Colonne sombre ancrée au bord gauche : logo, menu vertical dont **Jouer** est la première entrée
-  (Commandes, Bestiaire, Arsenal, Cartes, Options), puis indications et drapeaux en pied. À droite, un
+  (Arène, Commandes, Bestiaire, Arsenal, Cartes, Options), puis indications et drapeaux en pied. À droite, un
   seul panneau réunit dernière partie et meilleures parties ; il disparaît tant qu'aucune partie n'est
   enregistrée. La démo reste visible au centre. Sous 720 px, la colonne passe au-dessus des records
   (Jouer visible sans défiler).
@@ -152,6 +154,16 @@ Maquettes comparées avant de choisir (proposition 1 retenue sur trois : carte c
   la première pression choisit Jouer ; Entrée (A) active l'entrée. Entrée sans focus et Start lancent la
   partie comme avant. Un volet ouvert prend le focus sur Fermer, A ou B le referme, et le focus revient
   à l'entrée qui l'a ouvert.
+
+## Arènes au choix
+
+- Cinq arènes : Entrepôt (l'arène d'origine), La Fosse, Colonnade, Bunker, Le Pont, choisies sur huit
+  maquettes. Toutes gardent la grille 44 × 30, la bordure, les huit cases de porte et la case de départ :
+  apparitions, démo et caméra restent inchangées.
+- Choix par une entrée à bascule du menu de l'accueil, juste sous Jouer (« Arène : … ») : clic ou Entrée
+  pour la suivante, ← → au clavier, croix ← → ou stick de la manette, depuis n'importe quelle entrée. La démo
+  repart aussitôt sur l'arène choisie, qui sert d'aperçu. Choix retenu sous `STORAGE_ARENA` (`tete-carree-arena`).
+- Records communs à toutes les arènes ; une partie enregistrée ne retient pas son arène.
 
 ## Écran titre : volet Cartes
 
@@ -269,6 +281,10 @@ game. Each entry: what it is, where, and why it was not fixed.
 Decisions the code does not settle and that were not made. Never resolved by guessing.
 
 - Corriger ou non le bug d'arrondi du champ de distances : le corriger change le déplacement de la horde.
+  Il pèse davantage dans le Bunker : joueur au départ, 66 % du sol sans chemin (Entrepôt 11 %, Colonnade 11 %,
+  Le Pont 7 %, La Fosse 1 %) ; les ennemis de ces tuiles marchent droit sur le joueur et butent sur les murs
+  de la casemate. Corriger le bug, retoucher le Bunker, ou le garder tel quel ?
+- Records par arène, ou communs comme aujourd'hui ?
 - `npm run package` s'appuie sur la commande `zip` du système : faut-il un script multiplateforme
   (Windows sans WSL) ? Cela demanderait une dépendance de dev.
 - Garder la double balise viewport, ou n'en garder qu'une (laquelle : avec ou sans `user-scalable=no`) ?

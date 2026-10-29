@@ -71,6 +71,7 @@ Noms de tests en français, phrase complète qui se lit comme la règle.
 | `tests/unlock.test.js` | `rules/unlock.js` : seuil de l'Uzi, déblocages multiples dans l'ordre, pas de double déblocage, munitions à l'arrivée |
 | `tests/map.test.js` | `rules/map.js` : tir au-dessus d'une crevasse mais pas d'un mur, ligne de vue bloquée par une barricade, marche bloquée par une crevasse, case occupée, contact avec le bord d'une crevasse |
 | `tests/pathfield.test.js` | `rules/pathfield.js` : suivi d'un couloir, barricade qui allonge le chemin, zone coupée qui converge vers le bord ; `test.fails` du bug connu |
+| `tests/arenas.test.js` | plans de `state/arena.js`, pour chaque arène : départ sur du sol, chaque porte reliée au départ à pied, aucune case de sol enfermée (parcours case à case, pas le champ de distances) |
 | `tests/cards.test.js` | `rules/cards.js` : trois cartes différentes, même graine ⇒ mêmes cartes, carte au max exclue, plus rien à proposer |
 | `tests/waves.test.js` | `rules/waves.js` : 13 zombies en vague 1, entrée de chaque type à sa vague, Prime de risque grossit les meutes, compteur de restants, apparition deux par deux après la vague 6 |
 | `tests/scoring.test.js` | `rules/scoring.js` : points par kill et multiplicateur, Chair à canon, Prime de risque, Soif de sang, caisse lâchée par un blindé |
