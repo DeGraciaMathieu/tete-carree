@@ -91,7 +91,7 @@ export function update(dt) {
       }
       if (!S.queue.length && world.enemies.length === 0) {
         S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = PICK_DELAY; S.repit = repitBonus(S.mods, S.repit);
-        const bonus = waveBonus(S.wave, S.mods); addScore(bonus);
+        const bonus = waveBonus(S.wave, S.mods) + S.pot; S.pot = 0; addScore(bonus); // Tout ou rien : la cagnotte est versée
         banner('Vague terminée', 'Bonus +', 'end', bonus);
         const hp = waveEndHp(S.mods, player.hp, player.maxHp);
         if (hp > player.hp && !player.dead) { player.hp = hp; pop(player.x, player.y - 46, 'Vie restaurée', '#62c46e'); }

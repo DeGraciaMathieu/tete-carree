@@ -17,6 +17,11 @@ export function killPoints(type, mods, multiplier) {
 // Bonus de fin de vague : WAVE_BONUS × numéro de vague, ×3 sous Une seule vie.
 export function waveBonus(wave, mods) { return WAVE_BONUS * wave * (modLevel(mods, 'unevie') ? UNEVIE_POINTS_MUL : 1); }
 
+// Tout ou rien : pendant une vague, les points d'un kill vont dans la cagnotte au lieu du score.
+export function potsKill(mods, waveActive) { return !!modLevel(mods, 'toutourien') && waveActive; }
+// Cagnotte après un coup encaissé : Tout ou rien la vide.
+export function potAfterHit(mods, pot) { return modLevel(mods, 'toutourien') ? 0 : pot; }
+
 // Points de vie rendus par le kill : Soif de sang à partir de ×3 (dès ×1 sous Vampire), plus le soin de Vampire.
 export function soifHeal(mods, multiplier) {
   const soif = modLevel(mods, 'soif'), vampire = modLevel(mods, 'vampire');

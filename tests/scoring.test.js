@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { killPoints, soifHeal, rollDrop, waveBonus } from '../src/rules/scoring.js';
+import { killPoints, soifHeal, rollDrop, waveBonus, potsKill, potAfterHit } from '../src/rules/scoring.js';
 
 const fixed = (...values) => () => values.shift();
 
@@ -57,4 +57,15 @@ test('Sablier : chaque kill rapporte deux fois plus', () => {
 
 test('Élite : chaque kill rapporte trois fois plus', () => {
   assert.equal(killPoints('z', { elite: 1 }, 1), 150);
+});
+
+test('Tout ou rien : pendant une vague, les points des kills attendent dans la cagnotte, donc les armes ne se débloquent qu\'à la fin', () => {
+  assert.equal(potsKill({ toutourien: 1 }, true), true);
+  assert.equal(potsKill({ toutourien: 1 }, false), false);
+  assert.equal(potsKill({}, true), false);
+});
+
+test('Tout ou rien : un coup encaissé vide la cagnotte', () => {
+  assert.equal(potAfterHit({ toutourien: 1 }, 4200), 0);
+  assert.equal(potAfterHit({}, 4200), 4200);
 });

@@ -9,7 +9,7 @@ import { fctx, stampBlood, stampScorch } from '../render/floor.js';
 import { banner } from '../render/hud.js';
 import { playerProtected, resolveEnemyHit, secondWind } from '../rules/damage.js';
 import { comboAfterHit, ownBlastRadius, ownBlastSelfMul } from '../rules/modifiers.js';
-import { killPoints, rollDrop, soifHeal } from '../rules/scoring.js';
+import { killPoints, potAfterHit, potsKill, rollDrop, soifHeal } from '../rules/scoring.js';
 import { isVoid } from '../state/arena.js';
 import { S, blocks, comboTime, mod, multiplier, player, rng, world } from '../state/world.js';
 import { $, fmt, rnd } from '../util.js';
@@ -44,7 +44,7 @@ export function killEnemy(e, dx, dy, fell) {
   e.dead = true; S.kills++; S.combo++; S.lastKill = S.time; S.comboT = comboTime(); S.bestCombo = Math.max(S.bestCombo, S.combo);
   const m = multiplier(), pts = killPoints(e.type, S.mods, m), heal = soifHeal(S.mods, m);
   if (heal && !player.dead) player.hp = Math.min(player.maxHp, player.hp + heal);
-  addScore(pts);
+  if (potsKill(S.mods, S.waveActive)) S.pot += pts; else addScore(pts);
   pop(e.x, e.y - 40, (fell ? 'Chute ! +' : '+') + fmt(pts), m > 1 || fell ? '#f2c230' : '#ffffff');
   const cEl = $('comboNum'); cEl.classList.add('bump'); setTimeout(() => cEl.classList.remove('bump'), 90);
   if (fell) { world.fallers.push({ e, t: 0 }); sfx('fall'); return; }
@@ -62,6 +62,7 @@ export function hurtPlayer(dmg, soft) {
   if (playerProtected(player)) return;
   player.hp -= dmg; player.hurtT = .35; player.flash = .08; player.lastHurt = S.time;
   if (!soft) { world.shake = Math.min(16, world.shake + 4); S.comboT = comboAfterHit(S.mods, S.comboT); }
+  if (S.pot && !potAfterHit(S.mods, S.pot)) { pop(player.x, player.y - 46, `−${fmt(S.pot)} perdus`, '#ff8f84'); S.pot = 0; }
   blood(player.x, player.y, 4);
   sfx('hurt', 120);
   if (soft) rumble(0, .15, 50); else rumble(.6, .4, 140);

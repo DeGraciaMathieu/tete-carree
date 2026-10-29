@@ -8,14 +8,15 @@ import {
   REPIT_MAX, REPIT_BREAK_MUL, FIDELE_PISTOL_MUL, VAMPIRE_DRAIN, BRULEE_ROLL_CD_MUL, BRULEE_ROLL_HP, RACINE_DAMAGE_MUL,
   RACINE_SPEED_MUL, VERRE_DAMAGE_MUL, SABLIER_DRAIN, SABLIER_HOLD, ELITE_HP_MUL, ELITE_SPEED_MUL,
   ENTRAVE_SPEED_MUL, ENTRAVE_DAMAGE_MUL, MITRAILLE_CD_MUL, MITRAILLE_AMMO_COST, MITRAILLE_PISTOL_REFILL, W,
-  LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL, LOURDE_SELF_PUSH, LOURDE_SPREAD,
+  TOUTOURIEN_KILLS_PER_MULTIPLIER, LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL, LOURDE_SELF_PUSH, LOURDE_SPREAD,
 } from '../config.js';
 
 export const modLevel = (mods, id) => (mods && mods[id]) || 0;
 
 // Fièvre : un cran tous les FIEVRE_KILLS_PER_MULTIPLIER kills au lieu de KILLS_PER_MULTIPLIER.
-// bonus : crans gagnés par Sans répit, qui s'ajoutent à ceux du combo.
-export function multiplier(combo, mods, bonus = 0) { return 1 + bonus + Math.floor(combo / (modLevel(mods, 'fievre') ? FIEVRE_KILLS_PER_MULTIPLIER : KILLS_PER_MULTIPLIER)); }
+// Tout ou rien : tous les TOUTOURIEN_KILLS_PER_MULTIPLIER kills. bonus : crans gagnés par Sans répit, qui s'ajoutent à ceux du combo.
+const killsPerMultiplier = mods => modLevel(mods, 'toutourien') ? TOUTOURIEN_KILLS_PER_MULTIPLIER : modLevel(mods, 'fievre') ? FIEVRE_KILLS_PER_MULTIPLIER : KILLS_PER_MULTIPLIER;
+export function multiplier(combo, mods, bonus = 0) { return 1 + bonus + Math.floor(combo / killsPerMultiplier(mods)); }
 export function frenzy(mods, combo, bonus = 0) { return modLevel(mods, 'frenesie') > 0 && multiplier(combo, mods, bonus) >= FRENZY_MULTIPLIER; }
 export function fireMul(mods, combo, bonus = 0) { return Math.pow(CADENCE_CD_MUL, modLevel(mods, 'cadence')) * (modLevel(mods, 'sansarmure') ? SANSARMURE_CD_MUL : 1) * (frenzy(mods, combo, bonus) ? FRENZY_CD_MUL : 1); }
 export function comboTime(mods) { return (COMBO_T + TENACE_BONUS * modLevel(mods, 'tenace')) * (modLevel(mods, 'fievre') ? FIEVRE_COMBO_MUL : 1); }

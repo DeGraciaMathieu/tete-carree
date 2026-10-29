@@ -428,7 +428,8 @@ sans écran de choix. Quand la vague 8 se termine, alors le joueur reçoit trois
   joueur, mais la cagnotte est perdue.
 - Conséquence : les **déblocages d'armes** n'arrivent qu'en fin de vague. La carte le dit :
   « Les points d'une vague ne comptent qu'à sa fin ».
-- Le HUD montre la cagnotte sous le score (« en jeu : 4 200 ») ; elle se vide avec un effet rouge.
+- Le HUD montre la cagnotte sous le score (« En jeu : 4 200 ») ; un coup la vide, avec un nombre
+  flottant rouge au-dessus du joueur (« −4 200 perdus »). Mort en pleine vague : la cagnotte est perdue.
 
 **Impact.** `config` ; `state/world.js` (`S.pot`) ; `rules/modifiers.js` (`multiplier`) ;
 `rules/scoring.js` (`potAfterHit`) ; `game/combat.js` (`killEnemy`, `hurtPlayer`) ; `game/score.js` ;

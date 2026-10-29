@@ -212,3 +212,8 @@ test('Main lourde : chaque tir d\'arme à feu fait reculer le joueur et dévie s
   assert.equal(selfPush({ lourde: 1 }, 'grenade') + extraSpread({ lourde: 1 }, 'wall'), 0);
   assert.equal(selfPush({}, 'uzi') + extraSpread({}, 'rail'), 0);
 });
+
+test('Tout ou rien : un cran de multiplicateur tous les 2 kills', () => {
+  assert.equal(multiplier(4, { toutourien: 1 }), 3);
+  assert.equal(multiplier(4, {}), 1);
+});

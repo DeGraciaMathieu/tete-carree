@@ -48,6 +48,8 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 #hpFill::after{content:'';position:absolute;inset:0 0 50% 0;background:rgba(255,255,255,.18)}
 #hpTicks{position:absolute;inset:0;background:linear-gradient(90deg,transparent calc(100% - 1px),rgba(0,0,0,.45) 0) 0 0/var(--tick,25%) 100%}
 #score{font-family:var(--display);font-size:22px;letter-spacing:.02em;line-height:1;font-variant-numeric:tabular-nums}
+#pot{font-size:11px;color:var(--r-m);margin-top:2px}
+#pot b{font-weight:400;color:var(--text)}
 #next{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #next b{color:var(--hazard);font-weight:400}
 .wave{text-align:center}

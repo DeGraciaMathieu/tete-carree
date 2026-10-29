@@ -63,6 +63,7 @@ large, elles se couchent.
 | `entrave` (pacte majeur) | `rollMax` rend 0 (charges vidées dans `applyCard`, clic à vide dans `tryRoll`) ; `speedMul` ; `shotDamageMul` |
 | `mitraille` (pacte majeur) | `weaponCdMul` et `ammoCost` dans `fireWeapon` (armes à feu seulement) ; munitions du pistolet dans `applyCard`, `refillOf` au ramassage et dans `rollPerks` ; `loadedWeapon` quand l'arme en main est vide |
 | `lourde` (pacte majeur) | `shotDamageMul` ; `shotKnockMul` dans `shoot` ; `extraSpread` (un tirage `jitter` de plus) et `selfPush` dans `fireWeapon` ; recul cosmétique ×1,5 dans `recoil` |
+| `toutourien` (pacte majeur) | `multiplier` (`TOUTOURIEN_KILLS_PER_MULTIPLIER`) ; `potsKill` dans `killEnemy` (cagnotte `S.pot`), `potAfterHit` dans `hurtPlayer`, versement avec le bonus de fin de vague dans `update` ; `#pot` dans `updateHud` |
 
 ## Pactes majeurs
 
@@ -78,7 +79,7 @@ qu'un pacte majeur est possédé (un seul par partie).
 | Multiplicateur | `multiplier(combo, mods, bonus) = 1 + bonus + floor(combo / KILLS_PER_MULTIPLIER)` (`rules/modifiers.js`), `FIEVRE_KILLS_PER_MULTIPLIER` sous Fièvre ; `bonus` = crans de Sans répit (`S.repit`) |
 | Frénésie | active si la carte est prise et `multiplier ≥ FRENZY_MULTIPLIER` |
 | Points d'un kill | `killPoints(type, mods, multiplier)` (`rules/scoring.js`, `KILL_POINTS`) |
-| Ajout au score | `addScore(n)` (`game/score.js`) : seul point d'entrée, déclenche les déblocages d'armes |
+| Ajout au score | `addScore(n)` (`game/score.js`) : seul point d'entrée, déclenche les déblocages d'armes ; sous Tout ou rien, les kills d'une vague passent par la cagnotte `S.pot` |
 | Bonus de fin de vague | `waveBonus(wave, mods)` (`rules/scoring.js`) : `WAVE_BONUS × vague`, ajouté dans `update` |
 | Record | `world.best`, enregistré par `gameOver` sous `STORAGE_BEST` (`tete-carree-best`, clé à ne jamais changer) |
 | Dernière partie et meilleures parties | `world.runs` (`{ last, top }`), classées par `rankRun` (`rules/records.js`, `TOP_RUNS`), enregistrées par `gameOver` sous `STORAGE_RUNS` (`tete-carree-runs`) ; affichées par `renderRuns` (`render/hud.js`) sur l'accueil (bloc masqué tant qu'aucune partie n'est enregistrée) et l'écran de fin |

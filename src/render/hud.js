@@ -134,6 +134,8 @@ export function updateHud() {
   const low = player.hp < LOW_HP ? 'low' : '';
   if (hudCache.low !== low) { hudCache.low = low; $('hpBar').classList.toggle('low', !!low); }
   setText('score', fmt(S.score));
+  const pot = mod('toutourien') ? S.pot : -1; // Tout ou rien : points en jeu pendant la vague
+  if (hudCache.pot !== pot) { hudCache.pot = pot; $('pot').hidden = pot < 0; $('pot').innerHTML = `En jeu : <b>${fmt(Math.max(0, pot))}</b>`; }
   const rc = player.rollCharges <= 0 || !!player.roll;
   if (hudCache.rc !== rc) { hudCache.rc = rc; $('rollBtn').classList.toggle('cd', rc); }
   const nx = W.findIndex((w, i) => !unlocked[i]);
