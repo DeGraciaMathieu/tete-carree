@@ -16,10 +16,12 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 
 | Module | Rôle | Dépendances clés |
 | --- | --- | --- |
-| `index.html` | écrans (titre, choix de carte, pause, fin), HUD, contrôles tactiles, textes des contrôles et du bestiaire | `./src/style.css`, `./src/main.js` |
-| `src/main.js` | point d'entrée : importe les modules d'entrée, `resize`, `setOutline`, `setFps`, `startDemo`, `renderRuns`, `buildArsenal`, lance `frame` | tout |
+| `index.html` | écrans (titre, choix de carte, pause, fin), HUD, contrôles tactiles ; textes fixes repérés par `data-i18n`, `data-i18n-html`, `data-i18n-aria` | `./src/style.css`, `./src/main.js` |
+| `src/main.js` | point d'entrée : importe les modules d'entrée, `resize`, `startDemo`, `applyLang`, lance `frame` | tout |
 | `src/config.js` | constantes : arène (`T`, `MW`, `MH`), armes `W`, `SHOTS`, cartes `MODS`, raretés `RAR`, ennemis `ENEMY_STATS`…, vagues `WAVE_UNITS`…, stockage `STORAGE_*`, `SHOW_FPS_BY_DEFAULT` | — |
-| `src/util.js` | `$` (getElementById), `rnd` (aléa cosmétique), `clamp`, `fmt` | — |
+| `src/util.js` | `$` (getElementById), `rnd` (aléa cosmétique), `clamp`, `fmt` (nombres au format de la langue) | i18n |
+| `src/i18n/index.js` | `tr` (dictionnaire courant, liaison vivante), `lang`, `setLang`, `LANGS` ; langue lue dans `STORAGE_LANG`, sinon celle du navigateur (français si `fr…`, anglais sinon) | config |
+| `src/i18n/fr.js`, `src/i18n/en.js` | tous les textes du jeu, mêmes clés : interface, `weapons`, `rar`, `rarGroups`, `cards` (`name`, `short`, `desc`/`plus`/`minus`), `waveIntro` | config |
 | `src/rules/rng.js` | `createRng(seed)` (LCG) | — |
 | `src/rules/modifiers.js` | `modLevel`, `multiplier`, `frenzy`, `fireMul`, `comboTime`, `rollMax` | config |
 | `src/rules/unlock.js` | `weaponsToUnlock`, `ammoOnUnlock` | config |
@@ -45,13 +47,13 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/render/cardIcons.js` | `cardIcon(id)` : pictogramme SVG d'une carte de modificateur | rien |
 | `src/render/sprites.js` | `drawChar`, `drawBloater`, `drawRunner`, `drawSpitter`, `drawArmored`, `drawPlayerState`, `GUNS`… | canvas |
 | `src/render/scene.js` | `render()` : caméra, sol, tri en profondeur, entités, projectiles, effets | sprites, floor |
-| `src/render/hud.js` | `buildSlots`, `updateHud`, `resetHud`, `banner`, `drawFace`, `buildArsenal`, `renderRuns` (dernière partie et meilleures parties) | world |
+| `src/render/hud.js` | `buildSlots`, `updateHud`, `resetHud`, `banner`, `drawFace`, `buildArsenal`, `buildCardsPanel`, `renderRuns` (dernière partie et meilleures parties), `translatePage` (textes `data-i18n*`) | world, i18n |
 | `src/render/fps.js` | `fpsOn`, `setFps`, `tickFps` | config (`SHOW_FPS_BY_DEFAULT`) |
-| `src/audio/sfx.js` | `audio()` (démarrage au premier geste), `sfx(name)`, bouton son | — |
+| `src/audio/sfx.js` | `audio()` (démarrage au premier geste), `sfx(name)`, bouton son (`showMute`) | i18n |
 | `src/input/keyboard.js` | `keys`, `mouseFire`, `releaseFire`, raccourcis, pause sur `blur`/`visibilitychange` | game |
 | `src/input/touch.js` | `stick`, `aim`, boutons ROULER/ARME | game |
 | `src/input/gamepad.js` | `pad`, `pollPad`, `rumble` (`getGamepads` sous `try/catch`) | game |
-| `src/input/buttons.js` | boutons des écrans (Jouer, Reprendre, FPS, contours…) | game/flow |
+| `src/input/buttons.js` | boutons des écrans (Jouer, Reprendre, FPS, contours, langue…) ; `applyLang` réécrit l'accueil et les réglages dans la langue courante | game/flow, i18n |
 | `src/loop/update.js` | `update(dt)` : acide, joueur, champ de distances, ennemis, séparation, projectiles, ramassage, blocs, particules, caméra | tout |
 | `src/loop/frame.js` | `frame` (rAF) | update, render |
 
@@ -67,6 +69,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | Dessin | `src/render/sprites.js` (silhouette), `src/render/scene.js` (ordre et effets), `src/render/hud.js` (DOM) |
 | Nouvelle touche, geste ou bouton | `src/input/…` ; nouveau fichier ⇒ import dans `src/main.js` |
 | Nouvel écran ou élément de HUD | `index.html` + `src/style.css` + `src/render/hud.js` ou `src/game/flow.js` |
+| Nouveau texte affiché au joueur | une clé dans `src/i18n/fr.js` **et** `src/i18n/en.js`, lue par `tr.<clé>` ou `data-i18n` dans `index.html` |
 | Nouveau son | `src/audio/sfx.js` |
 | Choix d'architecture ou question non tranchée | `docs/decisions.md` |
 

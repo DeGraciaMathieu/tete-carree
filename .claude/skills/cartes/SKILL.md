@@ -21,6 +21,11 @@ large, elles se couchent.
 | `rar` | `c` Commune, `r` Rare, `l` Légendaire, `p` Pacte, `m` Pacte majeur ; poids de tirage `RAR[rar].w` |
 | `excl` | pacte majeur : ids des cartes qu'il rend inutiles ; exclusion symétrique dans `rollCards` |
 | `max` | niveau maximal ; une carte au max n'est plus proposée |
+
+Textes, dans `src/i18n/fr.js` et `src/i18n/en.js`, sous `cards[id]` (lus par `tr.cards[m.id]`) :
+
+| Champ | Rôle |
+| --- | --- |
 | `name`, `short` | titre de la carte ; libellé court du HUD (`#mods`) et de l'écran de pause |
 | `desc(n)` | texte d'une carte ordinaire au niveau `n` qu'elle donnerait |
 | `plus(n)`, `minus(n)` | pour un pacte (`isPact(m)` : `rar` `p` ou `m`) : avantage et contrepartie, à la place de `desc` |
@@ -93,8 +98,9 @@ qu'un pacte majeur est possédé (un seul par partie). Tant qu'aucun n'est pris,
 
 ## Ajouter une carte
 
-1. Ajoute l'entrée dans `MODS` (`src/config.js`) : `id` unique, `rar`, `max`, `name`, `short`, et
-   `desc(n)` — ou `plus(n)`/`minus(n)` pour un pacte. Les nombres du texte doivent correspondre aux
+1. Ajoute l'entrée dans `MODS` (`src/config.js`) : `id` unique, `rar`, `max`. Ajoute ses textes sous
+   `cards.<id>` dans `src/i18n/fr.js` **et** `src/i18n/en.js` : `name`, `short`, et
+   `desc(n)` — ou `plus(n)`/`minus(n)` pour un pacte (`tests/i18n.test.js` échoue s'il en manque). Les nombres du texte doivent correspondre aux
    constantes : de préférence, construis-les à partir de la constante plutôt que de les écrire en dur.
 2. Ajoute ses constantes d'effet dans `src/config.js` (section « Cartes »).
 3. Si l'effet est une formule ou une condition, mets-la dans `src/rules/modifiers.js` (ou la règle du
@@ -116,7 +122,7 @@ Réserve d'idées de cartes non implémentées : `docs/idees-cartes.md`.
 
 - Le tirage dépend de l'ordre de `MODS` : réordonner le tableau change les cartes proposées pour une
   même graine.
-- Les textes `desc`/`plus`/`minus` sont de la documentation vivante surveillée par le hook Stop :
+- Les textes `desc`/`plus`/`minus` (`src/i18n/`, dans les deux langues) sont de la documentation vivante surveillée par le hook Stop :
   plusieurs écrivent encore leurs nombres en dur (`1.4` de Combo tenace, `14 * n` de Barbelés,
   `100 + 25 * n` de Constitution, `5 * n` d'Aimant, « 40 % » de Second souffle…). Si tu changes la
   constante, change le texte.

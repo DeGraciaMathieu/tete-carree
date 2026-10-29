@@ -165,6 +165,23 @@ Spécification : `docs/prd/pactes-majeurs.md`.
   diable) à la fin de la vague 5 puis toutes les `MAJOR_EVERY` (2) vagues ; entre-temps, chance normale.
 - La démo ne tire jamais de pacte majeur.
 
+## Langues : français et anglais
+
+- Tous les textes affichés au joueur vivent dans `src/i18n/fr.js` et `src/i18n/en.js`, mêmes clés
+  (`tests/i18n.test.js`) ; `config.js` ne garde que les données (`W`, `MODS`, `RAR` sans nom ni texte).
+  Les textes des cartes importent les constantes de `config.js`, comme avant.
+- `tr` est une **liaison vivante** vers le dictionnaire courant : `tr.left(n)` dans `updateHud` coûte un accès
+  de propriété, pas de recherche par clé ni de tableau d'arguments (chemin chaud).
+- Langue au premier lancement : celle du navigateur (`fr…` → français, sinon anglais : public itch.io
+  majoritairement anglophone) ; choix du joueur gardé sous une nouvelle clé `STORAGE_LANG` (`tete-carree-lang`).
+- Choix de la langue sur l'accueil (drapeaux français et britannique en SVG à côté d'Options, la langue courante
+  allumée ; pas d'emoji drapeau, affiché en lettres « FR » / « GB » sous Windows) et dans le volet Options,
+  **pas dans l'écran de pause** : le HUD, les cases d'armes et les cartes se construisent dans la langue
+  courante au début de la partie, rien n'est à réécrire en cours de partie.
+- Le nom du jeu, « Tête Carrée », n'est pas traduit (logo, titre de l'onglet).
+- Nombres au format de la langue (`fmt` : `1 000` / `1,000`) ; virgule ou point décimal et « 25 % » / « 25% »
+  dans les textes des cartes.
+
 ## Rules extracted
 
 | Rule | Module | Test | Notes |
@@ -235,9 +252,9 @@ Decisions the code does not settle and that were not made. Never resolved by gue
   (Windows sans WSL) ? Cela demanderait une dépendance de dev.
 - Garder la double balise viewport, ou n'en garder qu'une (laquelle : avec ou sans `user-scalable=no`) ?
 - Faut-il un favicon ? Le navigateur demande `/favicon.ico`, absent depuis l'origine (404 bénin).
-- Les textes des cartes (`MODS[].desc`, `plus`, `minus`) écrivent leurs nombres en dur au lieu de les
+- Les textes des cartes (`cards[id].desc`, `plus`, `minus` de `src/i18n/`) écrivent leurs nombres en dur au lieu de les
   construire à partir des constantes d'effet (`TENACE_BONUS`, `BARBELES_DAMAGE`, `CONSTITUTION_HP`…) :
-  faut-il les dériver des constantes ? En attendant, le hook Stop de synchronisation de la
+  faut-il les dériver des constantes ? Ils sont désormais écrits deux fois (français, anglais). En attendant, le hook Stop de synchronisation de la
   documentation (`.claude/settings.json`) surveille leur cohérence.
 - Combo tenace annonce « le combo tient X s au lieu de Y s » sans tenir compte de Fièvre, qui divise
   cette fenêtre par deux : `desc(n)` ne reçoit que le niveau, pas les autres cartes prises. Faut-il

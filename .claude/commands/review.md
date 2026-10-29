@@ -67,7 +67,8 @@ Pour chaque point, statut **OK**, **VIOLATION** (avec fichier:ligne et correctio
 21. Patterns établis : `world.fieldDirty` après une modification de grille, `banner`/`sfx`/`pop` pour le
     retour joueur, caches du HUD.
 22. Documentation vivante : textes de l'écran titre et de l'écran de choix de carte dans `index.html`,
-    `desc`/`plus`/`minus` des cartes, bannières de vagues toujours vrais.
+    `desc`/`plus`/`minus` des cartes (`src/i18n/`), bannières de vagues toujours vrais, en français comme en anglais ;
+    aucun texte affiché au joueur en dur hors de `src/i18n/`.
 23. `CLAUDE.md`, skills et `docs/decisions.md` à jour si le périmètre a bougé.
 
 ## 3. Tests

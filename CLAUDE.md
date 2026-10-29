@@ -29,12 +29,13 @@ et les questions ouvertes : lis-le avant tout changement structurel.
 
 | Dossier | Contient | Peut importer |
 | --- | --- | --- |
-| `src/config.js` | toutes les valeurs d'équilibrage, armes `W`, cartes `MODS`, raretés `RAR`, clés de stockage | rien |
+| `src/config.js` | toutes les valeurs d'équilibrage, armes `W`, cartes `MODS`, raretés `RAR`, clés de stockage (données seules, sans texte) | rien |
+| `src/i18n/` | textes du jeu en français (`fr.js`) et en anglais (`en.js`), mêmes clés ; `tr` = dictionnaire courant, `setLang` | `config` |
 | `src/rules/` | décisions pures, testées | `config.js`, d'autres règles |
 | `src/state/` | état de la partie (`world.js`) et arène (`arena.js`) | `config`, `rules`, `util` |
 | `src/game/` | orchestration : règle → état → effets (sons, particules, bannières) | tout sauf `loop/` |
-| `src/render/` | canvas, sprites, scène, sol, HUD, FPS | `config`, `state`, `util` (exception assumée : `hud.js` importe `sfx` pour la bannière et `selectWeapon` pour le clic sur une case d'arme) |
-| `src/audio/` | sons synthétisés | `util` |
+| `src/render/` | canvas, sprites, scène, sol, HUD, FPS | `config`, `state`, `util`, `i18n` (exception assumée : `hud.js` importe `sfx` pour la bannière et `selectWeapon` pour le clic sur une case d'arme) |
+| `src/audio/` | sons synthétisés | `util`, `i18n` (libellé du bouton Son) |
 | `src/input/` | écouteurs clavier/souris, tactile, boutons, manette ; appellent directement les actions de `game/` | tout sauf `loop/` |
 | `src/loop/` | `update(dt)` et boucle `requestAnimationFrame` | tout |
 | `src/main.js` | point d'entrée | tout |
@@ -54,8 +55,8 @@ et les questions ouvertes : lis-le avant tout changement structurel.
   `cam` ne sont réaffectés que par `resetWorld`.
 - **Un module qui pose des écouteurs à l'import doit être importé dans `src/main.js`** — sinon il
   n'est jamais exécuté (c'est arrivé : boutons des écrans morts).
-- **Ne change pas** les clés `localStorage` (`STORAGE_BEST`, `STORAGE_FPS`, `STORAGE_OUTLINE`, `STORAGE_RUNS` :
-  `tete-carree-best`, `tete-carree-fps`, `tete-carree-outline`, `tete-carree-runs`), ni `base: './'` dans
+- **Ne change pas** les clés `localStorage` (`STORAGE_BEST`, `STORAGE_FPS`, `STORAGE_OUTLINE`, `STORAGE_RUNS`, `STORAGE_LANG` :
+  `tete-carree-best`, `tete-carree-fps`, `tete-carree-outline`, `tete-carree-runs`, `tete-carree-lang`), ni `base: './'` dans
   `vite.config.js`, ni les chemins relatifs (`./src/…`) de `index.html`.
 - **Ne retire pas** les protections navigateur : son démarré au premier geste, pause sur `blur` et
   `visibilitychange`, `navigator.getGamepads` sous `try/catch`, accès `localStorage` sous `try/catch`.
@@ -71,7 +72,10 @@ et les questions ouvertes : lis-le avant tout changement structurel.
 
 ### Style
 
-- Commentaires, textes du jeu, noms de tests et documentation en **français**.
+- Commentaires, noms de tests et documentation en **français**.
+- **Aucun texte affiché au joueur en dur** : il va dans `src/i18n/fr.js` **et** `src/i18n/en.js` (mêmes clés,
+  `tests/i18n.test.js` le vérifie) et se lit par `tr.<clé>` ; texte fixe de `index.html` par `data-i18n`,
+  `data-i18n-html` ou `data-i18n-aria`. Noms et textes des armes et cartes : `tr.weapons[w.id]`, `tr.cards[m.id]`.
 - Code compact du prototype conservé : fonctions courtes nommées en camelCase anglais
   (`hurtEnemy`, `spawnEnemy`), constantes de config en `SCREAMING_SNAKE_CASE`, entités en objets
   simples dans des tableaux (`world.enemies`, `world.pickups`…), types d'ennemis en une lettre
@@ -85,8 +89,8 @@ et les questions ouvertes : lis-le avant tout changement structurel.
 - Unités : distances en pixels du monde, une case = `T` px ; temps en secondes ; angles en radians.
 - La perspective 3/4 écrase l'axe vertical (souvent `* .55` ou `* 1.6` sur `y`) : garde ce facteur
   quand tu copies un calcul de portée au sol.
-- Les textes affichés au joueur (écran titre, bestiaire, `desc`/`plus`/`minus` des cartes) sont de la
-  documentation vivante : s'ils citent un nombre ou une règle, ils doivent rester vrais.
+- Les textes affichés au joueur (écran titre, bestiaire, `desc`/`plus`/`minus` des cartes dans `src/i18n/`) sont
+  de la documentation vivante, dans les deux langues : s'ils citent un nombre ou une règle, ils doivent rester vrais.
 
 ## Comportement attendu
 
