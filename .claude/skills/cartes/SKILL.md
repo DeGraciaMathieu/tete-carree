@@ -65,6 +65,7 @@ large, elles se couchent.
 | `lourde` (pacte majeur) | `shotDamageMul` ; `shotKnockMul` dans `shoot` ; `extraSpread` (un tirage `jitter` de plus) et `selfPush` dans `fireWeapon` ; recul cosmétique ×1,5 dans `recoil` |
 | `toutourien` (pacte majeur) | `multiplier` (`TOUTOURIEN_KILLS_PER_MULTIPLIER`) ; `potsKill` dans `killEnemy` (cagnotte `S.pot`), `potAfterHit` dans `hurtPlayer`, versement avec le bonus de fin de vague dans `update` ; `#pot` dans `updateHud` |
 | `sanspause` (pacte majeur) | `waveBreak` (`SANSPAUSE_BREAK`) ; `pickAfter` en fin de vague dans `update` ; `takeAllCards` : `openPick` tire hors pactes (`noPacts`), `takeAll` applique toutes les cartes |
+| `specialiste` (pacte majeur) | `choosePick` enchaîne sur `openWeaponPick` / `chooseWeapon` (`S.special`, munitions infinies) ; `canSwitch` dans `selectWeapon` et `cycleWeapon` ; `shotDamageMul`, `specialMul` (explosions du joueur dans `explosion`, PV des barricades dans `placeBlock`) ; caisses de munitions en points ; cases `.sealed` ; proposé à partir de `SPECIALISTE_MIN_WEAPONS` armes (`ctx.weapons` de `rollCards`) |
 
 ## Pactes majeurs
 

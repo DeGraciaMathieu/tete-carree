@@ -7,7 +7,7 @@ import { casing, dust, gibs, muzzleFx, sparks } from '../render/effects.js';
 import { GUNS } from '../render/sprites.js';
 import { clearShot, doorSet, frontTile, map, moveCircle, shotTile } from '../state/arena.js';
 import { S, ammo, blocks, cam, fireMul, jitter, mod, player, rng, unlocked, world } from '../state/world.js';
-import { ammoCost, extraSpread, selfPush, shotDamageMul, shotKnockMul, weaponCdMul } from '../rules/modifiers.js';
+import { ammoCost, canSwitch, extraSpread, selfPush, shotDamageMul, shotKnockMul, specialMul, weaponCdMul } from '../rules/modifiers.js';
 import { clamp } from '../util.js';
 
 // pierce : nombre d'ennemis que le tir peut toucher (Infinity pour le railgun) ; bounce : rebonds restants
@@ -64,7 +64,7 @@ function placeBlock(kind) {
   const rx = tx * T, ry = ty * T;
   const overl = e => { const cx = clamp(e.x, rx, rx + T), cy = clamp(e.y, ry, ry + T); return (e.x - cx) ** 2 + (e.y - cy) ** 2 < e.r * e.r; };
   if (overl(player) || world.enemies.some(e => !e.dead && overl(e))) return false;
-  const hp = kind === 'wall' ? WALL_HP : BARREL_HP;
+  const hp = kind === 'wall' ? WALL_HP * specialMul(S.mods) : BARREL_HP;
   const blk = { kind, i, tx, ty, hp, max: hp, flash: 0, drop: 1 };
   if (kind === 'wall') {
     S.wallCount++;
@@ -138,13 +138,13 @@ function loadedWeapon() {
   return player.weapon;
 }
 export function selectWeapon(i) {
-  if (i < 0 || i >= W.length || !unlocked[i] || ammo[i] <= 0 || player.weapon === i) return;
+  if (i < 0 || i >= W.length || !unlocked[i] || ammo[i] <= 0 || player.weapon === i || !canSwitch(S.special, i)) return;
   player.weapon = i; sfx('click');
 }
 export function cycleWeapon(dir) {
   for (let k = 1; k <= W.length; k++) {
     const i = (player.weapon + dir * k + W.length * 2) % W.length;
-    if (unlocked[i] && ammo[i] > 0) { player.weapon = i; sfx('click'); return; }
+    if (unlocked[i] && ammo[i] > 0 && canSwitch(S.special, i)) { player.weapon = i; sfx('click'); return; }
   }
 }
 export function updateTurret(b, dt) {

@@ -8,7 +8,7 @@ import { addPart, blood, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood, stampScorch } from '../render/floor.js';
 import { banner } from '../render/hud.js';
 import { playerProtected, resolveEnemyHit, secondWind } from '../rules/damage.js';
-import { comboAfterHit, ownBlastRadius, ownBlastSelfMul } from '../rules/modifiers.js';
+import { comboAfterHit, ownBlastRadius, ownBlastSelfMul, specialMul } from '../rules/modifiers.js';
 import { killPoints, potAfterHit, potsKill, rollDrop, soifHeal } from '../rules/scoring.js';
 import { isVoid } from '../state/arena.js';
 import { S, blocks, comboTime, mod, multiplier, player, rng, world } from '../state/world.js';
@@ -91,11 +91,12 @@ export function shockwave(x, y, R, dmg) {
 // own : explosion provoquée par le joueur (baril, grenade, roquette), soumise à Poudre noire
 export function explosion(x, y, R, dmg, own = false) {
   if (own) R = ownBlastRadius(S.mods, R);
+  const em = own ? specialMul(S.mods) : 1; // Spécialiste : ses explosions blessent deux fois plus la horde
   { const pd = Math.hypot(player.x - x, player.y - y); if (pd < 420) rumble(.75 * (1 - pd / 420), .45 * (1 - pd / 420), 220); }
   for (const e of world.enemies) {
     if (e.dead) continue;
     const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy) || 1;
-    if (d < R + e.r) { const f = 1 - Math.max(0, d - e.r) / R * BLAST_FALLOFF; hurtEnemy(e, dmg * f, dx / d, dy / d, BLAST_KNOCK * f, 'blast'); }
+    if (d < R + e.r) { const f = 1 - Math.max(0, d - e.r) / R * BLAST_FALLOFF; hurtEnemy(e, dmg * f * em, dx / d, dy / d, BLAST_KNOCK * f, 'blast'); }
   }
   const pd = Math.hypot(player.x - x, player.y - y);
   if (pd < R * BLAST_SELF_RANGE) hurtPlayer(dmg * BLAST_SELF_DAMAGE * (1 - pd / R * BLAST_SELF_FALLOFF) * (own ? ownBlastSelfMul(S.mods) : 1));

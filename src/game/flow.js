@@ -1,6 +1,6 @@
 // Enchaînement des écrans : titre, partie, pause, choix de carte, fin de partie.
 import { audio, sfx, silence } from '../audio/sfx.js';
-import { CONSTITUTION_HP, DIABLE_HP, MITRAILLE_PISTOL_AMMO, RAR, STORAGE_BEST, STORAGE_RUNS, TOP_RUNS, VERRE_HP } from '../config.js';
+import { CONSTITUTION_HP, DIABLE_HP, MITRAILLE_PISTOL_AMMO, RAR, STORAGE_BEST, STORAGE_RUNS, TOP_RUNS, VERRE_HP, W } from '../config.js';
 import { pad } from '../input/gamepad.js';
 import { releaseFire } from '../input/keyboard.js';
 import { cardIcon } from '../render/cardIcons.js';
@@ -9,7 +9,7 @@ import { banner, buildSlots, renderRuns, resetHud } from '../render/hud.js';
 import { isPact, rollCards } from '../rules/cards.js';
 import { takeAllCards, waveBreak } from '../rules/modifiers.js';
 import { rankRun } from '../rules/records.js';
-import { S, ammo, comboTime, mod, player, resetWorld, rng, rollMax, world } from '../state/world.js';
+import { S, ammo, comboTime, mod, player, resetWorld, rng, rollMax, unlocked, world } from '../state/world.js';
 import { $, clamp, fmt } from '../util.js';
 
 export function newGame() {
@@ -36,7 +36,7 @@ export function gameOver() {
   try { localStorage.setItem(STORAGE_RUNS, JSON.stringify(world.runs)); } catch (e) {}
   renderRuns(); $('overScreen').hidden = false;
 }
-let pickChoices = [], pickTimers = [], pickLocked = false;
+let pickChoices = [], pickTimers = [], pickLocked = false, weaponChoices = null;
 // Distribution : les cartes arrivent face cachée puis se retournent une à une, la Légendaire en dernier.
 const DEAL_FIRST_MS = 350, DEAL_STEP_MS = 300, DEAL_LEGEND_MS = 250, DEAL_OUT_MS = 320;
 function cardHtml(m, i) {
@@ -65,14 +65,14 @@ function dealCards(slots) {
 export function openPick() {
   // Pas de pause : le joueur gagne toutes les cartes proposées, tirées hors pactes
   const all = takeAllCards(S.mods);
-  pickChoices = rollCards(S.mods, rng, S.legendNext, { wave: S.wave, noPacts: all });
+  pickChoices = rollCards(S.mods, rng, S.legendNext, { wave: S.wave, noPacts: all, weapons: unlocked.filter(Boolean).length });
   if (!pickChoices.length) return;
   S.legendNext = false;
   world.state = 'pick'; releaseFire();
   pickTimers.forEach(clearTimeout); pickTimers = []; pickLocked = false;
   $('pickWave').textContent = `Vague ${S.wave} terminée`;
   $('pickTitle').textContent = all ? `Tu gagnes ces ${pickChoices.length > 1 ? pickChoices.length + ' cartes' : 'cette carte'}` : 'Choisis une carte';
-  const box = $('cards'); box.innerHTML = '';
+  const box = $('cards'); box.innerHTML = ''; box.classList.remove('weapons');
   pickChoices.forEach((m, i) => {
     const slot = document.createElement('div');
     slot.className = 'mslot'; slot.style.animationDelay = (i * 80) + 'ms';
@@ -88,6 +88,7 @@ export function openPick() {
   sfx('pickup');
 }
 export function choosePick(i) {
+  if (weaponChoices) { chooseWeapon(i); return; }
   const m = pickChoices[i], slots = $('cards').children;
   // une carte encore face cachée ne se choisit pas
   if (!m || world.state !== 'pick' || pickLocked || slots[i].firstChild.classList.contains('down')) return;
@@ -97,7 +98,37 @@ export function choosePick(i) {
   for (let k = 0; k < slots.length; k++) slots[k].classList.add(k === i ? 'chosen' : 'away');
   sfx('unlock');
   const sub = isPact(m) ? 'Pacte scellé' : mod(m.id) > 1 ? `Niveau ${mod(m.id)}` : 'Carte obtenue';
+  if (m.id === 'specialiste') { pickTimers.push(setTimeout(openWeaponPick, DEAL_OUT_MS)); return; }
   pickTimers.push(setTimeout(() => { $('pickScreen').hidden = true; world.state = 'play'; banner(m.name, sub); }, DEAL_OUT_MS));
+}
+// Spécialiste : le pacte pris, le joueur choisit parmi ses armes débloquées celle qu'il gardera. Pas de retour en arrière.
+function openWeaponPick() {
+  weaponChoices = W.map((w, i) => i).filter(i => unlocked[i]); pickLocked = false;
+  $('pickWave').textContent = 'Pacte scellé : tu ne pourras plus en changer';
+  $('pickTitle').textContent = 'Choisis ton arme';
+  const box = $('cards'); box.innerHTML = ''; box.classList.add('weapons');
+  weaponChoices.forEach((wi, k) => {
+    const slot = document.createElement('div');
+    slot.className = 'mslot'; slot.style.animationDelay = (k * 50) + 'ms';
+    const now = ammo[wi] === Infinity ? 'Déjà infinie' : `${ammo[wi]} munitions → ∞`;
+    slot.innerHTML = `<div class="mflip"><button class="mcard r-m wcard" aria-label="${W[wi].name}"><span class="rar">Arme ${wi + 1}</span>`
+      + `<span class="mname">${W[wi].name}</span><span class="mbody"><span>${now}</span></span></button></div><span class="mkey only-desk">${k + 1}</span>`;
+    const b = slot.querySelector('.mcard');
+    b.addEventListener('click', () => chooseWeapon(k));
+    b.addEventListener('pointerenter', () => { pickFocus = k; });
+    box.appendChild(slot);
+  });
+  pickFocus = 0; if (pad.on) focusCard(0);
+  sfx('pickup');
+}
+function chooseWeapon(k) {
+  const wi = weaponChoices[k], slots = $('cards').children;
+  if (wi === undefined || world.state !== 'pick' || pickLocked) return;
+  pickLocked = true; weaponChoices = null;
+  S.special = wi; player.weapon = wi; ammo[wi] = Infinity;
+  for (let j = 0; j < slots.length; j++) slots[j].classList.add(j === k ? 'chosen' : 'away');
+  sfx('unlock');
+  pickTimers.push(setTimeout(() => { $('pickScreen').hidden = true; world.state = 'play'; banner('Spécialiste', `Pacte scellé · ${W[wi].name}`); }, DEAL_OUT_MS));
 }
 // Pas de pause : toutes les cartes sont gagnées d'un coup, une fois toutes retournées.
 function takeAll(slots) {

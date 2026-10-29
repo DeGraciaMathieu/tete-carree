@@ -68,6 +68,11 @@ test('Pas de pause : les cartes gagnées d\'office ne sont jamais des pactes', (
   assert.ok(!draws({ sanspause: 1 }, { wave: 12, noPacts: true }).some(id => isPact(MODS.find(m => m.id === id))));
 });
 
+test('Spécialiste n\'est pas proposé tant que seul le pistolet est débloqué', () => {
+  assert.ok(!draws({}, { wave: 10, weapons: 1 }).includes('specialiste'));
+  assert.ok(draws({}, { wave: 10, weapons: 3 }, 600).includes('specialiste'));
+});
+
 test('chaque carte a son pictogramme', () => {
   for (const m of MODS) assert.match(cardIcon(m.id), /<(path|circle)/, m.id);
 });

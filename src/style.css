@@ -73,6 +73,7 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .slot.sel{border-color:var(--hazard);box-shadow:inset 0 -3px 0 var(--hazard)}
 .slot.sel .n{color:var(--hazard)}
 .slot.locked{opacity:.42;cursor:default}
+.slot.sealed{opacity:.3;cursor:default;text-decoration:line-through}
 .slot.locked .a{font-family:var(--mono);font-size:12px;color:var(--muted)}
 .slot.empty .a{color:var(--blood)}
 .slot.new{animation:newslot 1.6s ease-out}
@@ -108,6 +109,10 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .picktitle span{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--hazard)}
 .picktitle h2{font-family:var(--display);font-weight:400;font-size:clamp(28px,6vw,40px);margin:2px 0 0;text-wrap:balance}
 .cards{display:grid;grid-template-columns:repeat(3,minmax(0,220px));gap:18px;justify-content:center}
+/* Spécialiste : choix de l'arme gardée, cartes basses en grille */
+.cards.weapons{grid-template-columns:repeat(auto-fit,minmax(140px,180px))}
+.mcard.wcard{aspect-ratio:auto;min-height:110px;justify-content:center}
+.mcard.wcard .rar{margin-top:0}
 /* Carte à jouer : papier clair, cadre à la couleur de la rareté, niveau dans les coins ; distribuée face cachée */
 .r-c{--rd:#5d645c} .r-r{--rd:#2c6ea3} .r-l{--rd:#8a6a00} .r-p{--rd:var(--r-p)} .r-m{--rd:var(--r-m)}
 .mslot{position:relative;perspective:900px;animation:cardin .32s ease-out backwards;transition:transform .3s ease-in,opacity .3s}
@@ -154,6 +159,9 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 /* Téléphone : cartes couchées, coin à gauche, texte à droite */
 @media (max-width:640px){
   .cards{grid-template-columns:1fr;gap:10px}
+  .cards.weapons{grid-template-columns:1fr 1fr}
+  .mcard.wcard{display:flex;min-height:72px;text-align:center}
+  .mcard.wcard .rar{position:static}
   .mcard{aspect-ratio:auto;display:grid;grid-template-columns:38px 1fr;grid-template-areas:"ix name" "ico body" "ico pips";column-gap:12px;row-gap:3px;align-items:start;text-align:left;padding:12px 14px 10px 12px}
   .mix.tl{position:static;grid-area:ix;justify-self:center}
   .mix.br{display:none}

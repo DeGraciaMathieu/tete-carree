@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, repitBonus, waveBreak,
-  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, pickAfter, takeAllCards, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
+  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, pickAfter, takeAllCards, canSwitch, specialMul, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
 } from '../src/rules/modifiers.js';
 
 test('le multiplicateur gagne un cran tous les 5 kills enchaînés', () => {
@@ -224,4 +224,16 @@ test('Pas de pause : 1,5 s entre deux vagues, un choix de cartes après les vagu
   assert.equal(pickAfter({ sanspause: 1 }, 8), true);
   assert.equal(pickAfter({}, 7), true);
   assert.equal(takeAllCards({ sanspause: 1 }), true);
+});
+
+test('Spécialiste : seule l\'arme choisie se sélectionne', () => {
+  assert.equal(canSwitch(3, 3), true);
+  assert.equal(canSwitch(3, 0), false);
+  assert.equal(canSwitch(-1, 0), true);
+});
+
+test('Spécialiste : ses tirs, ses explosions et ses barricades comptent double', () => {
+  assert.equal(shotDamageMul({ specialiste: 1 }, 'shotgun', 100, false), 2);
+  assert.equal(specialMul({ specialiste: 1 }), 2);
+  assert.equal(specialMul({}), 1);
 });

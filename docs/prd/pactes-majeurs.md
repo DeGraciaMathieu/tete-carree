@@ -299,8 +299,7 @@ l'écran) ; `render/hud.js` (armes barrées) ; `src/style.css` (rangée d'armes,
 
 **Tests.** `cards.test.js` : « Spécialiste n'est pas proposé avec une seule arme débloquée ».
 `modifiers.test.js` : « Spécialiste : seule l'arme choisie est sélectionnable », « Spécialiste : dégâts
-×2 sur l'arme choisie seulement ». `unlock.test.js` : « Spécialiste : une arme débloquée après le pacte
-reste inutilisable ». Vérifications manuelles : choix au clavier, à la manette et au tactile, en
+×2 sur l'arme choisie seulement ». la règle `canSwitch` couvre aussi les armes débloquées après le pacte. Vérifications manuelles : choix au clavier, à la manette et au tactile, en
 portrait et en paysage.
 
 ---

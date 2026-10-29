@@ -21,7 +21,7 @@ addEventListener('keydown', e => {
     return;
   }
   if (world.state === 'over' && e.code === 'Enter') { startGame(); return; }
-  if (world.state === 'pick') { const m = /^(Digit|Numpad)([1-3])$/.exec(e.code); if (m) choosePick(+m[2] - 1); return; }
+  if (world.state === 'pick') { const m = /^(Digit|Numpad)([1-9])$/.exec(e.code); if (m) choosePick(+m[2] - 1); return; }
   if (e.code === 'KeyP' || e.code === 'Escape') { if (world.state === 'play') pause(); else if (world.state === 'pause') resume(); return; }
   if (e.code === 'KeyF') { setFps(!fpsOn); return; }
   if (world.state !== 'play') return;

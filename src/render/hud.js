@@ -148,11 +148,13 @@ export function updateHud() {
   setText('comboKills', S.combo + (S.combo > 1 ? ' kills' : ' kill'));
   setStyle('comboFill', 'width', (S.combo ? S.comboT / comboTime() * 100 : 0).toFixed(1) + '%');
   W.forEach((w, i) => {
-    const sig = (unlocked[i] ? 'u' : 'l') + (player.weapon === i ? 's' : '') + ammo[i];
+    const sealed = S.special >= 0 && i !== S.special; // Spécialiste : les autres armes sont condamnées
+    const sig = (unlocked[i] ? 'u' : 'l') + (player.weapon === i ? 's' : '') + (sealed ? 'x' : '') + ammo[i];
     if (slotSig[i] === sig) return; slotSig[i] = sig;
     const b = $('slot' + i);
     b.classList.toggle('locked', !unlocked[i]);
     b.classList.toggle('sel', player.weapon === i);
+    b.classList.toggle('sealed', sealed);
     b.classList.toggle('empty', unlocked[i] && ammo[i] <= 0);
     b.querySelector('.a').textContent = !unlocked[i] ? fmt(w.unlock) : ammo[i] === Infinity ? '∞' : ammo[i];
   });
