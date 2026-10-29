@@ -108,15 +108,15 @@ function renderHp() {
 export function buildArsenal() {
   $('arsenalList').innerHTML = W.map(w => `<li><span class="n">${tr.weapons[w.id].name}</span><span class="u">${w.unlock ? tr.unlockAt(fmt(w.unlock)) : tr.starter}</span></li>`).join('');
 }
-// Volet Cartes de l'écran titre : toutes les cartes par rareté, au texte de leur premier niveau.
+// Volet Cartes de l'écran titre : toutes les cartes par rareté, une ligne chacune, au texte de leur premier niveau.
 export function buildCardsPanel() {
   $('cardsList').innerHTML = Object.keys(tr.rarGroups).map(r => {
     const cards = MODS.filter(m => m.rar === r).map(m => {
       const c = tr.cards[m.id], body = c.plus ? `<span class="plus">+ ${c.plus(1)}</span><span class="minus">− ${c.minus(1)}</span>` : `<span>${c.desc(1)}</span>`;
-      return `<div class="mcard r-${r}"><span class="rar">${tr.rar[r]}</span><span class="mico">${cardIcon(m.id)}</span><span class="mname">${c.name}</span>`
-        + `<span class="mbody">${body}</span><span class="lv">${m.max > 1 ? tr.upTo(m.max) : tr.unique}</span></div>`;
+      return `<div class="crow r-${r}"><span class="mico">${cardIcon(m.id)}</span><span class="cname">${c.name}</span>`
+        + `<span class="clv">${m.max > 1 ? tr.upTo(m.max) : tr.unique}</span><span class="ctext">${body}</span></div>`;
     }).join('');
-    return `<h3 class="rgroup r-${r}">${tr.rarGroups[r]} · ${MODS.filter(m => m.rar === r).length}</h3><div class="cgrid">${cards}</div>`;
+    return `<h3 class="rgroup r-${r}">${tr.rarGroups[r]} · ${MODS.filter(m => m.rar === r).length}</h3><div class="clist">${cards}</div>`;
   }).join('');
 }
 function runDate(t) {
