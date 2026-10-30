@@ -98,14 +98,17 @@ const PLANS = {
     set4(8, 6, 2); set4(15, 13, 2);
   },
 };
+// arène construite par buildMap (le rendu en tire son thème) : en mode Histoire, ce n'est pas l'arène choisie sur l'accueil
+export let mapId = 'entrepot';
 export function buildMap(id) {
+  mapId = PLANS[id] ? id : 'entrepot';
   map.fill(0); doors.length = 0; doorSet.clear();
   rect(0, 0, MW, 1, 1); rect(0, MH - 1, MW, 1, 1); rect(0, 0, 1, MH, 1); rect(MW - 1, 0, 1, MH, 1);
   const cx = MW / 2 | 0, cy = MH / 2 | 0;
   for (const [x, y] of [[cx - 1, 0], [cx, 0], [cx - 1, MH - 1], [cx, MH - 1], [0, cy - 1], [0, cy], [MW - 1, cy - 1], [MW - 1, cy]]) {
     map[y * MW + x] = 0; doors.push([x, y]); doorSet.add(y * MW + x);
   }
-  (PLANS[id] || PLANS.entrepot)(cx, cy);
+  PLANS[mapId](cx, cy);
 }
 
 export function tileAt(tx, ty) { return Grid.tileAt(map, blocks, tx, ty); }

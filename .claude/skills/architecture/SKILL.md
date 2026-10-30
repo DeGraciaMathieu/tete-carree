@@ -33,7 +33,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/rules/records.js` | `rankRun` (classement des meilleures parties) | — |
 | `src/rules/damage.js` | `resolveEnemyHit`, `playerProtected`, `secondWind` | config, modifiers |
 | `src/state/world.js` | `world` (écran, collections, `shake`, `fieldDirty`, `best`, `runs`, `arena`), `S` (session), `player`, `blocks`, `unlocked`, `ammo`, `cam`, `rng`, `jitter`, raccourcis `mod`/`frenzy`/`fireMul`…, `resetWorld` | config, rules, arena |
-| `src/state/arena.js` | `map`, `doors`, `doorSet`, plans des arènes (`PLANS`), `buildMap(id)`, collisions (`moveCircle`, `unstick`), wrappers des règles de grille liés à l'état, `dist` + `computeField`/`nextStep`, `frontTile`, `clearShot` | rules/map, rules/pathfield |
+| `src/state/arena.js` | `map`, `doors`, `doorSet`, plans des arènes (`PLANS`), `buildMap(id)`, `mapId` (arène construite, lue par le rendu), collisions (`moveCircle`, `unstick`), wrappers des règles de grille liés à l'état, `dist` + `computeField`/`nextStep`, `frontTile`, `clearShot` | rules/map, rules/pathfield |
 | `src/game/combat.js` | `hurtEnemy`, `killEnemy`, `hurtPlayer`, `shockwave`, `explosion`, `toxicBurst` | rules/damage, rules/scoring, render/effects |
 | `src/game/weapons.js` | `fireWeapon`, `selectWeapon`, `cycleWeapon`, constructions (`placeBlock`, `damageBlock`, `explodeBarrel`), `updateTurret` | combat |
 | `src/game/enemies.js` | `spawnEnemy`, `startWave`, `spit`, `updateGlobs` | rules/waves |
@@ -52,6 +52,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/render/arsenal.js` | `buildArsenal`, `drawArsenal` (vignettes repeintes quand leur taille change, volet ouvert seulement) | config (`W`, `SHOTS`, explosifs, barricade), i18n, render/canvas (`drawOn`), render/scene (`drawBlock`), render/sprites (`drawGun`) |
 | `src/render/bestiary.js` | `buildBestiary`, `drawBestiary` (portraits animés, volet ouvert seulement) | config (`ENEMY_STATS`, `KILL_POINTS`), i18n, rules/waves (`firstWave`), render/canvas (`drawOn`), render/sprites |
 | `src/render/minimap.js` | `drawArenaMap` | config (`MW`, `MH`, `T`), state (`map`, `doors`, `player`, `world`) |
+| `src/render/themes.js` | `themeOf(id)` : couleurs du sol, des murs, des caisses de plan, du vide et du mini-plan par arène (`beton` pour les cinq arènes d'origine) | rien |
 | `src/audio/sfx.js` | `audio()` (démarrage au premier geste), `sfx(name)`, bouton son (`showMute`) | i18n |
 | `src/input/keyboard.js` | `keys`, `mouseFire`, `releaseFire`, raccourcis, pause sur `blur`/`visibilitychange` | game |
 | `src/input/touch.js` | `stick`, `aim`, boutons ROULER/ARME | game |

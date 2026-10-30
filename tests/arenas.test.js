@@ -1,7 +1,7 @@
 import { describe, test } from 'vitest';
 import assert from 'node:assert/strict';
 import { ARENAS, MH, MW, T } from '../src/config.js';
-import { buildMap, doors, map } from '../src/state/arena.js';
+import { buildMap, doors, map, mapId } from '../src/state/arena.js';
 
 // case de départ du joueur (resetWorld)
 const START_X = 22, START_Y = 15 + 4 / T | 0;
@@ -21,6 +21,11 @@ function reachable() {
 }
 
 describe.each(ARENAS)('arène %s', id => {
+  test('l\'arène construite est retenue : le rendu en tire son thème', () => {
+    buildMap(id);
+    assert.equal(mapId, id);
+  });
+
   test('le joueur démarre sur une case de sol libre', () => {
     buildMap(id);
     assert.equal(map[START_Y * MW + START_X], 0);

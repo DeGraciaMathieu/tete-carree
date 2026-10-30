@@ -3,7 +3,8 @@ import { AVEUGLE_SIGHT, LOW_HP, MH, MW, T, W } from '../config.js';
 import { ctx, cv, dpr, outlined, zoom } from './canvas.js';
 import { floorC } from './floor.js';
 import { aimMuzzle, drawAcidGround, drawArmored, drawBloater, drawChar, drawGlobs, drawPlayerState, drawRunner, drawSpitter } from './sprites.js';
-import { doorSet, frontTile, map, passable, tileAt } from '../state/arena.js';
+import { themeOf } from './themes.js';
+import { doorSet, frontTile, map, mapId, passable, tileAt } from '../state/arena.js';
 import { S, blocks, cam, mod, player, world } from '../state/world.js';
 import { rnd } from '../util.js';
 
@@ -70,30 +71,37 @@ function drawBeacons() {
     ctx.fillStyle = g; ctx.fillRect(p.x - 4, p.y - 74, 8, 62);
   }
 }
+// Thème de l'arène construite, relu au début de chaque image.
+let th = themeOf(mapId);
 function drawTile(tx, ty, kind) {
   const x = tx * T, y = ty * T, h = kind === 1 ? 26 : 18;
   const below = tileAt(tx, ty + 1) === 1 && map[(ty + 1) * MW + tx] === kind;
   if (kind === 1) {
-    if (!below || ty + 1 >= MH) { ctx.fillStyle = '#3c4245'; ctx.fillRect(x, y + T - h, T, h); ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(x, y + T - 4, T, 4); ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fillRect(x + T - 1, y + T - h, 1, h); }
-    ctx.fillStyle = '#596166'; ctx.fillRect(x, y - h, T, T);
-    ctx.fillStyle = '#737c81';
+    const w = th.wall;
+    if (!below || ty + 1 >= MH) { ctx.fillStyle = w.face; ctx.fillRect(x, y + T - h, T, h); ctx.fillStyle = 'rgba(0,0,0,.18)'; ctx.fillRect(x, y + T - 4, T, 4); ctx.fillStyle = 'rgba(255,255,255,.05)'; ctx.fillRect(x + T - 1, y + T - h, 1, h); }
+    ctx.fillStyle = w.top; ctx.fillRect(x, y - h, T, T);
+    ctx.fillStyle = w.light;
     const same = (dx, dy) => { const nx = tx + dx, ny = ty + dy; return nx < 0 || ny < 0 || nx >= MW || ny >= MH || map[ny * MW + nx] === 1; };
     if (!same(0, -1)) ctx.fillRect(x, y - h, T, 2);
     if (!same(-1, 0)) ctx.fillRect(x, y - h, 2, T);
-    if (!same(1, 0)) { ctx.fillStyle = '#4c5357'; ctx.fillRect(x + T - 2, y - h, 2, T); }
+    if (!same(1, 0)) { ctx.fillStyle = w.side; ctx.fillRect(x + T - 2, y - h, 2, T); }
   } else {
-    ctx.fillStyle = '#8f6639'; ctx.fillRect(x + 1, y + T - h, T - 2, h);
-    ctx.strokeStyle = '#6a4a28'; ctx.lineWidth = 1.5;
+    const c = th.crate;
+    ctx.fillStyle = c.face; ctx.fillRect(x + 1, y + T - h, T - 2, h);
+    ctx.strokeStyle = c.line; ctx.lineWidth = 1.5;
     ctx.strokeRect(x + 2.5, y + T - h + 1.5, T - 5, h - 3);
     ctx.beginPath(); ctx.moveTo(x + 3, y + T - 2); ctx.lineTo(x + T - 3, y + T - h + 2); ctx.stroke();
-    ctx.fillStyle = '#b98c55'; ctx.fillRect(x + 1, y - h + 1, T - 2, T - 2);
-    ctx.fillStyle = '#a57a46'; for (let k = 1; k < 4; k++) ctx.fillRect(x + 1, y - h + 1 + k * 7.5, T - 2, 1.5);
-    ctx.strokeStyle = '#7d5a31'; ctx.strokeRect(x + 1.5, y - h + 1.5, T - 3, T - 3);
+    ctx.fillStyle = c.top; ctx.fillRect(x + 1, y - h + 1, T - 2, T - 2);
+    ctx.fillStyle = c.slat; for (let k = 1; k < 4; k++) ctx.fillRect(x + 1, y - h + 1 + k * 7.5, T - 2, 1.5);
+    ctx.strokeStyle = c.rim; ctx.strokeRect(x + 1.5, y - h + 1.5, T - 3, T - 3);
   }
 }
 function drawVoid(tx0, tx1, ty0, ty1) {
+  const v = th.void;
+  if (v.kind === 'water') { drawWater(v, tx0, tx1, ty0, ty1); return; }
+  if (v.kind === 'wire') { drawWire(v, tx0, tx1, ty0, ty1); return; }
   // 1er passage : le fond noir, légèrement débordant pour éviter les liserés entre tuiles
-  ctx.fillStyle = '#0c0d0e';
+  ctx.fillStyle = v.bg;
   for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
     if (map[ty * MW + tx] === 3) ctx.fillRect(tx * T - .5, ty * T - .5, T + 1, T + 1);
   }
@@ -114,6 +122,30 @@ function drawVoid(tx0, tx1, ty0, ty1) {
     if (!lf) { const g = ctx.createLinearGradient(x, 0, x + 6, 0); g.addColorStop(0, 'rgba(110,114,106,.55)'); g.addColorStop(1, 'rgba(12,13,14,0)'); ctx.fillStyle = g; ctx.fillRect(x, y, 6, T); }
     if (!rt) { const g = ctx.createLinearGradient(x + T, 0, x + T - 6, 0); g.addColorStop(0, 'rgba(110,114,106,.35)'); g.addColorStop(1, 'rgba(12,13,14,0)'); ctx.fillStyle = g; ctx.fillRect(x + T - 6, y, 6, T); }
     if (!dn) { ctx.fillStyle = 'rgba(0,0,0,.45)'; ctx.fillRect(x, y + T - 5, T, 3); ctx.fillStyle = '#9a9e96'; ctx.fillRect(x, y + T - 2, T, 2); }
+  }
+}
+// Eau des égouts : nappe en aplat, rebord de pierre sombre au fond, bord de quai devant.
+function drawWater(v, tx0, tx1, ty0, ty1) {
+  for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
+    if (map[ty * MW + tx] !== 3) continue;
+    const x = tx * T, y = ty * T;
+    ctx.fillStyle = v.bg; ctx.fillRect(x - .5, y - .5, T + 1, T + 1);
+    if (ty > 0 && map[(ty - 1) * MW + tx] !== 3) { ctx.fillStyle = v.lip; ctx.fillRect(x, y, T, 6); }
+    if (ty < MH - 1 && map[(ty + 1) * MW + tx] !== 3) { ctx.fillStyle = v.rim; ctx.fillRect(x, y + T - 3, T, 3); }
+  }
+}
+// Barbelés de Sibérie : la neige, deux rangs de fil sombre hérissés, un poteau une case sur deux.
+function drawWire(v, tx0, tx1, ty0, ty1) {
+  for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
+    if (map[ty * MW + tx] !== 3) continue;
+    const x = tx * T, y = ty * T;
+    ctx.fillStyle = v.bg; ctx.fillRect(x - .5, y - .5, T + 1, T + 1);
+    ctx.fillStyle = v.wire;
+    for (let wy = 10; wy <= 21; wy += 11) {
+      ctx.fillRect(x, y + wy, T, 1.5);
+      for (let k = 2; k < T; k += 6) ctx.fillRect(x + k, y + wy - 1.5, 1.5, 4.5);
+    }
+    if ((tx + ty) & 1) { ctx.fillStyle = v.post; ctx.fillRect(x + T / 2 - 1.5, y + 4, 3, 22); }
   }
 }
 function drawFires() {
@@ -215,6 +247,7 @@ export function render() {
   ctx.setTransform(s, 0, 0, s, ox, oy);
   ctx.imageSmoothingEnabled = true;
   ctx.drawImage(floorC, 0, 0);
+  th = themeOf(mapId);
 
   const hw = cv.width / 2 / s, hh = cv.height / 2 / s;
   const tx0 = Math.max(0, Math.floor((cam.x - hw) / T) - 1), tx1 = Math.min(MW - 1, Math.floor((cam.x + hw) / T) + 1);
@@ -222,7 +255,7 @@ export function render() {
 
   drawVoid(tx0, tx1, ty0, ty1);
   // ombres portées des murs
-  ctx.fillStyle = 'rgba(30,32,30,.16)';
+  ctx.fillStyle = th.shadow;
   for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
     const m0 = map[ty * MW + tx];
     if ((m0 === 1 || m0 === 2) && ty + 1 < MH && !map[(ty + 1) * MW + tx]) ctx.fillRect(tx * T, (ty + 1) * T, T, 7);

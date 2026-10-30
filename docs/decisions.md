@@ -172,6 +172,20 @@ Maquettes comparées avant de choisir (proposition 1 retenue sur trois : carte c
 - Les barbelés du Camp de Sibérie sont des cases de vide : ils arrêtent les corps et laissent passer les
   tirs, la roulade les franchit, un ennemi projeté dedans sort du jeu comme dans une crevasse.
 
+## Thèmes des arènes
+
+Spécification : `docs/prd/themes-palettes.md`.
+
+- Un thème par arène des chapitres (Chinatown, Camp de Sibérie, Les égouts, Camp militaire), `beton` pour les
+  cinq arènes d'origine, inchangées. Couleurs seules dans `render/themes.js`, hors de `config.js` comme toutes
+  les couleurs ; les formes propres à chaque décor et l'ambiance viennent ensuite
+  (`docs/prd/themes-decor-ambiance.md`).
+- Le rendu lit l'arène **construite** (`mapId` de `state/arena.js`), pas l'arène choisie sur l'accueil : le
+  mode Histoire construira d'autres arènes que `world.arena`.
+- Le vide change d'aspect selon le thème : crevasse noire (béton), eau (égouts), barbelés au ras de la neige
+  (Sibérie). Ses règles ne changent pas.
+- Le rectangle pointillé jaune « façon entrepôt » ne reste que sur le thème béton.
+
 ## Écran titre : volet Cartes
 
 - Une ligne par carte sur deux colonnes (une seule sur téléphone), groupées par rareté avec un liseré à sa couleur :
