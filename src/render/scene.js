@@ -264,7 +264,7 @@ export function render() {
     if ((m0 === 1 || m0 === 2) && ty + 1 < MH && !map[(ty + 1) * MW + tx]) ctx.fillRect(tx * T, (ty + 1) * T, T, 7);
   }
 
-  if (dec) dec.drawBack(S.time, ambianceOn);
+  if (dec) dec.drawBack(S.time, ambianceOn, tx0, tx1, ty0, ty1);
   drawAcidGround();
   drawFires();
   drawMarkers();

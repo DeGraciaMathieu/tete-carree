@@ -201,6 +201,11 @@ Spécification : `docs/prd/themes-palettes.md`.
   blanc, neige poussée par le vent, vignette blanche), seul chapitre de jour ; la variante de nuit avec
   projecteurs n'a pas été retenue, les projecteurs des miradors restent éteints, simple décor. Inscriptions en
   cyrillique hors traduction (police Russo One, chargée pour leurs seuls caractères).
+- Les égouts (maquette https://claude.ai/artifact/1XZfEfpUjJx3KhuAWhY7dZ), plan inchangé : canaux qui coulent
+  (vers l'est et vers le sud), passerelles en caillebotis, bouches de tuyaux géants sur les quatre portes, mur
+  du fond en briques avec tuyaux, lampes grillagées et tags sans texte, piliers moussus, caisses pourries et
+  fûts toxiques ; pénombre verdâtre, cinq rais de lumière des plaques d'égout (dont un sur la case de départ),
+  gouttes et ronds dans l'eau.
 - Chaque décor règle son ambiance : `NIGHT` (teinte multipliée ou `null`), `FOG` (voile ou `null`), `WEATHER`
   (`'rain'`, `'snow'`), `VIGNETTE` (teinte des bords). Un décor peint aussi son vide : le rendu générique des
   crevasses est sauté.
