@@ -200,6 +200,19 @@ Spécification : `docs/prd/themes-palettes.md`.
   teinte (`render/ambiance.js`), pluie en tableaux typés : rien n'est alloué par image.
 - `npm run perf -- 20 <arène>` mesure une arène donnée.
 
+## Mode Histoire
+
+Spécification : `docs/prd/mode-histoire.md` et ses six étapes.
+
+- À côté du mode Arène. Quatre chapitres (`STORY_CHAPTERS` : Chinatown, Camp de Sibérie, Les égouts, Camp
+  militaire), cinq vagues chacun (`STORY_WAVES`), numérotation continue : les vagues 1 à 20 sont celles du mode
+  Arène. Entre deux chapitres, on garde tout (cartes, score, vie, armes, munitions) ; constructions, caisses,
+  flaques et ennemis disparaissent sans remboursement (`enterArena`). À la mort, on recommence au chapitre 1.
+- `resetWorld(arenaId)` construit l'arène passée : le mode Histoire ne touche jamais à `world.arena`, l'arène
+  choisie sur l'accueil.
+- Classement à part, sous `STORAGE_STORY` (`tete-carree-story`) : chapitre atteint d'abord, une histoire
+  terminée devant tout, score ensuite (`rankStoryRun`).
+
 ## Écran titre : volet Cartes
 
 - Une ligne par carte sur deux colonnes (une seule sur téléphone), groupées par rareté avec un liseré à sa couleur :

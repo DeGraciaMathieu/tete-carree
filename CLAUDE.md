@@ -55,8 +55,8 @@ et les questions ouvertes : lis-le avant tout changement structurel.
   `cam` ne sont réaffectés que par `resetWorld`.
 - **Un module qui pose des écouteurs à l'import doit être importé dans `src/main.js`** — sinon il
   n'est jamais exécuté (c'est arrivé : boutons des écrans morts).
-- **Ne change pas** les clés `localStorage` (`STORAGE_BEST`, `STORAGE_FPS`, `STORAGE_OUTLINE`, `STORAGE_RUNS`, `STORAGE_LANG`, `STORAGE_ARENA`, `STORAGE_AMBIANCE` :
-  `tete-carree-best`, `tete-carree-fps`, `tete-carree-outline`, `tete-carree-runs`, `tete-carree-lang`, `tete-carree-arena`, `tete-carree-ambiance`), ni `base: './'` dans
+- **Ne change pas** les clés `localStorage` (`STORAGE_BEST`, `STORAGE_FPS`, `STORAGE_OUTLINE`, `STORAGE_RUNS`, `STORAGE_LANG`, `STORAGE_ARENA`, `STORAGE_AMBIANCE`, `STORAGE_STORY` :
+  `tete-carree-best`, `tete-carree-fps`, `tete-carree-outline`, `tete-carree-runs`, `tete-carree-lang`, `tete-carree-arena`, `tete-carree-ambiance`, `tete-carree-story`), ni `base: './'` dans
   `vite.config.js`, ni les chemins relatifs (`./src/…`) de `index.html`.
 - **Ne retire pas** les protections navigateur : son démarré au premier geste, pause sur `blur` et
   `visibilitychange`, `navigator.getGamepads` sous `try/catch`, accès `localStorage` sous `try/catch`.

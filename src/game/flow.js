@@ -14,8 +14,8 @@ import { rankRun } from '../rules/records.js';
 import { S, ammo, comboTime, mod, player, resetWorld, rng, rollMax, unlocked, world } from '../state/world.js';
 import { $, clamp, fmt } from '../util.js';
 
-export function newGame() {
-  resetWorld();
+export function newGame(arenaId) {
+  resetWorld(arenaId);
   paintFloor();
   resetHud();
   buildSlots();

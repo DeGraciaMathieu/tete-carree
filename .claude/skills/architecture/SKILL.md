@@ -30,9 +30,10 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/rules/cards.js` | `rollCards(mods, rng)` | config, modifiers |
 | `src/rules/waves.js` | `waveQueue`, `queueCount`, `spawnBurst`, `spawnGap` | config, modifiers |
 | `src/rules/scoring.js` | `killPoints`, `soifHeal`, `rollDrop` | config, modifiers |
-| `src/rules/records.js` | `rankRun` (classement des meilleures parties) | — |
+| `src/rules/records.js` | `rankRun` (classement des meilleures parties du mode Arène), `rankStoryRun` (mode Histoire : chapitre atteint, histoire terminée devant, puis score) | — |
+| `src/rules/story.js` | mode Histoire : `chapterOf(wave)`, `chapterArena(i)`, `endsChapter(wave)`, `endsStory(wave)` | config (`STORY_CHAPTERS`, `STORY_WAVES`) |
 | `src/rules/damage.js` | `resolveEnemyHit`, `playerProtected`, `secondWind` | config, modifiers |
-| `src/state/world.js` | `world` (écran, collections, `shake`, `fieldDirty`, `best`, `runs`, `arena`), `S` (session), `player`, `blocks`, `unlocked`, `ammo`, `cam`, `rng`, `jitter`, raccourcis `mod`/`frenzy`/`fireMul`…, `resetWorld` | config, rules, arena |
+| `src/state/world.js` | `world` (écran, collections, `shake`, `fieldDirty`, `best`, `runs`, `arena`), `S` (session), `player`, `blocks`, `unlocked`, `ammo`, `cam`, `rng`, `jitter`, raccourcis `mod`/`frenzy`/`fireMul`…, `resetWorld(arenaId)`, `enterArena(id)` (changement d'arène sans recommencer la partie) ; `world.mode` (`arena` ou `story`), `world.storyRuns`, `S.chapter`, `S.outroT` | config, rules, arena |
 | `src/state/arena.js` | `map`, `doors`, `doorSet`, plans des arènes (`PLANS`), `buildMap(id)`, `mapId` (arène construite, lue par le rendu), collisions (`moveCircle`, `unstick`), wrappers des règles de grille liés à l'état, `dist` + `computeField`/`nextStep`, `frontTile`, `clearShot` | rules/map, rules/pathfield |
 | `src/game/combat.js` | `hurtEnemy`, `killEnemy`, `hurtPlayer`, `shockwave`, `explosion`, `toxicBurst` | rules/damage, rules/scoring, render/effects |
 | `src/game/weapons.js` | `fireWeapon`, `selectWeapon`, `cycleWeapon`, constructions (`placeBlock`, `damageBlock`, `explodeBarrel`), `updateTurret` | combat |

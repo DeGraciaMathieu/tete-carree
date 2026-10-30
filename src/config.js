@@ -268,6 +268,11 @@ export const FIELD_PERIOD = .22; // recalcul du champ de distances (s)
 export const PATH_BLOCK_COST = 9; // surcoût d'une construction pour la horde : elle préfère contourner
 export const MAX_DT = 1 / 30;     // pas de simulation maximal (s)
 
+/* ---------- Mode Histoire ---------- */
+export const STORY_CHAPTERS = ['chinatown', 'siberie', 'egouts', 'militaire']; // arène de chaque chapitre, dans l'ordre
+export const STORY_WAVES = 5;          // vagues par chapitre ; la numérotation continue d'un chapitre à l'autre
+export const STORY_OUTRO_DELAY = 1.5;  // secondes entre la fin du dernier choix de cartes et la scène de fin de chapitre
+
 /* ---------- Entrées ---------- */
 export const STICK_RADIUS = 48;
 export const PAD_MOVE_DEADZONE = .22, PAD_AIM_DEADZONE = .25;
@@ -282,6 +287,7 @@ export const STORAGE_RUNS = 'tete-carree-runs';
 export const STORAGE_LANG = 'tete-carree-lang'; // fr ou en, choisie sur l'accueil
 export const STORAGE_ARENA = 'tete-carree-arena'; // arène choisie sur l'accueil
 export const STORAGE_AMBIANCE = 'tete-carree-ambiance'; // option Ambiance : nuit, pluie, vignette des arènes thématiques
+export const STORAGE_STORY = 'tete-carree-story'; // classement du mode Histoire : JSON { last, top }
 export const TOP_RUNS = 5;
 // Version publiée : compteur masqué tant que le joueur ne l'a pas activé lui-même.
 export const SHOW_FPS_BY_DEFAULT = false;

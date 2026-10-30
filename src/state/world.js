@@ -1,6 +1,6 @@
 // État de la partie en cours (session, joueur, collections d'entités), création d'une nouvelle partie
 // et accès aux modificateurs et au combo de la session.
-import { ARENAS, BOX_FIRST, FIRST_BREAK, PLAYER_HP, PLAYER_RADIUS, STORAGE_ARENA, STORAGE_BEST, STORAGE_RUNS, T, W } from '../config.js';
+import { ARENAS, BOX_FIRST, FIRST_BREAK, PLAYER_HP, PLAYER_RADIUS, STORAGE_ARENA, STORAGE_BEST, STORAGE_RUNS, STORAGE_STORY, T, W } from '../config.js';
 import * as Mods from '../rules/modifiers.js';
 import { createRng } from '../rules/rng.js';
 import * as Waves from '../rules/waves.js';
@@ -42,6 +42,8 @@ export const world = {
   runs: { last: null, top: [] }, // dernière partie et meilleures parties { score, wave, kills, combo, mods, t }
   demo: false, // partie de démo derrière l'écran titre (game/demo.js)
   arena: ARENAS[0], // arène choisie sur l'accueil (state/arena.js)
+  mode: 'arena', // 'arena' ou 'story' (mode Histoire)
+  storyRuns: { last: null, top: [] }, // dernière partie et meilleures parties du mode Histoire, + { chapter, won, time }
 };
 
 export let S, player, blocks, unlocked, ammo, cam;
@@ -49,20 +51,34 @@ export let S, player, blocks, unlocked, ammo, cam;
 try { const a = localStorage.getItem(STORAGE_ARENA); if (ARENAS.includes(a)) world.arena = a; } catch (e) {}
 try { world.best = +localStorage.getItem(STORAGE_BEST) || 0; } catch (e) {}
 try { const r = JSON.parse(localStorage.getItem(STORAGE_RUNS)); if (r && Array.isArray(r.top)) world.runs = r; } catch (e) {}
+try { const r = JSON.parse(localStorage.getItem(STORAGE_STORY)); if (r && Array.isArray(r.top)) world.storyRuns = r; } catch (e) {}
 // Joueur d'avant le classement : son record y entre seul, sans le détail de la partie.
 if (!world.runs.top.length && world.best) world.runs.top = [{ score: world.best }];
 
-// Remet la partie à zéro : graine, arène, session, joueur, entités.
-export function resetWorld() {
+// Remet la partie à zéro : graine, arène (celle de l'accueil, sauf en mode Histoire), session, joueur, entités.
+export function resetWorld(arenaId = world.arena) {
   rng = createRng(Math.random() * 4294967296);
-  buildMap(world.arena);
-  S = { score: 0, wave: 0, waveActive: false, breakT: FIRST_BREAK, queue: [], spawnT: 0, combo: 0, comboT: 0, bestCombo: 0, kills: 0, time: 0, boxT: BOX_FIRST, fieldT: 0, overT: 0, mods: {}, wallCount: 0, souffleUsed: false, pickT: 0, repit: 0, legendNext: false, lastKill: -9, pot: 0, special: -1 };
+  buildMap(arenaId);
+  S = { chapter: 0, outroT: -1, score: 0, wave: 0, waveActive: false, breakT: FIRST_BREAK, queue: [], spawnT: 0, combo: 0, comboT: 0, bestCombo: 0, kills: 0, time: 0, boxT: BOX_FIRST, fieldT: 0, overT: 0, mods: {}, wallCount: 0, souffleUsed: false, pickT: 0, repit: 0, legendNext: false, lastKill: -9, pot: 0, special: -1 };
   player = { x: 22 * T, y: 15 * T + 4, r: PLAYER_RADIUS, hp: PLAYER_HP, fx: 0, fy: 1, cd: 0, weapon: 0, hurtT: 0, flash: 0, walk: 0, moving: false, muzzle: 0, recoil: 0, recoilV: 0, shellT: 0, lastHurt: -9, dead: false, roll: null, rollCd: 0, rollReady: 0, maxHp: PLAYER_HP, rollCharges: 1, invuln: 0 };
-  world.enemies = []; world.projs = []; world.grenades = []; world.rockets = []; world.parts = []; world.tracers = []; world.pops = []; world.booms = []; world.pickups = []; world.pending = []; world.bursts = []; world.fires = []; world.fallers = []; world.globs = []; world.puddles = [];
+  clearScene();
   blocks = new Map();
   unlocked = W.map(w => w.unlock === 0);
   ammo = W.map(w => w.unlock === 0 ? Infinity : 0);
   cam = { x: player.x, y: player.y, kx: 0, ky: 0, kvx: 0, kvy: 0 }; world.shake = 0; world.fieldDirty = true;
+}
+// Entités et effets de la scène : vidés par une nouvelle partie et par un changement d'arène.
+function clearScene() {
+  world.enemies = []; world.projs = []; world.grenades = []; world.rockets = []; world.parts = []; world.tracers = []; world.pops = []; world.booms = []; world.pickups = []; world.pending = []; world.bursts = []; world.fires = []; world.fallers = []; world.globs = []; world.puddles = [];
+}
+// Change d'arène sans recommencer la partie (chapitre suivant du mode Histoire) : la session, la vie, les armes
+// et les munitions restent ; constructions, caisses, ennemis et effets disparaissent, le joueur revient au centre.
+export function enterArena(id) {
+  buildMap(id);
+  clearScene(); blocks.clear();
+  player.x = 22 * T; player.y = 15 * T + 4; player.fx = 0; player.fy = 1; player.roll = null;
+  cam.x = player.x; cam.y = player.y; cam.kx = cam.ky = cam.kvx = cam.kvy = 0;
+  world.shake = 0; world.fieldDirty = true;
 }
 export function multiplier() { return Mods.multiplier(S.combo, S.mods, S.repit); }
 
