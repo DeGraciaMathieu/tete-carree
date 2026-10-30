@@ -40,7 +40,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/game/player.js` | `moveInput`, `tryRoll`, `updateRoll`, `updateFires` (traînée de feu) | input, combat |
 | `src/game/score.js` | `addScore` (+ déblocage des armes) | rules/unlock |
 | `src/game/flow.js` | `newGame`, `startDemo`, `chooseArena`, `showArena`, `startGame`, `pause`, `resume`, `gameOver`, `openPick`, `choosePick`, `demoPick`, `focusCard` ; `gameOver` enregistre la partie dans `world.runs` | rules/cards, render |
-| `src/game/demo.js` | partie de démo de l'écran titre : `demoControl` (pilote automatique, commandes dans `ctl`), `demoOver`, `DEMO_WAVES`, `DEMO_BREAK` | state, game/player, game/weapons |
+| `src/game/demo.js` | partie de démo de l'écran titre : `demoStart` (vague de départ, armes à feu débloquées), `demoControl` (pilote automatique, commandes dans `ctl`), `demoOver`, `DEMO_FIRST_WAVE`, `DEMO_LAST_WAVE`, `DEMO_BREAK` | rules/unlock, state, game/player, game/weapons |
 | `src/render/canvas.js` | `cv`, `ctx` (liaison vivante), `resize`, `zoom`, passe de contour `outlined` + proxy `OLP`, `setOutline` | — |
 | `src/render/floor.js` | sol peint hors écran (`floorC`, `fctx`), `paintFloor`, `stampBlood`, `stampScorch` | arena |
 | `src/render/effects.js` | particules : `addPart`, `blood`, `gibs`, `sparks`, `dust`, `pop`, `casing` | world |

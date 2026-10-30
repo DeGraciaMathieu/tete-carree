@@ -1,6 +1,7 @@
 // Enchaînement des écrans : titre, partie, pause, choix de carte, fin de partie.
 import { audio, sfx, silence } from '../audio/sfx.js';
 import { ARENAS, CONSTITUTION_HP, DIABLE_HP, MITRAILLE_PISTOL_AMMO, STORAGE_ARENA, STORAGE_BEST, STORAGE_RUNS, TOP_RUNS, VERRE_HP, W } from '../config.js';
+import { demoStart } from './demo.js';
 import { tr } from '../i18n/index.js';
 import { pad } from '../input/gamepad.js';
 import { releaseFire } from '../input/keyboard.js';
@@ -20,7 +21,7 @@ export function newGame() {
   buildSlots();
 }
 // Partie de démo derrière l'écran titre : pilotée par game/demo.js, muette, sans record, relancée quand elle s'achève.
-export function startDemo() { newGame(); world.demo = true; world.state = 'title'; silence(true); }
+export function startDemo() { newGame(); demoStart(); world.demo = true; world.state = 'title'; silence(true); }
 // Arène suivante (d = 1) ou précédente (d = -1) sur l'accueil : retenue, et la démo repart dessus pour la montrer.
 export function chooseArena(d) {
   const i = ARENAS.indexOf(world.arena);

@@ -2,14 +2,21 @@
 import { MH, MW, SHOTS, T, W } from '../config.js';
 import { tryRoll } from './player.js';
 import { selectWeapon } from './weapons.js';
+import { ammoOnUnlock } from '../rules/unlock.js';
 import { los } from '../state/arena.js';
 import { S, ammo, player, unlocked, world } from '../state/world.js';
 
-export const DEMO_WAVES = 3;  // la démo repart après cette vague
+export const DEMO_FIRST_WAVE = 5, DEMO_LAST_WAVE = 7; // la démo joue ces vagues, puis repart
 export const DEMO_BREAK = 2;  // pause entre deux vagues de démo (s)
 // Armes que la démo sait manier, de la préférée à la dernière : pas de construction ni d'explosif.
 const GUNS = ['shotgun', 'rifle', 'uzi', 'pistol'].map(id => W.findIndex(w => w.id === id));
 const FLEE = 170, DODGE = 30, CENTER_PULL = .45, CRATE_PULL = .6;
+
+// Début de démo : la horde de la vague DEMO_FIRST_WAVE, et les armes que la démo sait manier, comme un joueur arrivé là.
+export function demoStart() {
+  S.wave = DEMO_FIRST_WAVE - 1;
+  for (const i of GUNS) if (!unlocked[i]) { unlocked[i] = true; ammo[i] = ammoOnUnlock(i); }
+}
 
 // Commandes produites à chaque image, à la place du clavier, de la manette et du tactile.
 export const ctl = { mx: 0, my: 0, ax: 0, ay: 0 };
@@ -37,5 +44,5 @@ export function demoControl() {
   // roulade pour se dégager quand un ennemi est au contact
   if (near < DODGE && fx * fx + fy * fy > .01) tryRoll(fx, fy);
 }
-// La démo s'achève à la mort du joueur (après la chute) ou à la fin de la vague DEMO_WAVES.
-export function demoOver() { return player.dead ? S.overT <= 0 : !S.waveActive && S.wave >= DEMO_WAVES; }
+// La démo s'achève à la mort du joueur (après la chute) ou à la fin de la vague DEMO_LAST_WAVE.
+export function demoOver() { return player.dead ? S.overT <= 0 : !S.waveActive && S.wave >= DEMO_LAST_WAVE; }

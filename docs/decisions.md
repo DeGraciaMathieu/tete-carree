@@ -138,7 +138,10 @@ Ouvrir `index.html` par double-clic ne fonctionne plus (ESM natif non servi en `
   la pause automatique et le HUD l'ignorent ; `update` la traite comme une partie en cours.
 - Choix validés : démo muette (`silence` dans `audio/sfx.js`, sans toucher au réglage Son), sans
   vibration ni bannière, cartes prises au hasard parmi celles proposées, jamais de record. Le joueur
-  peut mourir : la démo repart à sa mort ou à la fin de la vague `DEMO_WAVES`.
+  peut mourir : la démo repart à sa mort ou à la fin de la vague `DEMO_LAST_WAVE`.
+- La démo commence à la vague `DEMO_FIRST_WAVE` (5) et joue jusqu'à la 7, avec pistolet, uzi, fusil et
+  pompe déjà débloqués (`demoStart`) : en vague 1, elle ne montrait que quelques zombies, ni coureurs
+  ni cracheurs.
 - Le pilote n'utilise que les armes à feu (pas de construction ni d'explosif, qui le blesseraient).
 
 ## Écran titre : disposition
