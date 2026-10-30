@@ -101,6 +101,13 @@ export default {
   noRuns: 'Aucune partie pour l\'instant', today: 'aujourd\'hui', date: 'Date', killsLabel: 'Kills',
   cardsTaken: 'Cartes prises', none: 'Aucune',
   overLineRun: (wave, kills) => `Tombé pendant la vague ${wave}, après ${kills} éliminations.`,
+  // mode Histoire
+  story: 'Histoire', chapterN: n => 'Chapitre ' + n, chapter: 'Chapitre', storyDone: 'Fin', duration: 'Durée', home: 'Accueil',
+  storyRuns: 'Meilleures parties Histoire', winTitle: 'Histoire terminée',
+  winLine: 'Le Dev n\'avait rien prévu après. Toi non plus.',
+  waveLabelStory: n => 'Ch. ' + n + ' · Vague',
+  overLineStory: (n, arena, wave, kills) => `Tombé au chapitre ${n}, ${arena}, pendant la vague ${wave}, après ${kills} éliminations.`,
+  lastRunStory: (n, arena) => `Histoire · Chapitre ${n} · ${arena}`,
 
   /* ---------- Choix de carte ---------- */
   level: (n, max) => `Niveau ${n} sur ${max}`,

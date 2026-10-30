@@ -1,6 +1,7 @@
 // Boutons des écrans et des réglages.
 import { showMute } from '../audio/sfx.js';
-import { chooseArena, pause, resume, showArena, startGame } from '../game/flow.js';
+import { chooseArena, pause, restart, resume, showArena, startGame, toTitle } from '../game/flow.js';
+import { startStory } from '../game/story.js';
 import { lang, setLang } from '../i18n/index.js';
 import { ambianceOn, setAmbiance } from '../render/ambiance.js';
 import { buildArsenal } from '../render/arsenal.js';
@@ -12,9 +13,12 @@ import { world } from '../state/world.js';
 import { $ } from '../util.js';
 
 $('playBtn').addEventListener('click', startGame);
-$('againBtn').addEventListener('click', startGame);
+$('storyBtn').addEventListener('click', startStory);
+$('againBtn').addEventListener('click', restart);
 $('resumeBtn').addEventListener('click', resume);
-$('restartBtn').addEventListener('click', startGame);
+$('restartBtn').addEventListener('click', restart);
+$('winAgainBtn').addEventListener('click', startStory);
+$('winHomeBtn').addEventListener('click', toTitle);
 $('arenaBtn').addEventListener('click', () => chooseArena(1));
 $('pauseBtn').addEventListener('click', () => { if (world.state === 'play') pause(); });
 for (const b of document.querySelectorAll('.optFps')) b.addEventListener('click', () => setFps(!fpsOn));

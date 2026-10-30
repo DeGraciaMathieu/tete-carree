@@ -211,7 +211,15 @@ Spécification : `docs/prd/mode-histoire.md` et ses six étapes.
 - `resetWorld(arenaId)` construit l'arène passée : le mode Histoire ne touche jamais à `world.arena`, l'arène
   choisie sur l'accueil.
 - Classement à part, sous `STORAGE_STORY` (`tete-carree-story`) : chapitre atteint d'abord, une histoire
-  terminée devant tout, score ensuite (`rankStoryRun`).
+  terminée devant tout, score ensuite (`rankStoryRun`). Le record et les meilleures parties du mode Arène ne
+  bougent pas. « Dernière partie » sur l'accueil montre la plus récente des deux modes.
+- Déroulement (`game/story.js`) : entrée Histoire sous « Arène : … » (Entrée sans focus lance toujours Jouer).
+  Après la dernière vague d'un chapitre et son choix de cartes, `S.outroT` (`STORY_OUTRO_DELAY`) remplace la
+  pause d'avant-vague ; à zéro, `endChapter` : scène de fin, fondu au noir (`#fade`), nouvelle arène, scène de
+  début, bannière « Chapitre N », puis la pause habituelle. Après la vague 20 : tableau de fin (`#winScreen`,
+  état `'win'`), Rejouer ou Accueil. Rejouer et Recommencer relancent le mode joué (`restart`).
+- État `'talk'` : le monde est figé, seul le dessin tourne (scènes et fondu) ; pause et entrées de jeu ignorées.
+- En Histoire, le panneau de vague affiche « Ch. N · Vague ».
 
 ## Écran titre : volet Cartes
 

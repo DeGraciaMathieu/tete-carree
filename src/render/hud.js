@@ -1,7 +1,7 @@
 // HUD DOM : bannières, santé, score, combo, emplacements d'armes, cartes actives ; écrans d'accueil et de fin
 // (dernière partie, meilleures parties) ; textes fixes de la page dans la langue courante.
 import { sfx } from '../audio/sfx.js';
-import { LOW_HP, MODS, SABLIER_HOLD, W } from '../config.js';
+import { LOW_HP, MODS, SABLIER_HOLD, STORY_CHAPTERS, W } from '../config.js';
 import { selectWeapon } from '../game/weapons.js';
 import { lang, tr } from '../i18n/index.js';
 import { S, ammo, comboTime, frenzy, mod, multiplier, player, queueCount, unlocked, world } from '../state/world.js';
@@ -45,7 +45,9 @@ export function buildSlots() {
 }
 let modsSig = '';
 // Vide les caches du HUD pour forcer un redessin complet en début de partie.
-export function resetHud() { slotSig = []; hudCache = {}; modsSig = ''; $('pauseScore').textContent = ''; }
+export function resetHud() { slotSig = []; hudCache = {}; modsSig = ''; $('pauseScore').textContent = ''; setWaveLabel(); }
+// Étiquette du panneau de vague : « Vague », ou le chapitre en mode Histoire.
+export function setWaveLabel() { $('waveLabel').textContent = world.mode === 'story' ? tr.waveLabelStory(S.chapter + 1) : tr.wave; }
 function renderMods() {
   const act = MODS.filter(m => mod(m.id));
   const sig = act.map(m => m.id + mod(m.id)).join(',') + (S.souffleUsed ? 'u' : '');
@@ -120,19 +122,41 @@ function runDate(t) {
   const d = new Date(t);
   return d.toDateString() === new Date().toDateString() ? tr.today : d.toLocaleDateString(tr.locale, { day: 'numeric', month: 'short' });
 }
-// Dernière partie (accueil) et meilleures parties (accueil et fin), la dernière surlignée dans le classement.
-export function renderRuns() {
-  const { last, top } = world.runs, none = `<p class="none">${tr.noRuns}</p>`;
+// Classement Arène : rang, score, vague, combo, date ; la dernière partie surlignée.
+function arenaBoard(top, last) {
   const rows = top.map((r, i) => `<tr${last && r.t === last.t ? ' class="me"' : ''}><td class="rank">${i + 1}</td><td>${fmt(r.score)}</td>`
     + `<td>${r.wave ?? '—'}</td><td>${r.combo ?? '—'}</td><td>${runDate(r.t)}</td></tr>`).join('');
-  const board = top.length ? `<table class="runs"><thead><tr><th></th><th>${tr.score}</th><th>${tr.wave}</th><th>${tr.combo}</th><th>${tr.date}</th></tr></thead><tbody>${rows}</tbody></table>` : none;
-  $('records').hidden = !last && !top.length;
-  $('runsTitle').innerHTML = board; $('runsOver').innerHTML = board;
+  return `<table class="runs"><thead><tr><th></th><th>${tr.score}</th><th>${tr.wave}</th><th>${tr.combo}</th><th>${tr.date}</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+// Classement Histoire : rang, chapitre atteint (« Fin » pour une histoire terminée), score, vague, date.
+function storyBoard(top, last) {
+  const rows = top.map((r, i) => `<tr${last && r.t === last.t ? ' class="me"' : ''}><td class="rank">${i + 1}</td><td>${r.won ? tr.storyDone : r.chapter}</td>`
+    + `<td>${fmt(r.score)}</td><td>${r.wave}</td><td>${runDate(r.t)}</td></tr>`).join('');
+  return `<table class="runs"><thead><tr><th></th><th>${tr.chapter}</th><th>${tr.score}</th><th>${tr.wave}</th><th>${tr.date}</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+const modChips = mods => MODS.filter(m => mods[m.id]).map(m => `<span class="mchip r-${m.rar}">${tr.cards[m.id].short}${m.max > 1 ? ` <b>${mods[m.id]}</b>` : ''}</span>`).join('');
+// Dernière partie, tous modes confondus (accueil), meilleures parties de chaque mode (accueil), classement du
+// mode joué (écrans de fin), la dernière partie surlignée.
+export function renderRuns() {
+  const none = `<p class="none">${tr.noRuns}</p>`, a = world.runs, s = world.storyRuns;
+  const arena = a.top.length ? arenaBoard(a.top, a.last) : none, story = s.top.length ? storyBoard(s.top, s.last) : none;
+  $('records').hidden = !a.last && !a.top.length && !s.last;
+  $('runsTitle').innerHTML = arena;
+  $('storyRunsLabel').hidden = $('storyRunsTitle').hidden = !s.top.length; $('storyRunsTitle').innerHTML = story;
+  $('runsOver').innerHTML = world.mode === 'story' ? story : arena; $('runsWin').innerHTML = story;
+  const last = !s.last || (a.last && a.last.t > s.last.t) ? a.last : s.last;
   if (!last) { $('lastRun').innerHTML = none; return; }
-  const chips = MODS.filter(m => last.mods[m.id]).map(m => `<span class="mchip r-${m.rar}">${tr.cards[m.id].short}${m.max > 1 ? ` <b>${last.mods[m.id]}</b>` : ''}</span>`).join('');
-  $('lastRun').innerHTML = `<b class="lscore">${fmt(last.score)}</b>`
+  const mode = last === s.last ? `<span class="rlabel">${last.won ? tr.winTitle : tr.lastRunStory(last.chapter, tr.arenas[STORY_CHAPTERS[last.chapter - 1]])}</span>` : '';
+  $('lastRun').innerHTML = `${mode}<b class="lscore">${fmt(last.score)}</b>`
     + `<div class="stats"><div><b>${last.wave}</b><span>${tr.wave}</span></div><div><b>${fmt(last.kills)}</b><span>${tr.killsLabel}</span></div><div><b>${last.combo}</b><span>${tr.combo}</span></div></div>`
-    + `<h3 class="rlabel">${tr.cardsTaken}</h3><div class="lmods">${chips || `<span class="none">${tr.none}</span>`}</div>`;
+    + `<h3 class="rlabel">${tr.cardsTaken}</h3><div class="lmods">${modChips(last.mods) || `<span class="none">${tr.none}</span>`}</div>`;
+}
+// Tableau de fin du mode Histoire : bilan de la partie qui vient de se terminer (world.storyRuns.last).
+export function renderWin() {
+  const r = world.storyRuns.last, m = Math.floor(r.time / 60), sec = Math.floor(r.time % 60);
+  $('winScore').textContent = fmt(r.score); $('winWave').textContent = r.wave; $('winKills').textContent = fmt(r.kills);
+  $('winCombo').textContent = r.combo; $('winTime').textContent = `${m}:${String(sec).padStart(2, '0')}`;
+  $('winMods').innerHTML = modChips(r.mods) || `<span class="none">${tr.none}</span>`;
 }
 // Textes fixes de la page : data-i18n (texte), data-i18n-html (texte avec balises), data-i18n-aria (aria-label).
 export function translatePage() {

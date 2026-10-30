@@ -24,7 +24,7 @@
       <div id="next"></div>
     </div>
     <div class="panel wave">
-      <div class="label" data-i18n="wave"></div>
+      <div class="label" id="waveLabel" data-i18n="wave"></div>
       <div id="waveNum">1</div>
       <div id="left">—</div>
     </div>
@@ -65,6 +65,7 @@
     <nav class="tmenu" id="titleMenu" data-i18n-aria="infoAria">
       <button class="btn" id="playBtn" data-i18n="play"></button>
       <button class="titem" id="arenaBtn"></button>
+      <button class="titem" id="storyBtn" data-i18n="story"></button>
       <button class="titem" data-panel="panelCtrl" data-i18n="controls"></button>
       <button class="titem" data-panel="panelBeasts" data-i18n="bestiary"></button>
       <button class="titem" data-panel="panelArsenal" data-i18n="arsenal"></button>
@@ -85,6 +86,7 @@
   <section class="rpanel records" id="records">
     <h2 class="rlabel" data-i18n="lastRun"></h2><div id="lastRun"></div>
     <h2 class="rlabel" data-i18n="bestRuns"></h2><div id="runsTitle"></div>
+    <h2 class="rlabel" id="storyRunsLabel" data-i18n="storyRuns" hidden></h2><div id="storyRunsTitle" hidden></div>
   </section>
   <div class="card tpanel" id="panelCtrl" hidden>
     <h2 data-i18n="controls"></h2>
@@ -184,6 +186,27 @@
     <div class="btns"><button class="btn" id="againBtn" data-i18n="again"></button></div>
   </div>
 </div>
+
+<div class="overlay" id="winScreen" hidden>
+  <div class="card">
+    <h2 data-i18n="winTitle"></h2>
+    <p data-i18n="winLine"></p>
+    <div class="stats">
+      <div><b id="winScore">0</b><span data-i18n="score"></span></div>
+      <div><b id="winWave">0</b><span data-i18n="wave"></span></div>
+      <div><b id="winKills">0</b><span data-i18n="killsLabel"></span></div>
+      <div><b id="winCombo">0</b><span data-i18n="bestCombo"></span></div>
+      <div><b id="winTime">0:00</b><span data-i18n="duration"></span></div>
+    </div>
+    <h3 class="rlabel" data-i18n="cardsTaken"></h3>
+    <div class="lmods" id="winMods"></div>
+    <h3 class="rlabel" data-i18n="storyRuns"></h3>
+    <div id="runsWin"></div>
+    <div class="btns"><button class="btn" id="winAgainBtn" data-i18n="again"></button><button class="btn ghost" id="winHomeBtn" data-i18n="home"></button></div>
+  </div>
+</div>
+
+<div id="fade" aria-hidden="true"></div>
 
 <script type="module" src="./src/main.js"></script>
 

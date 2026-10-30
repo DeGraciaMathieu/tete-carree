@@ -1,12 +1,13 @@
 // Pas de simulation : fait avancer la partie de `dt` secondes.
 import { sfx } from '../audio/sfx.js';
-import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, ACID_TICK_RESET, AIMANT_RANGE, AIMANT_SPEED, AMMO_NO_WEAPON_BONUS, AMMO_REFILL_WEAPONS, ARMOR_SHOVE, BARBELES_DAMAGE, BLOATER_FUSE, BLOATER_FUSE_SPEED, BLOATER_TRIGGER_REACH, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_MIN_DIST, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_HIT_REACH, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MELEE_REACH, MH, MW, PICKUP_RADIUS, PICK_DELAY, PLAYER_SPEED, RAVITO_ZOMBIES, ROCKET_DAMAGE, ROCKET_HIT_REACH, ROCKET_RADIUS, SPITTER_BACKOFF, SPITTER_HOLD, SPITTER_HOLD_SPEED, SPITTER_MIN_RANGE, SPITTER_SIGHT, SPITTER_TOO_CLOSE, SPITTER_WINDUP, T, W } from '../config.js';
+import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, ACID_TICK_RESET, AIMANT_RANGE, AIMANT_SPEED, AMMO_NO_WEAPON_BONUS, AMMO_REFILL_WEAPONS, ARMOR_SHOVE, BARBELES_DAMAGE, BLOATER_FUSE, BLOATER_FUSE_SPEED, BLOATER_TRIGGER_REACH, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_MIN_DIST, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_HIT_REACH, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MELEE_REACH, MH, MW, PICKUP_RADIUS, PICK_DELAY, PLAYER_SPEED, RAVITO_ZOMBIES, ROCKET_DAMAGE, ROCKET_HIT_REACH, ROCKET_RADIUS, SPITTER_BACKOFF, SPITTER_HOLD, SPITTER_HOLD_SPEED, SPITTER_MIN_RANGE, SPITTER_SIGHT, SPITTER_TOO_CLOSE, SPITTER_WINDUP, STORY_OUTRO_DELAY, T, W } from '../config.js';
 import { explosion, hurtEnemy, hurtPlayer, killEnemy, toxicBurst } from '../game/combat.js';
 import { spawnEnemy, spit, startWave, updateGlobs } from '../game/enemies.js';
 import { DEMO_BREAK, ctl, demoControl } from '../game/demo.js';
 import { demoPick, gameOver, openPick } from '../game/flow.js';
 import { moveInput, updateFires, updateRoll } from '../game/player.js';
 import { addScore } from '../game/score.js';
+import { endChapter } from '../game/story.js';
 import { damageBlock, explodeBarrel, fireWeapon, fragments, updateTurret } from '../game/weapons.js';
 import { tr } from '../i18n/index.js';
 import { pad } from '../input/gamepad.js';
@@ -18,6 +19,7 @@ import { fctx, stampBlood } from '../render/floor.js';
 import { banner } from '../render/hud.js';
 import { blastRadius, boxKind, boxPeriod, fragShards, hpRate, pickAfter, refillOf, repitBonus, speedMul, waveBreak, waveEndHp } from '../rules/modifiers.js';
 import { waveBonus } from '../rules/scoring.js';
+import { endsChapter } from '../rules/story.js';
 import * as Waves from '../rules/waves.js';
 import { computeField, dist, isVoid, los, moveCircle, nextStep, openT, passable, shotTile, unstick, walkLine } from '../state/arena.js';
 import { S, ammo, blocks, cam, frenzy, jitter, mod, player, rng, rollCooldown, rollMax, unlocked, world } from '../state/world.js';
@@ -81,6 +83,8 @@ export function update(dt) {
     // vagues
     if (!S.waveActive) {
       if (S.pickT > 0) { S.pickT -= dt; if (S.pickT <= 0) { if (world.demo) demoPick(); else openPick(); } }
+      // mode Histoire : après le dernier choix de cartes d'un chapitre, la scène de fin remplace la vague suivante
+      else if (S.outroT >= 0) { S.outroT -= dt; if (S.outroT < 0 && !player.dead) endChapter(); }
       else { S.breakT -= dt; if (S.breakT <= 0) startWave(); }
     }
     else {
@@ -92,6 +96,7 @@ export function update(dt) {
       }
       if (!S.queue.length && world.enemies.length === 0) {
         S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = pickAfter(S.mods, S.wave) ? PICK_DELAY : 0; S.repit = repitBonus(S.mods, S.repit);
+        if (world.mode === 'story' && !world.demo && endsChapter(S.wave)) S.outroT = STORY_OUTRO_DELAY;
         const bonus = waveBonus(S.wave, S.mods) + S.pot; S.pot = 0; addScore(bonus); // Tout ou rien : la cagnotte est versée
         banner(tr.waveCleared, tr.waveBonus, 'end', bonus);
         const hp = waveEndHp(S.mods, player.hp, player.maxHp);

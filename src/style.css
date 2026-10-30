@@ -277,6 +277,11 @@ kbd{font:13px var(--mono);border:1px solid rgba(255,255,255,.35);border-bottom-w
 .none{margin:0;color:var(--muted);font-size:13px}
 #overScreen .runs{margin:8px 0 18px}
 #overScreen .rlabel{margin-top:4px}
+#winScreen .runs{margin:8px 0 18px}
+#winScreen .lmods{margin:8px 0 14px}
+#fade{position:fixed;inset:0;background:#000;opacity:0;pointer-events:none;transition:opacity .4s}
+#fade.on{opacity:1}
+@media (prefers-reduced-motion:reduce){#fade{transition:none}}
 .tpanel{grid-column:1 / -1;place-self:center;width:calc(100% - 32px);margin-block:16px}
 .tpanel .tclose{margin-top:16px}
 .tpanel .opts{flex-direction:column;align-items:stretch}

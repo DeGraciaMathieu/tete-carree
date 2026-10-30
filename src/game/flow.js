@@ -2,6 +2,7 @@
 import { audio, sfx, silence } from '../audio/sfx.js';
 import { ARENAS, CONSTITUTION_HP, DIABLE_HP, MITRAILLE_PISTOL_AMMO, STORAGE_ARENA, STORAGE_BEST, STORAGE_RUNS, TOP_RUNS, VERRE_HP, W } from '../config.js';
 import { demoStart } from './demo.js';
+import { recordStoryRun, startStory } from './story.js';
 import { tr } from '../i18n/index.js';
 import { pad } from '../input/gamepad.js';
 import { releaseFire } from '../input/keyboard.js';
@@ -11,6 +12,7 @@ import { banner, buildSlots, renderRuns, resetHud } from '../render/hud.js';
 import { isPact, rollCards } from '../rules/cards.js';
 import { takeAllCards, waveBreak } from '../rules/modifiers.js';
 import { rankRun } from '../rules/records.js';
+import { chapterArena } from '../rules/story.js';
 import { S, ammo, comboTime, mod, player, resetWorld, rng, rollMax, unlocked, world } from '../state/world.js';
 import { $, clamp, fmt } from '../util.js';
 
@@ -31,15 +33,30 @@ export function chooseArena(d) {
 }
 export function showArena() { $('arenaBtn').textContent = tr.arenaBtn(tr.arenas[world.arena]); }
 export function startGame() {
-  audio(); newGame(); world.demo = false; silence(false); world.state = 'play';
+  audio(); world.mode = 'arena'; newGame(); world.demo = false; silence(false); world.state = 'play';
   $('titleScreen').hidden = true; $('overScreen').hidden = true; $('pauseScreen').hidden = true; $('hud').hidden = false;
 }
 export function pause() { world.state = 'pause'; $('pauseScreen').hidden = false; }
 export function resume() { audio(); world.state = 'play'; $('pauseScreen').hidden = true; }
+// Rejouer et Recommencer relancent le mode de la partie en cours.
+export function restart() { if (world.mode === 'story') startStory(); else startGame(); }
+// Retour à l'accueil (tableau de fin du mode Histoire) : la démo repart en mode Arène.
+export function toTitle() {
+  world.mode = 'arena';
+  $('winScreen').hidden = true; $('overScreen').hidden = true; $('pauseScreen').hidden = true; $('hud').hidden = true; $('titleScreen').hidden = false;
+  startDemo(); $('storyBtn').focus();
+}
 export function gameOver() {
   world.state = 'over';
-  if (S.score > world.best) { world.best = S.score; try { localStorage.setItem(STORAGE_BEST, String(world.best)); } catch (e) {} }
   $('ovScore').textContent = fmt(S.score); $('ovWave').textContent = S.wave; $('ovCombo').textContent = S.bestCombo;
+  // mode Histoire : classement à part, le record et les meilleures parties du mode Arène ne bougent pas
+  if (world.mode === 'story') {
+    recordStoryRun(false);
+    $('overLine').textContent = tr.overLineStory(S.chapter + 1, tr.arenas[chapterArena(S.chapter)], S.wave, S.kills);
+    $('overScreen').hidden = false;
+    return;
+  }
+  if (S.score > world.best) { world.best = S.score; try { localStorage.setItem(STORAGE_BEST, String(world.best)); } catch (e) {} }
   $('overLine').textContent = tr.overLineRun(S.wave, S.kills);
   const run = { score: S.score, wave: S.wave, kills: S.kills, combo: S.bestCombo, mods: { ...S.mods }, t: Date.now() };
   world.runs = { last: run, top: rankRun(world.runs.top, run, TOP_RUNS) };

@@ -19,7 +19,7 @@ export function frame(now) {
   const dt = Math.min(MAX_DT, (now - last) / 1000); last = now;
   if (world.state === 'play') { update(dt); updateHud(); }
   else if (world.demo) { update(dt); if (demoOver()) startDemo(); drawArenaMap(); drawBestiary(dt); drawArsenal(); }
-  else if (world.state === 'title' || world.state === 'over') { S.time += dt; }
+  else if (world.state === 'title' || world.state === 'over' || world.state === 'win') { S.time += dt; }
   render();
   requestAnimationFrame(frame);
 }

@@ -8,7 +8,7 @@ auto_invoke: true
 
 Cycle d'une image (`loop/frame.js`) : `pollPad()`, `tickFps()`, `dt` plafonné à `MAX_DT` ; si
 `world.state === 'play'`, `update(dt)` (`loop/update.js`) puis `updateHud()` ; sur les écrans titre et
-de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
+de fin (`'over'`, `'win'`), seul `S.time` avance ; en `'talk'` (scènes du mode Histoire), rien n'avance ; dans tous les cas `render()` (`render/scene.js`).
 `update` fait avancer les entités, appelle les actions de `game/`, qui consultent les règles de
 `rules/` et appliquent leurs effets (état, sons, particules, bannières).
 
@@ -40,7 +40,8 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/game/enemies.js` | `spawnEnemy`, `startWave`, `spit`, `updateGlobs` | rules/waves |
 | `src/game/player.js` | `moveInput`, `tryRoll`, `updateRoll`, `updateFires` (traînée de feu) | input, combat |
 | `src/game/score.js` | `addScore` (+ déblocage des armes) | rules/unlock |
-| `src/game/flow.js` | `newGame`, `startDemo`, `chooseArena`, `showArena`, `startGame`, `pause`, `resume`, `gameOver`, `openPick`, `choosePick`, `demoPick`, `focusCard` ; `gameOver` enregistre la partie dans `world.runs` | rules/cards, render |
+| `src/game/flow.js` | `newGame(arenaId)`, `restart` (relance le mode joué), `toTitle` (retour à l'accueil),, `startDemo`, `chooseArena`, `showArena`, `startGame`, `pause`, `resume`, `gameOver`, `openPick`, `choosePick`, `demoPick`, `focusCard` ; `gameOver` enregistre la partie dans `world.runs` | rules/cards, render |
+| `src/game/story.js` | mode Histoire : `startStory`, `endChapter` (appelé par `update` quand `S.outroT` s'écoule), `recordStoryRun` ; ouverture des chapitres, fondu et changement d'arène, victoire ; points d'accroche des scènes de début et de fin de chapitre | flow, rules/story, state, render/hud |
 | `src/game/demo.js` | partie de démo de l'écran titre : `demoStart` (vague de départ, armes à feu débloquées), `demoControl` (pilote automatique, commandes dans `ctl`), `demoOver`, `DEMO_FIRST_WAVE`, `DEMO_LAST_WAVE`, `DEMO_BREAK` | rules/unlock, state, game/player, game/weapons |
 | `src/render/canvas.js` | `cv`, `ctx` (liaison vivante), `resize`, `zoom`, passe de contour `outlined` + proxy `OLP`, `setOutline` | — |
 | `src/render/floor.js` | sol peint hors écran (`floorC`, `fctx`), `paintFloor`, `stampBlood`, `stampScorch` | arena |
@@ -48,7 +49,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/render/cardIcons.js` | `cardIcon(id)` : pictogramme SVG d'une carte de modificateur | rien |
 | `src/render/sprites.js` | `drawChar`, `drawBloater`, `drawRunner`, `drawSpitter`, `drawArmored`, `drawPlayerState`, `GUNS`… | canvas |
 | `src/render/scene.js` | `render()` : caméra, sol, tri en profondeur, entités, projectiles, effets | sprites, floor |
-| `src/render/hud.js` | `buildSlots`, `updateHud`, `resetHud`, `banner`, `drawFace`, `buildCardsPanel`, `renderRuns` (dernière partie et meilleures parties), `translatePage` (textes `data-i18n*`) | world, i18n |
+| `src/render/hud.js` | `buildSlots`, `updateHud`, `resetHud`, `banner`, `drawFace`, `buildCardsPanel`, `renderRuns` (dernière partie tous modes, meilleures parties Arène et Histoire), `renderWin` (tableau de fin du mode Histoire), `setWaveLabel`, `translatePage` (textes `data-i18n*`) | world, i18n |
 | `src/render/fps.js` | `fpsOn`, `setFps`, `tickFps` | config (`SHOW_FPS_BY_DEFAULT`) |
 | `src/render/arsenal.js` | `buildArsenal`, `drawArsenal` (vignettes repeintes quand leur taille change, volet ouvert seulement) | config (`W`, `SHOTS`, explosifs, barricade), i18n, render/canvas (`drawOn`), render/scene (`drawBlock`), render/sprites (`drawGun`) |
 | `src/render/bestiary.js` | `buildBestiary`, `drawBestiary` (portraits animés, volet ouvert seulement) | config (`ENEMY_STATS`, `KILL_POINTS`), i18n, rules/waves (`firstWave`), render/canvas (`drawOn`), render/sprites |

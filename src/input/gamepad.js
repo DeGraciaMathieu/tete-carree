@@ -1,7 +1,8 @@
 // Manette : sondage à chaque image (getGamepads protégé), vibrations, navigation dans les cartes.
 import { audio } from '../audio/sfx.js';
 import { PAD_AIM_DEADZONE, PAD_MOVE_DEADZONE } from '../config.js';
-import { chooseArena, choosePick, focusCard, pause, pickFocus, resume, startGame } from '../game/flow.js';
+import { chooseArena, choosePick, focusCard, pause, pickFocus, restart, resume, startGame, toTitle } from '../game/flow.js';
+import { startStory } from '../game/story.js';
 import { tryRoll } from '../game/player.js';
 import { cycleWeapon } from '../game/weapons.js';
 import { moveMenu, openPanel, panelOpen } from './buttons.js';
@@ -64,7 +65,8 @@ export function pollPad() {
     else if (hit(0)) f.click();
     return;
   }
-  if (world.state === 'over') { if (hit(0) || hit(9)) startGame(); return; }
+  if (world.state === 'over') { if (hit(0) || hit(9)) restart(); return; }
+  if (world.state === 'win') { if (hit(0) || hit(9)) startStory(); else if (hit(1)) toTitle(); return; }
   if (world.state === 'pause') { if (hit(0) || hit(1) || hit(9)) resume(); return; }
   if (world.state === 'pick') {
     if (hit(14) || hit(12) || flick < 0) focusCard(pickFocus - 1);

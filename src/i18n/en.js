@@ -102,6 +102,13 @@ export default {
   noRuns: 'No runs yet', today: 'today', date: 'Date', killsLabel: 'Kills',
   cardsTaken: 'Cards taken', none: 'None',
   overLineRun: (wave, kills) => `Fell during wave ${wave}, after ${kills} kills.`,
+  // story mode
+  story: 'Story', chapterN: n => 'Chapter ' + n, chapter: 'Chapter', storyDone: 'End', duration: 'Time', home: 'Home',
+  storyRuns: 'Best Story runs', winTitle: 'Story complete',
+  winLine: 'The Dev didn\'t plan anything after this. Neither did you.',
+  waveLabelStory: n => 'Ch. ' + n + ' · Wave',
+  overLineStory: (n, arena, wave, kills) => `Fell in chapter ${n}, ${arena}, during wave ${wave}, after ${kills} kills.`,
+  lastRunStory: (n, arena) => `Story · Chapter ${n} · ${arena}`,
 
   /* ---------- Choix de carte ---------- */
   level: (n, max) => `Level ${n} of ${max}`,
