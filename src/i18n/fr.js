@@ -102,6 +102,26 @@ export default {
   cardsTaken: 'Cartes prises', none: 'Aucune',
   overLineRun: (wave, kills) => `Tombé pendant la vague ${wave}, après ${kills} éliminations.`,
   // mode Histoire
+  // dialogues du mode Histoire : [personnage, réplique] ; textes provisoires, ton « Le Dev »
+  speakers: { tc: 'Tête Carrée', dev: 'Le Dev' }, skip: 'Passer', talkHintDesk: 'Entrée ▸', talkHintPad: 'A ▸', talkHintTouch: 'Toucher ▸',
+  scenes: {
+    chinatown: {
+      intro: [['dev', 'Chapitre 1. Chinatown. Tiens cinq vagues et on passe à la suite.'], ['tc', 'Pourquoi tout est rouge ?'], ['dev', 'J\'ai trouvé une palette. Elle était gratuite.'], ['tc', 'Et les zombies ?'], ['dev', 'Les mêmes. Recolorés. Personne ne verra.']],
+      outro: [['tc', 'C\'est fini ?'], ['dev', 'Pour cette rue. On t\'envoie en Sibérie.'], ['tc', 'Pourquoi la Sibérie ?'], ['dev', 'J\'avais un pack de neige.']],
+    },
+    siberie: {
+      intro: [['dev', 'Chapitre 2. Un camp de prisonniers, en Sibérie.'], ['tc', 'Je n\'ai rien fait.'], ['dev', 'Tu as abattu une centaine de zombies à Chinatown.'], ['tc', 'C\'était le jeu !'], ['dev', 'Le camp n\'a pas lu les règles.']],
+      outro: [['tc', 'Comment je sors d\'ici ?'], ['dev', 'Par les égouts. Il y a toujours des égouts.'], ['tc', 'En Sibérie ?'], ['dev', 'J\'ai dit toujours.']],
+    },
+    egouts: {
+      intro: [['dev', 'Chapitre 3. Les égouts.'], ['tc', 'Ça sent mauvais.'], ['dev', 'C\'est du canvas. Ça ne sent rien.'], ['tc', 'Alors pourquoi je le sens ?'], ['dev', 'Immersion.']],
+      outro: [['tc', 'Il y a de la lumière, là-haut.'], ['dev', 'Une base militaire. C\'est là que tout a commencé.'], ['tc', 'Tu viens de l\'inventer.'], ['dev', 'À l\'instant, oui.']],
+    },
+    militaire: {
+      intro: [['dev', 'Chapitre 4. Le camp militaire. Le dernier.'], ['tc', 'Et après ?'], ['dev', 'Après, il y a l\'écran de fin. Je l\'ai fait en dernier.'], ['tc', 'Ça va se voir.']],
+      outro: [['tc', 'C\'est vraiment fini ?'], ['dev', 'Vingt vagues. Je n\'ai rien écrit après.'], ['tc', 'Même pas un boss ?'], ['dev', 'C\'est un sujet complexe à part.']],
+    },
+  },
   story: 'Histoire', chapterN: n => 'Chapitre ' + n, chapter: 'Chapitre', storyDone: 'Fin', duration: 'Durée', home: 'Accueil',
   storyRuns: 'Meilleures parties Histoire', winTitle: 'Histoire terminée',
   winLine: 'Le Dev n\'avait rien prévu après. Toi non plus.',

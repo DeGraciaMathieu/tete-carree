@@ -206,6 +206,16 @@
   </div>
 </div>
 
+<div id="talkBox" role="dialog" aria-labelledby="talkName" hidden>
+  <canvas id="talkFace" width="13" height="13" aria-hidden="true"></canvas>
+  <div class="tbody">
+    <div class="tname" id="talkName"></div>
+    <div class="ttext" id="talkText" aria-hidden="true"></div>
+    <div class="sr" id="talkFull" aria-live="polite"></div>
+  </div>
+  <button class="btn ghost" id="talkSkip" data-i18n="skip"></button>
+  <span class="thint"><span class="only-desk" data-i18n="talkHintDesk"></span><span class="only-pad" data-i18n="talkHintPad"></span><span class="only-touch" data-i18n="talkHintTouch"></span></span>
+</div>
 <div id="fade" aria-hidden="true"></div>
 
 <script type="module" src="./src/main.js"></script>

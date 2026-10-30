@@ -3,6 +3,7 @@ import { audio, silence } from '../audio/sfx.js';
 import { FIRST_BREAK, STORAGE_STORY, TOP_RUNS } from '../config.js';
 import { newGame } from './flow.js';
 import { tr } from '../i18n/index.js';
+import { closeTalk, completeLine, lineDone, showLine } from '../render/dialog.js';
 import { paintFloor } from '../render/floor.js';
 import { banner, renderRuns, renderWin, setWaveLabel } from '../render/hud.js';
 import { waveBreak } from '../rules/modifiers.js';
@@ -12,15 +13,31 @@ import { S, enterArena, world } from '../state/world.js';
 import { $ } from '../util.js';
 
 const FADE_MS = 420; // durée du fondu au noir entre deux chapitres (transition CSS de #fade)
+const TALK_GUARD_MS = 250; // une scène ignore les entrées tout juste après son ouverture (tir maintenu, Entrée appuyée)
 
 export function startStory() {
   audio(); world.mode = 'story'; newGame(chapterArena(0)); world.demo = false; silence(false);
   $('titleScreen').hidden = true; $('overScreen').hidden = true; $('pauseScreen').hidden = true; $('winScreen').hidden = true; $('hud').hidden = false;
   beginChapter(0);
 }
-// Points d'accroche des scènes de début et de fin de chapitre (dialogues) : la suite est passée en `done`.
-function chapterIntro(i, done) { done(); }
-function chapterOutro(i, done) { done(); }
+// Scène de dialogue : une réplique à la fois, le monde figé ; `done` est appelé quand elle se ferme.
+let scene = null, line = 0, sceneAt = 0, sceneDone = null;
+function playScene(lines, done) {
+  if (!lines || !lines.length) { done(); return; }
+  scene = lines; line = 0; sceneDone = done; sceneAt = performance.now();
+  world.state = 'talk'; showLine(lines[0][0], lines[0][1]);
+}
+function finishScene() { const done = sceneDone; scene = sceneDone = null; closeTalk(); done(); }
+// Entrée, Espace, clic, toucher, A, Start : finit la réplique qui s'écrit, sinon passe à la suivante.
+export function advanceScene() {
+  if (!scene || performance.now() - sceneAt < TALK_GUARD_MS) return;
+  if (!lineDone()) { completeLine(); return; }
+  if (++line < scene.length) showLine(scene[line][0], scene[line][1]); else finishScene();
+}
+// Échap, B, bouton Passer : ferme toute la scène.
+export function skipScene() { if (scene && performance.now() - sceneAt >= TALK_GUARD_MS) finishScene(); }
+function chapterIntro(i, done) { playScene(tr.scenes[chapterArena(i)].intro, done); }
+function chapterOutro(i, done) { playScene(tr.scenes[chapterArena(i)].outro, done); }
 
 function beginChapter(i) {
   S.chapter = i; world.state = 'talk'; setWaveLabel();

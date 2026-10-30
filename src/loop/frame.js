@@ -18,6 +18,7 @@ export function frame(now) {
   tickFps(now - last, now);
   const dt = Math.min(MAX_DT, (now - last) / 1000); last = now;
   if (world.state === 'play') { update(dt); updateHud(); }
+  else if (world.state === 'talk') updateHud(); // scène du mode Histoire : monde figé, HUD à jour derrière la boîte
   else if (world.demo) { update(dt); if (demoOver()) startDemo(); drawArenaMap(); drawBestiary(dt); drawArsenal(); }
   else if (world.state === 'title' || world.state === 'over' || world.state === 'win') { S.time += dt; }
   render();

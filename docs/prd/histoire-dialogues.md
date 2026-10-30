@@ -85,7 +85,7 @@ D'après la maquette (option A) :
 
 ```js
 speakers: { tc: 'Tête Carrée', dev: 'Le Dev' },        // en : { tc: 'Tête Carrée', dev: 'The Dev' }
-story: {
+scenes: {
   chinatown: { intro: [['dev', '…'], ['tc', '…']], outro: [ … ] },
   siberie:   { intro: [ … ], outro: [ … ] },
   egouts:    { intro: [ … ], outro: [ … ] },
@@ -93,7 +93,7 @@ story: {
 },
 ```
 
-Une scène se retrouve par l'arène du chapitre (`tr.story[chapterArena(i)]`). Le nom de Tête Carrée
+Une scène se retrouve par l'arène du chapitre (`tr.scenes[chapterArena(i)]`). Le nom de Tête Carrée
 ne se traduit pas : c'est le nom du jeu.
 
 ### Textes provisoires
@@ -173,7 +173,7 @@ Ton « Le Dev ». Ils sont à réécrire ensemble ; la mécanique ne dépend pas
 | input | `src/input/gamepad.js` | `'talk'` : A et Start avancent, B passe |
 | input | `src/input/buttons.js` | clic ou toucher sur l'écran : avancer ; bouton Passer |
 | DOM | `index.html`, `src/style.css` | `#talkBox` (portrait, nom, texte, copie `aria-live`, indication, Passer), voile, jeton `--dev`, boutons tactiles masqués pendant `'talk'` |
-| i18n | `src/i18n/fr.js`, `src/i18n/en.js` | `speakers`, `story`, `skip` (« Passer » / « Skip »), indications |
+| i18n | `src/i18n/fr.js`, `src/i18n/en.js` | `speakers`, `scenes`, `skip` (« Passer » / « Skip »), indications |
 | documentation | `docs/decisions.md`, skill `architecture` | section « Mode Histoire : dialogues » ; carte des modules (`render/dialog.js`) |
 
 Si `render/dialog.js` ou un module d'entrée pose des écouteurs à l'import, il doit être importé dans
@@ -204,7 +204,7 @@ Si `render/dialog.js` ou un module d'entrée pose des écouteurs à l'import, il
 - `les deux langues donnent les mêmes répliques aux mêmes personnages, dans le même ordre`
   (même nombre de répliques par scène, même suite de `tc` et `dev`)
 - `aucune réplique n'est vide ni ne contient undefined`
-- `story` et `speakers` ajoutés à la liste des dictionnaires imbriqués comparés clé à clé
+- `scenes` et `speakers` ajoutés à la liste des dictionnaires imbriqués comparés clé à clé
 
 Vérifications manuelles :
 

@@ -63,8 +63,10 @@ function renderMods() {
 // du flash d'un coup ; cligne des yeux de temps en temps. Redessiné seulement quand son apparence change.
 // La même tête, en grand, sert de mascotte à l'écran titre.
 const FACE_HURT = .6, faceCtx = $('face').getContext('2d');
+// Humeur du héros d'après sa vie : 'ok', 'hurt', 'crit' ou 'dead' (portrait du HUD et des dialogues).
+export function heroMood() { return player.dead || player.hp <= 0 ? 'dead' : player.hp < LOW_HP ? 'crit' : player.hp < player.maxHp * FACE_HURT ? 'hurt' : 'ok'; }
 function renderFace() {
-  const mood = player.dead || player.hp <= 0 ? 'dead' : player.hp < LOW_HP ? 'crit' : player.hp < player.maxHp * FACE_HURT ? 'hurt' : 'ok';
+  const mood = heroMood();
   const flash = player.flash > 0, blink = (mood === 'ok' || mood === 'hurt') && S.time % 3.2 < .12;
   const sig = mood + (flash ? 'f' : '') + (blink ? 'b' : '');
   if (hudCache.face === sig) return;

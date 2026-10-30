@@ -220,6 +220,13 @@ Spécification : `docs/prd/mode-histoire.md` et ses six étapes.
   état `'win'`), Rejouer ou Accueil. Rejouer et Recommencer relancent le mode joué (`restart`).
 - État `'talk'` : le monde est figé, seul le dessin tourne (scènes et fondu) ; pause et entrées de jeu ignorées.
 - En Histoire, le panneau de vague affiche « Ch. N · Vague ».
+- Dialogues (`render/dialog.js`, scènes dans `game/story.js`) : boîte en bas de l'écran, opaque, jeu figé
+  derrière (`'talk'`), au début et à la fin de chaque chapitre seulement. Tête Carrée a le visage du HUD (humeur
+  selon sa vie, `heroMood`), le Dev une flèche de souris en pixels. Entrée, Espace, clic, toucher, A, Start :
+  finir la réplique en cours, puis passer à la suivante ; Échap, B, bouton Passer : fermer la scène. Les
+  entrées des 250 premières millisecondes et les répétitions de touche sont ignorées. Répliques sans limite de
+  longueur (la boîte défile). Textes dans `tr.scenes[arène].intro/outro` et `tr.speakers` (la clé `story` est
+  le libellé du menu) ; ceux d'aujourd'hui sont provisoires, scénario à écrire.
 
 ## Écran titre : volet Cartes
 

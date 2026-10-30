@@ -103,6 +103,26 @@ export default {
   cardsTaken: 'Cards taken', none: 'None',
   overLineRun: (wave, kills) => `Fell during wave ${wave}, after ${kills} kills.`,
   // story mode
+  // story mode dialogues: [speaker, line]; placeholder texts, "The Dev" tone
+  speakers: { tc: 'Tête Carrée', dev: 'The Dev' }, skip: 'Skip', talkHintDesk: 'Enter ▸', talkHintPad: 'A ▸', talkHintTouch: 'Tap ▸',
+  scenes: {
+    chinatown: {
+      intro: [['dev', 'Chapter 1. Chinatown. Hold five waves and we move on.'], ['tc', 'Why is everything red?'], ['dev', 'I found a palette. It was free.'], ['tc', 'And the zombies?'], ['dev', 'Same ones. Recoloured. Nobody will notice.']],
+      outro: [['tc', 'Is it over?'], ['dev', 'For this street. You\'re off to Siberia.'], ['tc', 'Why Siberia?'], ['dev', 'I had a snow pack.']],
+    },
+    siberie: {
+      intro: [['dev', 'Chapter 2. A prison camp, in Siberia.'], ['tc', 'I didn\'t do anything.'], ['dev', 'You shot about a hundred zombies in Chinatown.'], ['tc', 'That was the game!'], ['dev', 'The camp didn\'t read the rules.']],
+      outro: [['tc', 'How do I get out of here?'], ['dev', 'Through the sewers. There are always sewers.'], ['tc', 'In Siberia?'], ['dev', 'I said always.']],
+    },
+    egouts: {
+      intro: [['dev', 'Chapter 3. The sewers.'], ['tc', 'It stinks.'], ['dev', 'It\'s a canvas. It doesn\'t smell.'], ['tc', 'Then why can I smell it?'], ['dev', 'Immersion.']],
+      outro: [['tc', 'There\'s light up there.'], ['dev', 'An army base. That\'s where it all started.'], ['tc', 'You just made that up.'], ['dev', 'Just now, yes.']],
+    },
+    militaire: {
+      intro: [['dev', 'Chapter 4. The army camp. The last one.'], ['tc', 'And then?'], ['dev', 'Then there\'s the end screen. I made it last.'], ['tc', 'It\'ll show.']],
+      outro: [['tc', 'Is it really over?'], ['dev', 'Twenty waves. I didn\'t write anything after that.'], ['tc', 'Not even a boss?'], ['dev', 'That\'s a whole separate, complicated topic.']],
+    },
+  },
   story: 'Story', chapterN: n => 'Chapter ' + n, chapter: 'Chapter', storyDone: 'End', duration: 'Time', home: 'Home',
   storyRuns: 'Best Story runs', winTitle: 'Story complete',
   winLine: 'The Dev didn\'t plan anything after this. Neither did you.',
