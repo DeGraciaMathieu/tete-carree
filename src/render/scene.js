@@ -1,6 +1,8 @@
 // Composition de chaque image : décor, crevasses, constructions, caisses, entités triées, repères, vignette.
 import { AVEUGLE_SIGHT, LOW_HP, MH, MW, T, W } from '../config.js';
+import { ambianceOn, drawRain, drawVignette, nightTint } from './ambiance.js';
 import { ctx, cv, dpr, outlined, zoom } from './canvas.js';
+import { decorOf } from './decor.js';
 import { floorC } from './floor.js';
 import { aimMuzzle, drawAcidGround, drawArmored, drawBloater, drawChar, drawGlobs, drawPlayerState, drawRunner, drawSpitter } from './sprites.js';
 import { themeOf } from './themes.js';
@@ -248,6 +250,7 @@ export function render() {
   ctx.imageSmoothingEnabled = true;
   ctx.drawImage(floorC, 0, 0);
   th = themeOf(mapId);
+  const dec = decorOf(mapId);
 
   const hw = cv.width / 2 / s, hh = cv.height / 2 / s;
   const tx0 = Math.max(0, Math.floor((cam.x - hw) / T) - 1), tx1 = Math.min(MW - 1, Math.floor((cam.x + hw) / T) + 1);
@@ -261,6 +264,7 @@ export function render() {
     if ((m0 === 1 || m0 === 2) && ty + 1 < MH && !map[(ty + 1) * MW + tx]) ctx.fillRect(tx * T, (ty + 1) * T, T, 7);
   }
 
+  if (dec) dec.drawBack(S.time, ambianceOn);
   drawAcidGround();
   drawFires();
   drawMarkers();
@@ -275,7 +279,10 @@ export function render() {
   }
   const list = [];
   for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
-    const v = map[ty * MW + tx]; if (v === 1 || v === 2) list.push({ k: (ty + 1) * T, t: 0, tx, ty, v });
+    const v = map[ty * MW + tx]; if ((v === 1 || v === 2) && !(dec && dec.covered[ty * MW + tx])) list.push({ k: (ty + 1) * T, t: 0, tx, ty, v });
+  }
+  if (dec) for (let i = 0; i < dec.objects.length; i++) {
+    const o = dec.objects[i]; if (o.x1 >= cam.x - hw && o.x0 <= cam.x + hw && o.k >= cam.y - hh - 20 && o.k - 110 <= cam.y + hh) list.push({ k: o.k, t: 7, o });
   }
   for (const b of blocks.values()) list.push({ k: b.ty * T + T * .75, t: 1, o: b });
   for (const p of world.pickups) list.push({ k: p.y, t: 2, o: p });
@@ -300,6 +307,7 @@ export function render() {
         if ((g.t * 8 | 0) & 1) { ctx.fillStyle = '#ff4a3a'; ctx.fillRect(g.x - 1, g.y - 9 - g.z, 2, 2); }
         break;
       }
+      case 7: outlined(d.o, d.o.draw); break;
       case 6: {
         const r = d.o, a = Math.atan2(r.vy, r.vx);
         ctx.save(); ctx.translate(r.x, r.y - 14); ctx.rotate(a);
@@ -310,6 +318,11 @@ export function render() {
     }
   }
 
+  if (dec) {
+    dec.drawOver();
+    if (ambianceOn) nightTint(dec.NIGHT, cam.x - hw - 40, cam.y - hh - 40, 2 * hw + 80, 2 * hh + 80);
+    dec.drawLights(S.time);
+  }
   drawMuzzleHalo();
   // boules de feu
   for (const p of world.projs) {
@@ -369,6 +382,7 @@ export function render() {
     ctx.fillStyle = p.color; ctx.fillText(p.text, p.x, p.y);
   }
   ctx.globalAlpha = 1;
+  if (dec && dec.RAIN && ambianceOn) drawRain(S.time, cam.x - hw - 40, cam.y - hh - 40, 2 * hw + 80, 2 * hh + 80);
   if (mod('aveugle')) drawBlindness();
   // indicateur de pose de bloc
   if (world.state === 'play' && !player.dead && (W[player.weapon].id === 'wall' || W[player.weapon].id === 'barrel')) {
@@ -386,6 +400,7 @@ export function render() {
 
   // vignette
   ctx.setTransform(1, 0, 0, 1, 0, 0);
+  if (dec && ambianceOn) drawVignette();
   const pulse = player.hp < LOW_HP && !player.dead ? (.25 + .15 * Math.sin(S.time * 6)) : 0;
   const hurt = Math.max(0, player.hurtT) * 1.6 + pulse;
   if (hurt > .01) {

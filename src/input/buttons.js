@@ -2,6 +2,7 @@
 import { showMute } from '../audio/sfx.js';
 import { chooseArena, pause, resume, showArena, startGame } from '../game/flow.js';
 import { lang, setLang } from '../i18n/index.js';
+import { ambianceOn, setAmbiance } from '../render/ambiance.js';
 import { buildArsenal } from '../render/arsenal.js';
 import { buildBestiary } from '../render/bestiary.js';
 import { outlineOn, setOutline } from '../render/canvas.js';
@@ -18,11 +19,12 @@ $('arenaBtn').addEventListener('click', () => chooseArena(1));
 $('pauseBtn').addEventListener('click', () => { if (world.state === 'play') pause(); });
 for (const b of document.querySelectorAll('.optFps')) b.addEventListener('click', () => setFps(!fpsOn));
 for (const b of document.querySelectorAll('.optOl')) b.addEventListener('click', () => setOutline(!outlineOn));
+for (const b of document.querySelectorAll('.optAmb')) b.addEventListener('click', () => setAmbiance(!ambianceOn));
 
 // Langue : réécrit l'accueil et les réglages ; le HUD et les cartes se construisent ensuite dans la langue courante.
 export function applyLang() {
   translatePage(); buildArsenal(); buildBestiary(); buildCardsPanel(); renderRuns(); showArena();
-  setFps(fpsOn); setOutline(outlineOn); showMute();
+  setFps(fpsOn); setOutline(outlineOn); setAmbiance(ambianceOn); showMute();
 }
 for (const b of document.querySelectorAll('.optLang')) b.addEventListener('click', () => { setLang(lang === 'fr' ? 'en' : 'fr'); applyLang(); });
 for (const b of document.querySelectorAll('.tflag')) b.addEventListener('click', () => { setLang(b.dataset.lang); applyLang(); });

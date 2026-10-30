@@ -62,13 +62,15 @@ const PLANS = {
     rect4(7, 4, 1, 4, 1); rect4(7, 4, 5, 1, 1);
     for (const [x, y] of [[cx - 6, 8], [cx + 5, 8], [cx - 6, MH - 9], [cx + 5, MH - 9]]) map[y * MW + x] = 2;
   },
-  // quatre pâtés de boutiques séparés par des ruelles, une grande rue est-ouest et une nord-sud,
-  // un portique à chaque entrée nord et sud, des étals dans les rues
+  // une rue la nuit : façades de boutiques au nord et portique sur la porte, mur de briques au sud et ruelle
+  // sur la porte ; sur la chaussée, taxis abandonnés, étals, tables de mahjong et piles de caisses
   chinatown() {
-    rect4(3, 3, 7, 6, 1); rect4(12, 3, 6, 6, 1);
-    rect4(3, 11, 7, 2, 1); rect4(12, 11, 4, 2, 1);
-    set4(19, 2, 1);
-    set4(7, 14, 2); set4(14, 14, 2); set4(20, 7, 2);
+    rect(1, 1, MW - 2, 3, 1); rect(20, 1, 4, 3, 0);
+    rect(1, 26, MW - 2, 3, 1); rect(20, 26, 4, 3, 0);
+    rect4(16, 8, 3, 1, 1);
+    rect4(5, 8, 2, 1, 2); rect4(11, 11, 2, 1, 2);
+    set4(8, 13, 2);
+    rect4(1, 5, 2, 2, 2);
   },
   // baraquements en long, un mirador dans chaque coin, enceinte de barbelés autour de la place
   // d'appel, ouverte face aux portes ; braseros sur la place. Les barbelés sont du vide : ils arrêtent

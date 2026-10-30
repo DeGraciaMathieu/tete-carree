@@ -281,6 +281,7 @@ export const STORAGE_OUTLINE = 'tete-carree-outline';
 export const STORAGE_RUNS = 'tete-carree-runs';
 export const STORAGE_LANG = 'tete-carree-lang'; // fr ou en, choisie sur l'accueil
 export const STORAGE_ARENA = 'tete-carree-arena'; // arène choisie sur l'accueil
+export const STORAGE_AMBIANCE = 'tete-carree-ambiance'; // option Ambiance : nuit, pluie, vignette des arènes thématiques
 export const TOP_RUNS = 5;
 // Version publiée : compteur masqué tant que le joueur ne l'a pas activé lui-même.
 export const SHOW_FPS_BY_DEFAULT = false;

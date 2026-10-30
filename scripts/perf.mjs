@@ -1,7 +1,7 @@
 // Mesure des allocations JS : serveur Vite + Chrome sans interface, une partie jouée (joueur immobile et
 // invulnérable), profil d'allocations échantillonné. Échoue au-delà du budget : la cause habituelle des
 // baisses de fps est le ramasse-miettes.
-// Usage : npm run perf [-- secondes]   (CHROME=<chemin> pour un autre navigateur Chromium)
+// Usage : npm run perf [-- secondes [arène]]   (CHROME=<chemin> pour un autre navigateur Chromium)
 import { spawn } from 'node:child_process';
 import { mkdtempSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -9,6 +9,7 @@ import { join } from 'node:path';
 
 const BUDGET_MB_S = 10;   // aujourd'hui ~2 Mo/s ; 140 Mo/s avant la correction du tas du champ de distances
 const SECONDS = +(process.argv[2] || 20);
+const ARENA = process.argv[3]; // arène jouée (id de ARENAS) ; sans argument, celle d'un profil vierge (Entrepôt)
 const VITE_PORT = 5191, DEBUG_PORT = 9333;
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const TOP = 12;
@@ -39,6 +40,10 @@ try {
   await send('Page.enable');
   await send('Page.navigate', { url: `http://localhost:${VITE_PORT}/` });
   await sleep(2500);
+  if (ARENA) {
+    await send('Runtime.evaluate', { expression: `localStorage.setItem('tete-carree-arena', ${JSON.stringify(ARENA)})` });
+    await send('Page.reload'); await sleep(2500);
+  }
   // Entrée sur l'écran titre lance une partie
   await send('Input.dispatchKeyEvent', { type: 'keyDown', code: 'Enter', key: 'Enter', windowsVirtualKeyCode: 13 });
   await send('Input.dispatchKeyEvent', { type: 'keyUp', code: 'Enter', key: 'Enter', windowsVirtualKeyCode: 13 });
@@ -48,7 +53,7 @@ try {
   // Le serveur Vite sert le même module que le jeu, on agit donc sur le vrai état.
   await send('Runtime.evaluate', { expression: `import('/src/state/world.js').then(m => { m.player.invuln = 1e9; })`, awaitPromise: true });
 
-  console.log(`Partie lancée, mesure pendant ${SECONDS} s…`);
+  console.log(`Partie lancée${ARENA ? ` (${ARENA})` : ''}, mesure pendant ${SECONDS} s…`);
   await send('HeapProfiler.enable');
   await send('HeapProfiler.startSampling', { samplingInterval: 4096, includeObjectsCollectedByMajorGC: true, includeObjectsCollectedByMinorGC: true });
   await sleep(SECONDS * 1000);

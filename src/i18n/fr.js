@@ -77,6 +77,7 @@ export default {
   optMute: muted => 'Son : ' + (muted ? 'coupé' : 'activé'),
   optFps: on => 'FPS : ' + (on ? 'affichés' : 'masqués'),
   optOutline: on => 'Contours : ' + (on ? 'activés' : 'désactivés'),
+  optAmbiance: on => 'Ambiance : ' + (on ? 'activée' : 'désactivée'),
   optLang: 'Langue : Français',
 
   /* ---------- Manette ---------- */

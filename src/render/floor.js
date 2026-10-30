@@ -1,5 +1,6 @@
 // Sol de l'arène peint hors écran, et traces persistantes (sang, brûlures).
 import { MH, MW, T } from '../config.js';
+import { decorOf } from './decor.js';
 import { themeOf } from './themes.js';
 import { doors, map, mapId } from '../state/arena.js';
 import { rnd } from '../util.js';
@@ -8,6 +9,18 @@ export const floorC = document.createElement('canvas');
 floorC.width = MW * T; floorC.height = MH * T;
 export const fctx = floorC.getContext('2d');
 export function paintFloor() {
+  const dec = decorOf(mapId);
+  if (dec) { dec.paintGround(fctx, floorC.width, floorC.height); dec.prepare(); }
+  else paintTiles();
+  // bandes de danger devant les portes
+  for (const [x, y] of doors) {
+    const g = fctx.createRadialGradient(x * T + T / 2, y * T + T / 2, 2, x * T + T / 2, y * T + T / 2, 40);
+    g.addColorStop(0, 'rgba(15,16,17,.85)'); g.addColorStop(1, 'rgba(15,16,17,0)');
+    fctx.fillStyle = g; fctx.fillRect(x * T - 40, y * T - 40, T + 80, T + 80);
+  }
+}
+// Sol générique d'une arène sans décor : couleurs du thème, motif, gravats au bord du vide, marquage.
+function paintTiles() {
   const th = themeOf(mapId), f = th.floor;
   fctx.fillStyle = f.base; fctx.fillRect(0, 0, floorC.width, floorC.height);
   for (let y = 0; y < MH; y++) for (let x = 0; x < MW; x++) {
@@ -33,12 +46,6 @@ export function paintFloor() {
   if (f.marking) {
     fctx.strokeStyle = 'rgba(214,170,40,.55)'; fctx.lineWidth = 3; fctx.setLineDash([14, 10]);
     fctx.strokeRect(13 * T + 8, 9 * T + 8, 18 * T - 16, 12 * T - 16); fctx.setLineDash([]);
-  }
-  // bandes de danger devant les portes
-  for (const [x, y] of doors) {
-    const g = fctx.createRadialGradient(x * T + T / 2, y * T + T / 2, 2, x * T + T / 2, y * T + T / 2, 40);
-    g.addColorStop(0, 'rgba(15,16,17,.85)'); g.addColorStop(1, 'rgba(15,16,17,0)');
-    fctx.fillStyle = g; fctx.fillRect(x * T - 40, y * T - 40, T + 80, T + 80);
   }
 }
 // Motif du sol propre au thème : fissures du béton, flaques du bitume, traces de pas dans la neige,
