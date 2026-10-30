@@ -24,6 +24,7 @@ L'aléa cosmétique (`Math.random`, `rnd`) y est permis ; jamais `rng`, qui fera
 | Perspective 3/4 | hauteur `z` soustraite à `y` à l'affichage ; ellipses d'ombre aplaties |
 | HUD (DOM) | `render/hud.js` : `buildSlots`, `updateHud` (cache `setText`/`setStyle` pour n'écrire que ce qui change), `resetHud`, `banner(m, s, kind, count)` ; portrait du héros `renderFace` (canvas `#face` de 13 × 13 : intact, blessé sous 60 % de la vie max, critique sous `LOW_HP`, mort ; redessiné seulement quand son apparence change, sursaut CSS `jolt` à chaque perte de vie) |
 | Compteur de FPS | `render/fps.js` : `fpsOn` = réglage enregistré (`STORAGE_FPS`) sinon `SHOW_FPS_BY_DEFAULT` (`false`) ; `setFps`, `tickFps` |
+| Mini-plan de l'accueil | `render/minimap.js` : `drawArenaMap()` (appelée par `loop/frame.js` pendant la démo), plan vu de dessus repeint au changement d'arène, joueur et horde en points ; canvas `#arenaMap` dans `#titleMenu`, masqué sous 720 px |
 | Écrans | éléments de `index.html` (`#titleScreen`, `#pickScreen`, `#pauseScreen`, `#overScreen`) montrés par `hidden`, pilotés par `game/flow.js` |
 
 ## Le proxy de contour (`OLP`)

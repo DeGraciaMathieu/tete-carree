@@ -49,6 +49,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/render/scene.js` | `render()` : caméra, sol, tri en profondeur, entités, projectiles, effets | sprites, floor |
 | `src/render/hud.js` | `buildSlots`, `updateHud`, `resetHud`, `banner`, `drawFace`, `buildArsenal`, `buildCardsPanel`, `renderRuns` (dernière partie et meilleures parties), `translatePage` (textes `data-i18n*`) | world, i18n |
 | `src/render/fps.js` | `fpsOn`, `setFps`, `tickFps` | config (`SHOW_FPS_BY_DEFAULT`) |
+| `src/render/minimap.js` | `drawArenaMap` | config (`MW`, `MH`, `T`), state (`map`, `doors`, `player`, `world`) |
 | `src/audio/sfx.js` | `audio()` (démarrage au premier geste), `sfx(name)`, bouton son (`showMute`) | i18n |
 | `src/input/keyboard.js` | `keys`, `mouseFire`, `releaseFire`, raccourcis, pause sur `blur`/`visibilitychange` | game |
 | `src/input/touch.js` | `stick`, `aim`, boutons ROULER/ARME | game |

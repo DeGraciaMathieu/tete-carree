@@ -6,6 +6,7 @@ import { pollPad } from '../input/gamepad.js';
 import { update } from './update.js';
 import { tickFps } from '../render/fps.js';
 import { updateHud } from '../render/hud.js';
+import { drawArenaMap } from '../render/minimap.js';
 import { render } from '../render/scene.js';
 import { S, world } from '../state/world.js';
 
@@ -15,7 +16,7 @@ export function frame(now) {
   tickFps(now - last, now);
   const dt = Math.min(MAX_DT, (now - last) / 1000); last = now;
   if (world.state === 'play') { update(dt); updateHud(); }
-  else if (world.demo) { update(dt); if (demoOver()) startDemo(); }
+  else if (world.demo) { update(dt); if (demoOver()) startDemo(); drawArenaMap(); }
   else if (world.state === 'title' || world.state === 'over') { S.time += dt; }
   render();
   requestAnimationFrame(frame);

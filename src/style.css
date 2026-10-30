@@ -243,6 +243,7 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .tmenu .btn::before{content:'▶ ';font-size:.75em}
 .tmenu .btn:focus{outline:2px solid var(--text);outline-offset:3px}
 .titem{font:16px var(--mono);color:#d4d8cf;text-shadow:0 1px 2px #000;letter-spacing:.12em;text-transform:uppercase;text-align:left;background:none;border:0;border-left:3px solid var(--line);padding:7px 0 7px 16px;cursor:pointer}
+#arenaMap{width:220px;height:150px;margin-top:18px;border:1px solid rgba(242,194,48,.6);image-rendering:pixelated}
 .titem:hover,.titem:focus{color:var(--hazard);border-left-color:var(--hazard);outline:0}
 .tfoot{display:grid;justify-items:start;gap:10px}
 .tfoot .padhint{margin:0;color:#c3c8bf;text-shadow:0 1px 2px #000}
@@ -252,6 +253,7 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
   #titleScreen{grid-template-columns:1fr;align-content:start}
   .tside{width:auto;gap:22px;padding:max(28px,calc(env(safe-area-inset-top,0px) + 16px)) 16px 24px;background:linear-gradient(rgba(14,15,16,.94) 80%,rgba(14,15,16,.6))}
   .tmenu{justify-items:stretch}
+  #arenaMap{display:none}
   .records{justify-self:stretch;width:auto;margin:0 16px 24px}
 }
 #mascot{width:52px;height:52px;image-rendering:pixelated;filter:drop-shadow(0 6px 0 rgba(0,0,0,.55))}
