@@ -10,7 +10,7 @@ floorC.width = MW * T; floorC.height = MH * T;
 export const fctx = floorC.getContext('2d');
 export function paintFloor() {
   const dec = decorOf(mapId);
-  if (dec) { dec.paintGround(fctx, floorC.width, floorC.height); dec.prepare(); }
+  if (dec) { dec.prepare(); dec.paintGround(fctx, floorC.width, floorC.height); }
   else paintTiles();
   // bandes de danger devant les portes
   for (const [x, y] of doors) {

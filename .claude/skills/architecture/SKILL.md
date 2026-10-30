@@ -57,8 +57,9 @@ de fin (`'over'`, `'win'`), seul `S.time` avance ; en `'talk'` (scènes du mode 
 | `src/render/dialog.js` | boîte de dialogue du mode Histoire : `showLine(who, text)` (portrait, nom, écriture lettre par lettre), `lineDone`, `completeLine`, `closeTalk` | i18n, render/hud (`drawFace`, `heroMood`) |
 | `src/render/themes.js` | `themeOf(id)` : couleurs du sol, des murs, des caisses de plan, du vide et du mini-plan par arène (`beton` pour les cinq arènes d'origine) | rien |
 | `src/render/decor.js` | `decorOf(id)` : décor élaboré d'une arène des chapitres, ou `null` (rendu générique des tuiles) | render/decor/* |
-| `src/render/decor/chinatown.js` | décor de Chinatown : `paintGround` (sol), `prepare` (objets du plan, cases `covered`, calques des façades et enseignes, guirlandes), `drawBack`, `drawOver` (portique), `drawLights` ; `NIGHT`, `RAIN` | render/canvas, render/ambiance, state/arena |
-| `src/render/ambiance.js` | `glow` (halos pré-rendus par teinte), `nightTint`, `drawRain`, `drawVignette`, option `ambianceOn`/`setAmbiance` (`STORAGE_AMBIANCE`) | config, i18n, render/canvas |
+| `src/render/decor/chinatown.js` | décor de Chinatown : `paintGround` (sol), `prepare` (objets du plan, cases `covered`, calques des façades et enseignes, guirlandes), `drawBack`, `drawOver` (portique), `drawLights` ; `NIGHT`, `FOG`, `WEATHER`, `VIGNETTE` | render/canvas, render/ambiance, state/arena |
+| `src/render/decor/siberie.js` | décor du Camp de Sibérie (blizzard) : mêmes fonctions ; `prepare` reconnaît baraquements, miradors, braseros et bûches dans `map` | render/canvas, render/ambiance, state/arena |
+| `src/render/ambiance.js` | `glow` (halos pré-rendus par teinte), `nightTint`, `drawRain`, `drawSnow`, `drawVignette(edge)`, option `ambianceOn`/`setAmbiance` (`STORAGE_AMBIANCE`) | config, i18n, render/canvas |
 | `src/audio/sfx.js` | `audio()` (démarrage au premier geste), `sfx(name)`, bouton son (`showMute`) | i18n |
 | `src/input/keyboard.js` | `keys`, `mouseFire`, `releaseFire`, raccourcis, pause sur `blur`/`visibilitychange` | game |
 | `src/input/touch.js` | `stick`, `aim`, boutons ROULER/ARME | game |

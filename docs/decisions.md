@@ -195,8 +195,17 @@ Spécification : `docs/prd/themes-palettes.md`.
   à la place des quatre pâtés validés d'abord. Les enseignes sont en chinois, comme décor : hors traduction ;
   la police Noto Serif SC est chargée pour leurs seuls caractères. Les deux guirlandes de lampions qui
   croisaient la chaussée sur la maquette ont été retirées : au cadrage du jeu, leurs lampions couvraient la horde.
+- Camp de Sibérie (maquette https://claude.ai/artifact/LEMD4DsHndmrNv6SoZVuSi), plan inchangé : baraquements
+  enneigés et cheminées qui fument, miradors, palissade, portail « ЛАГЕРЬ № 7 », barbelés en rouleaux, braseros,
+  bûches, mât et drapeau, bonhomme de neige à tête carrée. Ambiance retenue : **jour de blizzard** (voile
+  blanc, neige poussée par le vent, vignette blanche), seul chapitre de jour ; la variante de nuit avec
+  projecteurs n'a pas été retenue, les projecteurs des miradors restent éteints, simple décor. Inscriptions en
+  cyrillique hors traduction (police Russo One, chargée pour leurs seuls caractères).
+- Chaque décor règle son ambiance : `NIGHT` (teinte multipliée ou `null`), `FOG` (voile ou `null`), `WEATHER`
+  (`'rain'`, `'snow'`), `VIGNETTE` (teinte des bords). Un décor peint aussi son vide : le rendu générique des
+  crevasses est sauté.
 - Option « Ambiance » (Options et pause, clé `STORAGE_AMBIANCE`, `tete-carree-ambiance`) : coupe la teinte de
-  nuit, la pluie, la vapeur et la vignette ; le décor et ses lumières restent. Halos pré-rendus une fois par
+  nuit, le voile, la pluie, la neige, la vapeur et la vignette ; le décor et ses lumières restent. Halos pré-rendus une fois par
   teinte (`render/ambiance.js`), pluie en tableaux typés : rien n'est alloué par image.
 - `npm run perf -- 20 <arène>` mesure une arène donnée.
 

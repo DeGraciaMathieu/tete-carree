@@ -6,8 +6,7 @@ import { glow } from '../ambiance.js';
 import { ctx, outlined } from '../canvas.js';
 import { map } from '../../state/arena.js';
 
-export const NIGHT = '#6f7aa8';
-export const RAIN = true;
+export const NIGHT = '#6f7aa8', FOG = null, WEATHER = 'rain', VIGNETTE = 'rgba(0,0,0,.5)';
 const WW = MW * T, FH = 4 * T, GX = 22 * T; // FH : hauteur des façades, de la bordure au trottoir
 const HAN = '900 12px "Noto Serif SC", "Songti SC", "SimSun", serif', HAN_GATE = '900 14px "Noto Serif SC", "Songti SC", "SimSun", serif';
 const rgb = hex => { const n = parseInt(hex.slice(1), 16); return `${n >> 16},${n >> 8 & 255},${n & 255}`; };

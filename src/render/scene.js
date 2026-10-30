@@ -1,6 +1,6 @@
 // Composition de chaque image : décor, crevasses, constructions, caisses, entités triées, repères, vignette.
 import { AVEUGLE_SIGHT, LOW_HP, MH, MW, T, W } from '../config.js';
-import { ambianceOn, drawRain, drawVignette, nightTint } from './ambiance.js';
+import { ambianceOn, drawRain, drawSnow, drawVignette, nightTint } from './ambiance.js';
 import { ctx, cv, dpr, outlined, zoom } from './canvas.js';
 import { decorOf } from './decor.js';
 import { floorC } from './floor.js';
@@ -256,7 +256,7 @@ export function render() {
   const tx0 = Math.max(0, Math.floor((cam.x - hw) / T) - 1), tx1 = Math.min(MW - 1, Math.floor((cam.x + hw) / T) + 1);
   const ty0 = Math.max(0, Math.floor((cam.y - hh) / T) - 1), ty1 = Math.min(MH - 1, Math.floor((cam.y + hh + 40) / T) + 1);
 
-  drawVoid(tx0, tx1, ty0, ty1);
+  if (!dec) drawVoid(tx0, tx1, ty0, ty1); // un décor peint lui-même son vide (barbelés, eau)
   // ombres portées des murs
   ctx.fillStyle = th.shadow;
   for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
@@ -320,7 +320,8 @@ export function render() {
 
   if (dec) {
     dec.drawOver();
-    if (ambianceOn) nightTint(dec.NIGHT, cam.x - hw - 40, cam.y - hh - 40, 2 * hw + 80, 2 * hh + 80);
+    if (ambianceOn && dec.NIGHT) nightTint(dec.NIGHT, cam.x - hw - 40, cam.y - hh - 40, 2 * hw + 80, 2 * hh + 80);
+    if (ambianceOn && dec.FOG) { ctx.fillStyle = dec.FOG; ctx.fillRect(cam.x - hw - 40, cam.y - hh - 40, 2 * hw + 80, 2 * hh + 80); }
     dec.drawLights(S.time);
   }
   drawMuzzleHalo();
@@ -382,7 +383,8 @@ export function render() {
     ctx.fillStyle = p.color; ctx.fillText(p.text, p.x, p.y);
   }
   ctx.globalAlpha = 1;
-  if (dec && dec.RAIN && ambianceOn) drawRain(S.time, cam.x - hw - 40, cam.y - hh - 40, 2 * hw + 80, 2 * hh + 80);
+  if (dec && ambianceOn && dec.WEATHER === 'rain') drawRain(S.time, cam.x - hw - 40, cam.y - hh - 40, 2 * hw + 80, 2 * hh + 80);
+  if (dec && ambianceOn && dec.WEATHER === 'snow') drawSnow(S.time, cam.x - hw - 40, cam.y - hh - 40, 2 * hw + 80, 2 * hh + 80);
   if (mod('aveugle')) drawBlindness();
   // indicateur de pose de bloc
   if (world.state === 'play' && !player.dead && (W[player.weapon].id === 'wall' || W[player.weapon].id === 'barrel')) {
@@ -400,7 +402,7 @@ export function render() {
 
   // vignette
   ctx.setTransform(1, 0, 0, 1, 0, 0);
-  if (dec && ambianceOn) drawVignette();
+  if (dec && ambianceOn) drawVignette(dec.VIGNETTE);
   const pulse = player.hp < LOW_HP && !player.dead ? (.25 + .15 * Math.sin(S.time * 6)) : 0;
   const hurt = Math.max(0, player.hurtT) * 1.6 + pulse;
   if (hurt > .01) {

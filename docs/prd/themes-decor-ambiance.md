@@ -10,7 +10,7 @@ Partie du [mode Histoire](mode-histoire.md). Suppose l'[étape 2](themes-palette
 > maquette : c'est le cas de Chinatown, devenue une rue. Le tableau `look` et les variantes de case décrits
 > plus bas ne sont pas utilisés : le module de l'arène reconnaît lui-même ses objets dans `map`. L'option
 > « Ambiance », la pluie, les halos pré-rendus et `npm run perf -- 20 <arène>` sont faits avec Chinatown.
-> Restent à faire : Camp de Sibérie, Les égouts, Camp militaire.
+> Camp de Sibérie fait (blizzard de jour). Restent à faire : Les égouts, Camp militaire.
 
 ## Objectif
 
