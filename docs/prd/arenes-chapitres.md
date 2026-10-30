@@ -80,7 +80,7 @@ Sibérie passés en vide :
 | Chinatown | 404 | 12 | 0 | 100 % |
 | Camp de Sibérie | 208 | 12 | 36 (barbelés) | 100 % |
 | Les égouts | 32 | 8 | 232 | 100 % |
-| Camp militaire | 140 | 8 | 0 | 100 % |
+| Camp militaire | 148 | 8 | 0 | 100 % |
 
 ### Identifiants et noms
 

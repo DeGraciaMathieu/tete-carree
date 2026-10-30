@@ -24,7 +24,7 @@ export default {
   rollBtn: 'ROLL', rollAria: 'Roll', swapBtn: 'WEAPON', swapAria: 'Next weapon',
   lastRun: 'Last run', bestRuns: 'Your best runs', play: 'Play',
   arenaBtn: name => 'Arena: ' + name,
-  arenas: { entrepot: 'Warehouse', fosse: 'The Pit', colonnade: 'Colonnade', bunker: 'Bunker', pont: 'The Bridge' },
+  arenas: { entrepot: 'Warehouse', fosse: 'The Pit', colonnade: 'Colonnade', bunker: 'Bunker', pont: 'The Bridge', chinatown: 'Chinatown', siberie: 'Siberian Camp', egouts: 'The Sewers', militaire: 'Army Camp' },
   startDesk: '<kbd>Enter</kbd> play · <kbd>↑</kbd> <kbd>↓</kbd> choose · <kbd>←</kbd> <kbd>→</kbd> arena', startPad: 'A (✕) select · D-pad ↑ ↓ choose · ← → arena',
   padHint: 'Got a controller? Press any of its buttons to connect it.',
   padBlocked: 'This browser blocks controllers on this page.',

@@ -23,7 +23,7 @@ export default {
   rollBtn: 'ROULER', rollAria: 'Roulade', swapBtn: 'ARME', swapAria: 'Arme suivante',
   lastRun: 'Dernière partie', bestRuns: 'Tes meilleures parties', play: 'Jouer',
   arenaBtn: name => 'Arène : ' + name,
-  arenas: { entrepot: 'Entrepôt', fosse: 'La Fosse', colonnade: 'Colonnade', bunker: 'Bunker', pont: 'Le Pont' },
+  arenas: { entrepot: 'Entrepôt', fosse: 'La Fosse', colonnade: 'Colonnade', bunker: 'Bunker', pont: 'Le Pont', chinatown: 'Chinatown', siberie: 'Camp de Sibérie', egouts: 'Les égouts', militaire: 'Camp militaire' },
   startDesk: '<kbd>Entrée</kbd> jouer · <kbd>↑</kbd> <kbd>↓</kbd> choisir · <kbd>←</kbd> <kbd>→</kbd> arène', startPad: 'A (✕) valider · croix ↑ ↓ choisir · ← → arène',
   padHint: 'Une manette ? Appuie sur l\'un de ses boutons pour la connecter.',
   padBlocked: 'Ce navigateur bloque la manette dans cette page.',

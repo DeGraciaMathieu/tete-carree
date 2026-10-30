@@ -62,6 +62,41 @@ const PLANS = {
     rect4(7, 4, 1, 4, 1); rect4(7, 4, 5, 1, 1);
     for (const [x, y] of [[cx - 6, 8], [cx + 5, 8], [cx - 6, MH - 9], [cx + 5, MH - 9]]) map[y * MW + x] = 2;
   },
+  // quatre pâtés de boutiques séparés par des ruelles, une grande rue est-ouest et une nord-sud,
+  // un portique à chaque entrée nord et sud, des étals dans les rues
+  chinatown() {
+    rect4(3, 3, 7, 6, 1); rect4(12, 3, 6, 6, 1);
+    rect4(3, 11, 7, 2, 1); rect4(12, 11, 4, 2, 1);
+    set4(19, 2, 1);
+    set4(7, 14, 2); set4(14, 14, 2); set4(20, 7, 2);
+  },
+  // baraquements en long, un mirador dans chaque coin, enceinte de barbelés autour de la place
+  // d'appel, ouverte face aux portes ; braseros sur la place. Les barbelés sont du vide : ils arrêtent
+  // les corps et laissent passer les tirs
+  siberie() {
+    rect4(2, 2, 2, 2, 1);
+    rect4(7, 3, 11, 3, 1); rect4(3, 8, 3, 5, 1);
+    rect4(12, 9, 7, 1, 3); rect4(12, 9, 1, 3, 3);
+    set4(15, 12, 2); set4(9, 7, 2); set4(10, 7, 2);
+  },
+  // deux canaux est-ouest et deux nord-sud découpent l'arène en salles ; une passerelle devant chaque
+  // porte, une par rive, une à chaque croisement nord-sud ; piliers dans les salles
+  egouts(cx, cy) {
+    rect(1, 7, MW - 2, 2, 3); rect(1, MH - 9, MW - 2, 2, 3);
+    rect(10, 1, 2, MH - 2, 3); rect(MW - 12, 1, 2, MH - 2, 3);
+    rect(cx - 1, 7, 2, 2, 0); rect(cx - 1, MH - 9, 2, 2, 0);
+    rect(10, cy - 1, 2, 2, 0); rect(MW - 12, cy - 1, 2, 2, 0);
+    rect4(5, 7, 1, 2, 0); rect4(10, 4, 2, 1, 0);
+    rect4(15, 11, 2, 2, 1); rect4(4, 3, 2, 2, 1);
+    set4(7, 12, 2); set4(17, 4, 2);
+  },
+  // conteneurs le long des bords, deux postes de sacs de sable en U qui couvrent le centre,
+  // ouverts face aux portes ; caisses de munitions entre les deux
+  militaire() {
+    rect4(4, 3, 6, 2, 1); rect4(4, 9, 2, 5, 1); rect4(9, 8, 5, 2, 1);
+    rect4(17, 9, 4, 1, 1); rect4(17, 9, 1, 2, 1);
+    set4(8, 6, 2); set4(15, 13, 2);
+  },
 };
 export function buildMap(id) {
   map.fill(0); doors.length = 0; doorSet.clear();

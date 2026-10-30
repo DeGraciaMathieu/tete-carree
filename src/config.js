@@ -3,7 +3,7 @@
 /* ---------- Arène ---------- */
 export const T = 32, MW = 44, MH = 30;
 // Arènes choisies sur l'accueil, dans l'ordre du menu ; leurs plans sont dans state/arena.js.
-export const ARENAS = ['entrepot', 'fosse', 'colonnade', 'bunker', 'pont'];
+export const ARENAS = ['entrepot', 'fosse', 'colonnade', 'bunker', 'pont', 'chinatown', 'siberie', 'egouts', 'militaire'];
 export const ZOOM_MIN = 0.72, ZOOM_MAX = 1.7;
 
 /* ---------- Armes ---------- */
