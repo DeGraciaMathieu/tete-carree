@@ -102,6 +102,12 @@ et les questions ouvertes : lis-le avant tout changement structurel.
 - Pour vérifier le build publié : `npm run build` puis `./node_modules/.bin/vite preview`.
 - Après un changement dans un chemin chaud, et avant chaque publication sur itch.io, lance
   `npm run perf` : en cas d'échec, il nomme les fonctions qui allouent le plus.
+- Pour une modification visible du joueur (rendu, écran, HUD, caméra, décor, thème) ou qui offre
+  plusieurs options, fais d'office une page HTML d'exemples (artifact, hors du dépôt) : style du jeu
+  (case de `T` px, vue 3/4, contour sombre, polices et couleurs de `src/style.css`) et vraies données
+  (plans de `state/arena.js`, valeurs de `config.js`). Avant le code s'il y a un choix à trancher,
+  après pour montrer le résultat sinon. Pas pour une règle corrigée ni un changement invisible.
+
 ## Skills disponibles
 
 | Skill | Périmètre |

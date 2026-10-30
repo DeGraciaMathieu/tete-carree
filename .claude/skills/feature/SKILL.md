@@ -21,6 +21,10 @@ user_invocable: true
    - **plateformes** : clavier, manette, tactile — la commande doit-elle exister sur les trois ?
 4. Si la demande touche un comportement listé dans « Deliberately left alone » de
    `docs/decisions.md`, signale-le et demande explicitement avant de le modifier.
+5. Si le changement se voit à l'écran (rendu, écran, HUD, caméra, décor, thème) ou offre plusieurs
+   options, fais une page HTML d'exemples (artifact, hors du dépôt) dans le style du jeu et avec les
+   vraies données (plans d'arène, `config.js`) : une maquette par option, pour que l'utilisateur
+   tranche avant le code. Sans choix à faire, montre le résultat de la même façon dans le résumé (section 5).
 
 ## 2. Implémenter
 
@@ -61,3 +65,4 @@ Reste dans le périmètre demandé : pas de refonte ni de correction voisine non
 - Tests ajoutés ou modifiés, et résultat de `npm test`.
 - Ce qui a été vérifié en jouant, et ce qui ne l'a pas été.
 - Questions restées ouvertes.
+- Lien de la page d'exemples, si le changement est visible du joueur.
