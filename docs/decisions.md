@@ -160,13 +160,17 @@ Maquettes comparées avant de choisir (proposition 1 retenue sur trois : carte c
 
 ## Arènes au choix
 
-- Cinq arènes : Entrepôt (l'arène d'origine), La Fosse, Colonnade, Bunker, Le Pont, choisies sur huit
-  maquettes. Toutes gardent la grille 44 × 30, la bordure, les huit cases de porte et la case de départ :
-  apparitions, démo et caméra restent inchangées.
+- Neuf arènes : Entrepôt (l'arène d'origine), La Fosse, Colonnade, Bunker, Le Pont, choisies sur huit
+  maquettes ; puis Chinatown, Camp de Sibérie, Les égouts et Camp militaire, les arènes des chapitres du
+  mode Histoire (`docs/prd/arenes-chapitres.md`), jouables aussi en mode Arène. Toutes gardent la grille
+  44 × 30, la bordure, les huit cases de porte et la case de départ : apparitions, démo et caméra restent
+  inchangées.
 - Choix par une entrée à bascule du menu de l'accueil, juste sous Jouer (« Arène : … ») : clic ou Entrée
   pour la suivante, ← → au clavier, croix ← → ou stick de la manette, depuis n'importe quelle entrée. La démo
   repart aussitôt sur l'arène choisie, qui sert d'aperçu. Choix retenu sous `STORAGE_ARENA` (`tete-carree-arena`).
 - Records communs à toutes les arènes ; une partie enregistrée ne retient pas son arène.
+- Les barbelés du Camp de Sibérie sont des cases de vide : ils arrêtent les corps et laissent passer les
+  tirs, la roulade les franchit, un ennemi projeté dedans sort du jeu comme dans une crevasse.
 
 ## Écran titre : volet Cartes
 
@@ -272,7 +276,8 @@ game. Each entry: what it is, where, and why it was not fixed.
   chemin dans une arène vide, de 5 à 23 % des tuiles de sol dans l'arène réelle selon la position
   du joueur. Un ennemi sur une telle tuile n'obtient pas de `nextStep`. Comportement identique
   au prototype (vérifié tuile à tuile sur 140 positions du joueur). Documenté par un
-  `test.fails` dans `tests/pathfield.test.js`.
+  `test.fails` dans `tests/pathfield.test.js`. Explication et mesures par arène :
+  `docs/bug-arrondi-champ-distances.md`.
 - **Double balise `<meta name="viewport">`** dans `index.html` : la première n'a pas
   `user-scalable=no`, la seconde l'a. Le navigateur retient en général la première.
 - **`KeyQ` change d'arme (précédente)** mais n'est pas mentionnée dans les contrôles de l'écran titre.
@@ -291,7 +296,10 @@ Decisions the code does not settle and that were not made. Never resolved by gue
 
 - Corriger ou non le bug d'arrondi du champ de distances : le corriger change le déplacement de la horde.
   Il pèse davantage dans le Bunker : joueur au départ, 66 % du sol sans chemin (Entrepôt 11 %, Colonnade 11 %,
-  Le Pont 7 %, La Fosse 1 %) ; les ennemis de ces tuiles marchent droit sur le joueur et butent sur les murs
+  Le Pont 7 %, La Fosse 1 % ; arènes des chapitres : Camp militaire 33 %, Chinatown 9 %, Camp de Sibérie 5 %,
+  Les égouts 1 %). Ces chiffres sont pris joueur au centre. En moyenne sur les positions du joueur, la part
+  du sol où un ennemi sans chemin bute contre un mur est de 3 à 14 % (Camp militaire 13,8 %, Colonnade 11,1 %,
+  Entrepôt 10,2 %), et de 23 % pour le Bunker ; les ennemis de ces tuiles marchent droit sur le joueur et butent sur les murs
   de la casemate. Corriger le bug, retoucher le Bunker, ou le garder tel quel ?
 - Records par arène, ou communs comme aujourd'hui ?
 - `npm run package` s'appuie sur la commande `zip` du système : faut-il un script multiplateforme
