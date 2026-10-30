@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { createRng } from '../src/rules/rng.js';
-import { waveQueue, queueCount, spawnBurst, spawnGap } from '../src/rules/waves.js';
+import { firstWave, waveQueue, queueCount, spawnBurst, spawnGap } from '../src/rules/waves.js';
 
 const tally = q => q.reduce((t, k) => ({ ...t, [k[0]]: (t[k[0]] || 0) + 1 }), {});
 
@@ -16,6 +16,15 @@ test('chaque nouveau type d\'ennemi entre à sa vague annoncée', () => {
   assert.ok(tally(waveQueue(5, {}, createRng(1))).s, 'cracheurs en vague 5');
   assert.ok(tally(waveQueue(6, {}, createRng(1))).a, 'blindés en vague 6');
   assert.equal(tally(waveQueue(5, {}, createRng(1))).a, undefined);
+});
+
+test('le bestiaire annonce la vague où chaque ennemi arrive, ni avant ni après', () => {
+  for (const type of ['z', 'b', 'd', 'p', 's', 'a']) {
+    const n = firstWave(type);
+    assert.ok(tally(waveQueue(n, {}, createRng(1)))[type], `${type} présent en vague ${n}`);
+    if (n > 1) assert.equal(tally(waveQueue(n - 1, {}, createRng(1)))[type], undefined, `${type} absent en vague ${n - 1}`);
+  }
+  assert.deepEqual(['z', 'b', 'd', 'p', 's', 'a'].map(firstWave), [1, 2, 3, 4, 5, 6]);
 });
 
 test('Prime de risque grossit chaque meute de deux coureurs', () => {

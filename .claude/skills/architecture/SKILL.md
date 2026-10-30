@@ -47,8 +47,10 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/render/cardIcons.js` | `cardIcon(id)` : pictogramme SVG d'une carte de modificateur | rien |
 | `src/render/sprites.js` | `drawChar`, `drawBloater`, `drawRunner`, `drawSpitter`, `drawArmored`, `drawPlayerState`, `GUNS`… | canvas |
 | `src/render/scene.js` | `render()` : caméra, sol, tri en profondeur, entités, projectiles, effets | sprites, floor |
-| `src/render/hud.js` | `buildSlots`, `updateHud`, `resetHud`, `banner`, `drawFace`, `buildArsenal`, `buildCardsPanel`, `renderRuns` (dernière partie et meilleures parties), `translatePage` (textes `data-i18n*`) | world, i18n |
+| `src/render/hud.js` | `buildSlots`, `updateHud`, `resetHud`, `banner`, `drawFace`, `buildCardsPanel`, `renderRuns` (dernière partie et meilleures parties), `translatePage` (textes `data-i18n*`) | world, i18n |
 | `src/render/fps.js` | `fpsOn`, `setFps`, `tickFps` | config (`SHOW_FPS_BY_DEFAULT`) |
+| `src/render/arsenal.js` | `buildArsenal`, `drawArsenal` (vignettes repeintes quand leur taille change, volet ouvert seulement) | config (`W`, `SHOTS`, explosifs, barricade), i18n, render/canvas (`drawOn`), render/scene (`drawBlock`), render/sprites (`drawGun`) |
+| `src/render/bestiary.js` | `buildBestiary`, `drawBestiary` (portraits animés, volet ouvert seulement) | config (`ENEMY_STATS`, `KILL_POINTS`), i18n, rules/waves (`firstWave`), render/canvas (`drawOn`), render/sprites |
 | `src/render/minimap.js` | `drawArenaMap` | config (`MW`, `MH`, `T`), state (`map`, `doors`, `player`, `world`) |
 | `src/audio/sfx.js` | `audio()` (démarrage au premier geste), `sfx(name)`, bouton son (`showMute`) | i18n |
 | `src/input/keyboard.js` | `keys`, `mouseFire`, `releaseFire`, raccourcis, pause sur `blur`/`visibilitychange` | game |

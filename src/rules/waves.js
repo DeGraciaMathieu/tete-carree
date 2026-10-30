@@ -28,6 +28,15 @@ export function waveQueue(n, mods, rng) {
   return q.map(a => a[0]);
 }
 
+// Première vague où le type entre ('z', 'b', 'd', 's', 'a', 'p' pour les meutes) : le bestiaire l'affiche.
+export function firstWave(type) {
+  const u = WAVE_UNITS[type];
+  if (!u.from) return 1;
+  let n = u.from;
+  while (!unitCount(u, n)) n++;
+  return n;
+}
+
 // Nombre d'ennemis restant à sortir, une meute comptant pour chacun de ses coureurs.
 export function queueCount(queue) { let c = 0; for (const t of queue) c += t[0] === 'p' ? +t.slice(1) : 1; return c; }
 

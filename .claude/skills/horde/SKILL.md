@@ -82,8 +82,9 @@ Champs d'un ennemi : `type`, `r`, `hp`, `sp` (vitesse), `x`, `y`, `vx`, `vy`, `f
 6. Dessin : une fonction `draw<Nom>` dans `src/render/sprites.js` et sa branche dans les deux
    aiguillages par type de `src/render/scene.js` (chutes et liste triée).
 7. Tests : composition dans `tests/waves.test.js`, règle propre dans le test du module concerné.
-8. Documentation vivante : le paragraphe « Bestiaire et astuces » de `index.html`, et la bannière
-   d'annonce de sa première vague dans `startWave` (`src/game/enemies.js`).
+8. Documentation vivante : sa fiche dans le volet Bestiaire (`beasts` de `src/i18n/fr.js` et `en.js`,
+   type ajouté à `ORDER`/`DRAW` de `src/render/bestiary.js` ; la vague d'arrivée vient de `firstWave`),
+   et la bannière d'annonce de sa première vague dans `startWave` (`src/game/enemies.js`).
 
 ## Modifier une vague ou l'équilibrage
 

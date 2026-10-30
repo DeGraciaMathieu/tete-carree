@@ -52,7 +52,7 @@ Reste dans le périmètre demandé : pas de refonte ni de correction voisine non
 
 ## 4. Mettre à jour la documentation
 
-- **Documentation vivante du jeu** : textes de l'écran titre (contrôles, « Bestiaire et astuces »),
+- **Documentation vivante du jeu** : textes de l'écran titre (contrôles, fiches du Bestiaire),
   indications de l'écran de choix de carte dans `index.html` ; `desc`/`plus`/`minus` des cartes et
   bannières de vagues si la règle annoncée change.
 - `CLAUDE.md` et les skills concernés si une convention, un fichier ou un concept a bougé.

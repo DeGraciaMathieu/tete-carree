@@ -185,6 +185,12 @@ Maquettes comparées avant de choisir (proposition 1 retenue sur trois : carte c
   classement, sans vague, combo ni date.
 - La phrase de présentation du jeu a quitté l'accueil (absente de la maquette retenue) ; le bestiaire
   reste dans son volet.
+- Le volet Bestiaire est une liste illustrée : une ligne par ennemi dans l'ordre d'arrivée (`firstWave`
+  de `rules/waves.js`), portrait animé avec le vrai sprite, rôle, conseil, PV, dégâts, points. Les
+  astuces générales de l'ancien paragraphe (tir et déplacement séparés, roulade, cartes, barils et
+  barricades, crevasses) ont été retirées sans être déplacées ailleurs.
+- Le volet Arsenal suit le même modèle : une ligne par arme, touche, dessin du jeu en gros plan,
+  score de déblocage, rôle, conseil, chiffres de base (sans les cartes ; cadence arrondie au dixième).
 
 ## Pactes majeurs
 

@@ -1,13 +1,13 @@
 // Textes français : interface, armes, raretés et cartes. Mêmes clés que en.js.
 import {
-  ARTIFICIER_RADIUS_MUL, AVEUGLE_DAMAGE_MUL, AVEUGLE_SIGHT, BRULEE_ROLL_HP, CHAIR_POINTS_MUL, CHAIR_RADIUS_MUL, COMBO_T,
-  DIABLE_HP, ELITE_HP_MUL, ELITE_POINTS_MUL, ELITE_SPEED_MUL, ENTRAVE_DAMAGE_MUL, ENTRAVE_SPEED_MUL, FIDELE_PISTOL_MUL,
-  FIEVRE_COMBO_MUL, FIEVRE_KILLS_PER_MULTIPLIER, FRAG_SHARDS, KILLS_PER_MULTIPLIER, LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL,
+  ACID_DAMAGE, ACID_SPLASH_DAMAGE, ACID_TICK, ARTIFICIER_RADIUS_MUL, AVEUGLE_DAMAGE_MUL, AVEUGLE_SIGHT, BLOATER_DAMAGE, BRULEE_ROLL_HP, CHAIR_POINTS_MUL, CHAIR_RADIUS_MUL, COMBO_T,
+  DIABLE_HP, ELITE_HP_MUL, ELITE_POINTS_MUL, ELITE_SPEED_MUL, ENEMY_MELEE_DAMAGE, ENEMY_STATS, ENTRAVE_DAMAGE_MUL, ENTRAVE_SPEED_MUL, FIDELE_PISTOL_MUL,
+  FIEVRE_COMBO_MUL, FIEVRE_KILLS_PER_MULTIPLIER, FIREBALL_DAMAGE, FRAG_SHARDS, GRENADE_FUSE, KILLS_PER_MULTIPLIER, LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL,
   MITRAILLE_AMMO_COST, MITRAILLE_PISTOL_AMMO, PORTANT_FAR_MUL, PORTANT_NEAR_MUL, PORTANT_RANGE, POUDRE_RADIUS_MUL,
   POUDRE_SELF_MUL, PRIME_PACK_BONUS, PRIME_POINTS_MUL, QUITTE_POINTS_MUL, RACINE_DAMAGE_MUL, RACINE_SPEED_MUL,
   RAVITO_ZOMBIES, REPIT_BREAK_MUL, REPIT_MAX, ROLLAMMO_SHARE, SABLIER_DRAIN, SABLIER_HOLD, SABLIER_POINTS_MUL,
-  SILENCE_POINTS_MUL, SPECIALISTE_DAMAGE_MUL, TOUTOURIEN_KILLS_PER_MULTIPLIER, UNEVIE_POINTS_MUL, VAMPIRE_DRAIN,
-  VAMPIRE_HEAL, VERRE_DAMAGE_MUL, VERRE_HP,
+  SHOTS, SILENCE_POINTS_MUL, SPECIALISTE_DAMAGE_MUL, TOUTOURIEN_KILLS_PER_MULTIPLIER, TURRET_EVERY, UNEVIE_POINTS_MUL, VAMPIRE_DRAIN,
+  VAMPIRE_HEAL, VERRE_DAMAGE_MUL, VERRE_HP, WALL_HP,
 } from '../config.js';
 
 const pct = x => Math.round(x * 100) + ' %';
@@ -47,9 +47,22 @@ export default {
   touchRoll: 'Bouton ROULER, dans le sens du pouce gauche',
   touchWeapons: 'Bouton ARME ou les cases en haut',
   bestiary: 'Bestiaire',
-  bestiaryText: 'Le déplacement et le tir sont séparés : on peut reculer en arrosant la horde. Pendant une roulade, rien ne te touche et tu traverses la horde. Les Gonflés explosent à leur mort comme à ton contact : abats-les au cœur de la horde, pas à bout portant. Les coureurs déboulent en meute : rapides, mais une balle suffit. Les cracheurs restent à distance et lancent de l\'acide : sors de la flaque, ou traverse-la en roulade. Les blindés encaissent les balles de face : contourne-les, fais-les sauter, ou brise leur bouclier. Entre deux vagues, choisis une carte parmi trois pour renforcer ton survivant. Une balle fait sauter un baril, une barricade retient la horde le temps qu\'elle la casse. Les crevasses arrêtent la horde, pas tes balles : une explosion peut y précipiter les zombies, et une roulade bien placée les franchit.',
+  bestiaryText: 'Dans l\'ordre où ils arrivent. Leurs PV augmentent à chaque vague.',
+  beastWave: n => `vague ${n}`, beastHp: (hp, per) => `PV <b>${hp}</b> +${num(per)}/vague`, beastPts: n => `<b>${n}</b> pts`,
+  beasts: {
+    z: { name: 'Zombie', role: () => 'Lent mais nombreux : c\'est le gros de chaque vague.', tip: 'Recule en tirant, ne te laisse pas encercler.', hit: () => `coup <b>${ENEMY_MELEE_DAMAGE.z}</b>` },
+    b: { name: 'Gonflé', role: () => `Explose à sa mort comme à ton contact : ${BLOATER_DAMAGE} dégâts autour de lui.`, tip: 'Abats-le au cœur de la horde, jamais à bout portant.', hit: () => `explosion <b>${BLOATER_DAMAGE}</b>` },
+    d: { name: 'Diable', role: () => 'Plus rapide qu\'un zombie, il lance des boules de feu de loin.', tip: 'Une roulade évite ses boules de feu.', hit: () => `coup <b>${ENEMY_MELEE_DAMAGE.d}</b>, boule de feu <b>${FIREBALL_DAMAGE}</b>` },
+    r: { name: 'Coureur', role: () => 'Déboule en meute, bien plus vite qu\'un zombie.', tip: 'Fragile : une balle suffit. Arrose la meute avant le contact.', hit: () => `coup <b>${ENEMY_MELEE_DAMAGE.r}</b>` },
+    s: { name: 'Cracheur', role: () => 'Reste à distance et crache de l\'acide qui laisse une flaque.', tip: 'Sors de la flaque, ou traverse-la en roulade.', hit: () => `coup <b>${ENEMY_MELEE_DAMAGE.s}</b>, acide <b>${ACID_SPLASH_DAMAGE}</b> puis <b>${ACID_DAMAGE}</b> toutes les ${num(ACID_TICK)} s` },
+    a: { name: 'Blindé', role: () => `Son bouclier de ${ENEMY_STATS.a.shield} points arrête les balles qui viennent de face.`, tip: 'Contourne-le, fais-le sauter, ou brise son bouclier.', hit: () => `coup <b>${ENEMY_MELEE_DAMAGE.a}</b>` },
+  },
   arsenal: 'Arsenal',
   arsenalText: 'Chaque palier de score débloque une arme, avec deux recharges de munitions. Son numéro est sa touche.',
+  armDmg: n => `dégâts <b>${n}</b>`, armPellets: (n, d) => `dégâts <b>${n} × ${d}</b>`, armRate: n => `<b>${num(n)}</b> tirs/s`,
+  armRange: n => `portée <b>${n}</b>`, armRefill: n => `caisse <b>+${n}</b>`, armInfinite: 'munitions <b>illimitées</b>',
+  armBlast: n => `explosion <b>${n}</b>`, armRadius: n => `rayon <b>${n}</b>`, armWall: n => `mur <b>${n}</b> PV`,
+  armTurret: n => `tourelle <b>${n}</b> dégâts`, armPierce: 'traverse <b>tout</b>',
   cardsTitle: 'Cartes',
   cardsText: 'Entre deux vagues, choisis une carte parmi trois. Les pactes donnent un avantage contre une contrepartie ; un seul pacte majeur par partie, à partir de la vague 5.',
   options: 'Options',
@@ -116,15 +129,15 @@ export default {
 
   /* ---------- Armes, raretés, cartes ---------- */
   weapons: {
-    pistol: { name: 'Pistolet', short: 'Pistolet' },
-    uzi: { name: 'Uzi', short: 'Uzi' },
-    rifle: { name: 'Fusil d\'assaut', short: 'Assaut' },
-    shotgun: { name: 'Fusil à pompe', short: 'Pompe' },
-    wall: { name: 'Barricade', short: 'Barricade' },
-    barrel: { name: 'Baril', short: 'Baril' },
-    grenade: { name: 'Grenade', short: 'Grenade' },
-    rocket: { name: 'Lance-roquettes', short: 'Roquette' },
-    rail: { name: 'Railgun', short: 'Railgun' },
+    pistol: { name: 'Pistolet', short: 'Pistolet', role: () => 'Précis, munitions illimitées : ton arme de secours.', tip: 'Quand tout le reste est vide, il est toujours là.' },
+    uzi: { name: 'Uzi', short: 'Uzi', role: () => 'Tire très vite, mais disperse ses balles.', tip: 'Arrose la horde de près, pas un ennemi au loin.' },
+    rifle: { name: 'Fusil d\'assaut', short: 'Assaut', role: () => 'Rapide et précis, il porte loin.', tip: 'L\'arme à tout faire du milieu de partie.' },
+    shotgun: { name: 'Fusil à pompe', short: 'Pompe', role: () => `${SHOTS.shotgun.pellets} plombs en éventail, dévastateur de près.`, tip: 'Laisse-les approcher, puis vide le couloir.' },
+    wall: { name: 'Barricade', short: 'Barricade', role: () => `Pose un mur de ${WALL_HP} PV devant toi. Une barricade sur ${TURRET_EVERY} porte une tourelle.`, tip: 'Ferme un couloir : la horde perd du temps à la casser.' },
+    barrel: { name: 'Baril', short: 'Baril', role: () => 'Pose un baril explosif. Une balle le fait sauter.', tip: 'Pose-le sur leur chemin, tire quand ils l\'entourent.' },
+    grenade: { name: 'Grenade', short: 'Grenade', role: () => `Lancée en cloche, elle explose au bout de ${num(GRENADE_FUSE)} s.`, tip: 'Lance-la au cœur de la horde et recule : l\'explosion te blesse aussi.' },
+    rocket: { name: 'Lance-roquettes', short: 'Roquette', role: () => 'La roquette file droit et explose au premier contact.', tip: 'Pas sur un ennemi au contact : l\'explosion te touche aussi.' },
+    rail: { name: 'Railgun', short: 'Railgun', role: () => 'Un rayon qui traverse toute la file et ignore le bouclier des blindés.', tip: 'Aligne la horde dans un couloir : un tir les traverse tous.' },
   },
   rar: { c: 'Commune', r: 'Rare', l: 'Légendaire', p: 'Pacte', m: 'Pacte majeur' },
   cards: {

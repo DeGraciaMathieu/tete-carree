@@ -399,7 +399,7 @@ function drawFlash(id, tip) {
   ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x + len * .45, -w * 1.7); ctx.lineTo(x + 2, 0); ctx.lineTo(x + len * .45, w * 1.7); ctx.closePath(); ctx.fill();
   ctx.fillStyle = '#ffd36a'; ctx.beginPath(); ctx.arc(x, 0, id === 'shotgun' ? 3 : 2, 0, 7); ctx.fill();
 }
-function drawGun(id, C) {
+export function drawGun(id, C) {
   const R = (c, x, y, w, h) => { ctx.fillStyle = C(c); ctx.fillRect(x, y, w, h); };
   switch (id) {
     case 'pistol': R('#1c1e21', -1, -2, 9, 3.5); R('#3a3f45', 0, -2, 7, 1); R('#1c1e21', 0, 1, 3, 3.5); break;

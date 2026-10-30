@@ -1,5 +1,5 @@
 // HUD DOM : bannières, santé, score, combo, emplacements d'armes, cartes actives ; écrans d'accueil et de fin
-// (arsenal, dernière partie, meilleures parties) ; textes fixes de la page dans la langue courante.
+// (dernière partie, meilleures parties) ; textes fixes de la page dans la langue courante.
 import { sfx } from '../audio/sfx.js';
 import { LOW_HP, MODS, SABLIER_HOLD, W } from '../config.js';
 import { selectWeapon } from '../game/weapons.js';
@@ -103,10 +103,6 @@ function renderHp() {
   const drain = mod('sablier') && S.waveActive && S.time - S.lastKill > SABLIER_HOLD && !player.dead; // le Sablier s'écoule
   if (hudCache.hpDrain !== drain) { hudCache.hpDrain = drain; $('hpBar').classList.toggle('drain', drain); }
   setText('hpNum', mod('unevie') && !player.dead ? tr.oneHit : String(Math.ceil(Math.max(0, player.hp))));
-}
-// Volet Arsenal de l'écran titre : les armes dans l'ordre de leurs touches, avec leur score de déblocage.
-export function buildArsenal() {
-  $('arsenalList').innerHTML = W.map(w => `<li><span class="n">${tr.weapons[w.id].name}</span><span class="u">${w.unlock ? tr.unlockAt(fmt(w.unlock)) : tr.starter}</span></li>`).join('');
 }
 // Volet Cartes de l'écran titre : toutes les cartes par rareté, une ligne chacune, au texte de leur premier niveau.
 export function buildCardsPanel() {

@@ -61,7 +61,9 @@ Champs d'une arme dans `W` : `id`, `name` (bannières, HUD « Prochaine »), `sh
 5. Son : une entrée dans `SFX` (`src/audio/sfx.js`).
 6. Tests : seuil de déblocage dans `tests/unlock.test.js` ; toute règle de dégâts nouvelle dans
    `src/rules/damage.js` + `tests/damage.test.js`.
-7. Si une carte cite l'arme (Balles perforantes : « pistolet, Uzi et fusil d'assaut »), mets son texte à jour.
+7. Volet Arsenal de l'écran titre : `role` et `tip` sous `weapons` de `src/i18n/fr.js` et `en.js`,
+   emprise du dessin dans `BOUNDS` et chiffres dans `statsOf` (`src/render/arsenal.js`).
+8. Si une carte cite l'arme (Balles perforantes : « pistolet, Uzi et fusil d'assaut »), mets son texte à jour.
 
 ## Modifier l'équilibrage
 

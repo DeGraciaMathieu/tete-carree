@@ -280,11 +280,39 @@ kbd{font:13px var(--mono);border:1px solid rgba(255,255,255,.35);border-bottom-w
 .tpanel{grid-column:1 / -1;place-self:center;width:calc(100% - 32px);margin-block:16px}
 .tpanel .tclose{margin-top:16px}
 .tpanel .opts{flex-direction:column;align-items:stretch}
-.arsenal{list-style:none;counter-reset:w;margin:0;padding:12px 0;border-block:1px solid var(--line);display:grid;gap:6px;font-size:13px}
-.arsenal li{counter-increment:w;display:grid;grid-template-columns:22px 1fr auto;gap:10px}
-.arsenal li::before{content:counter(w);color:var(--hazard)}
-.arsenal .u{color:var(--muted);font-variant-numeric:tabular-nums}
+/* Volet Arsenal : une ligne par arme, touche, dessin en gros plan, déblocage, rôle, conseil, chiffres */
+.tpanel#panelArsenal{max-width:780px}
+.arms{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.arms li{display:grid;grid-template-columns:34px 96px minmax(0,1fr);gap:4px 16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.akey{grid-row:span 3;width:34px;height:34px;display:grid;place-items:center;font-family:var(--display);font-size:22px;line-height:1;color:var(--hazard);border:1px solid rgba(242,194,48,.5)}
+.aicon{grid-row:span 3;width:96px;height:56px;background:radial-gradient(ellipse at 50% 60%,rgba(179,182,175,.2),transparent 70%)}
+.aname{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px}
+.card .aname h3{font-family:var(--display);font-weight:400;font-size:21px;line-height:1.1;margin:0}
+.aunlock{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.aunlock.start{color:var(--life)}
+.card .arms p{margin:0;font-size:14px}
+.atip{color:var(--text)}
+.atip::before{content:'→ ';color:var(--hazard)}
+.astats{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.astats b{color:var(--text);font-weight:400}
+@media (max-width:720px){
+  .arms li{grid-template-columns:34px 72px minmax(0,1fr)}
+  .aicon{width:72px;height:42px}
+}
 .tpanel#panelCards{max-width:900px}
+/* Volet Bestiaire : une ligne par ennemi, portrait animé, vague d'arrivée, rôle, conseil, chiffres */
+.tpanel#panelBeasts{max-width:760px}
+.beasts{list-style:none;margin:0;padding:0;border-top:1px solid var(--line)}
+.beasts li{display:grid;grid-template-columns:64px minmax(0,1fr);gap:4px 16px;align-items:center;padding:12px 0;border-bottom:1px solid var(--line)}
+.bportrait{grid-row:span 3;width:64px;height:64px;background:radial-gradient(circle at 50% 80%,rgba(179,182,175,.22),transparent 70%)}
+.bname{display:flex;flex-wrap:wrap;align-items:baseline;gap:2px 12px}
+.card .bname h3{font-family:var(--display);font-weight:400;font-size:21px;line-height:1.1;margin:0}
+.bwave{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.card .beasts p{margin:0;font-size:14px}
+.btip{color:var(--text)}
+.btip::before{content:'→ ';color:var(--hazard)}
+.bstats{display:flex;flex-wrap:wrap;gap:4px 14px;font-size:13px;color:var(--muted);font-variant-numeric:tabular-nums}
+.bstats b{color:var(--text);font-weight:400}
 /* Volet Cartes : une ligne par carte, sur deux colonnes, groupées par rareté (liseré à la couleur de la rareté) */
 .rgroup{margin:20px 0 10px;font-size:12px;font-weight:400;letter-spacing:.14em;text-transform:uppercase;color:var(--rc)}
 .clist{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:20px}

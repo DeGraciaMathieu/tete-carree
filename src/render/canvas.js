@@ -64,6 +64,11 @@ export function outlined(ent, draw) {
   }
   draw();
 }
+// Dessine sur un autre canvas (portraits du bestiaire) : ctx pointe sur g le temps de draw.
+export function drawOn(g, draw) {
+  const real = ctx; ctx = g;
+  try { draw(); } finally { ctx = real; }
+}
 export function setOutline(v) {
   outlineOn = v;
   for (const b of document.querySelectorAll('.optOl')) b.textContent = tr.optOutline(v);

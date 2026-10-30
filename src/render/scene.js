@@ -129,7 +129,7 @@ function drawFires() {
     }
   }
 }
-function drawBlock(b) {
+export function drawBlock(b) {
   const x = b.tx * T, y = b.ty * T, fl = b.flash > 0, dr = b.drop * 14;
   ctx.save(); ctx.translate(0, -dr);
   if (b.kind === 'wall') {

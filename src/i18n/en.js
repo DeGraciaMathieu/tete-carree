@@ -1,13 +1,13 @@
 // Textes anglais : interface, armes, raretés et cartes. Mêmes clés que fr.js.
 import {
-  ARTIFICIER_RADIUS_MUL, AVEUGLE_DAMAGE_MUL, AVEUGLE_SIGHT, BRULEE_ROLL_HP, CHAIR_POINTS_MUL, CHAIR_RADIUS_MUL, COMBO_T,
-  DIABLE_HP, ELITE_HP_MUL, ELITE_POINTS_MUL, ELITE_SPEED_MUL, ENTRAVE_DAMAGE_MUL, ENTRAVE_SPEED_MUL, FIDELE_PISTOL_MUL,
-  FIEVRE_COMBO_MUL, FIEVRE_KILLS_PER_MULTIPLIER, FRAG_SHARDS, KILLS_PER_MULTIPLIER, LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL,
+  ACID_DAMAGE, ACID_SPLASH_DAMAGE, ACID_TICK, ARTIFICIER_RADIUS_MUL, AVEUGLE_DAMAGE_MUL, AVEUGLE_SIGHT, BLOATER_DAMAGE, BRULEE_ROLL_HP, CHAIR_POINTS_MUL, CHAIR_RADIUS_MUL, COMBO_T,
+  DIABLE_HP, ELITE_HP_MUL, ELITE_POINTS_MUL, ELITE_SPEED_MUL, ENEMY_MELEE_DAMAGE, ENEMY_STATS, ENTRAVE_DAMAGE_MUL, ENTRAVE_SPEED_MUL, FIDELE_PISTOL_MUL,
+  FIEVRE_COMBO_MUL, FIEVRE_KILLS_PER_MULTIPLIER, FIREBALL_DAMAGE, FRAG_SHARDS, GRENADE_FUSE, KILLS_PER_MULTIPLIER, LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL,
   MITRAILLE_AMMO_COST, MITRAILLE_PISTOL_AMMO, PORTANT_FAR_MUL, PORTANT_NEAR_MUL, PORTANT_RANGE, POUDRE_RADIUS_MUL,
   POUDRE_SELF_MUL, PRIME_PACK_BONUS, PRIME_POINTS_MUL, QUITTE_POINTS_MUL, RACINE_DAMAGE_MUL, RACINE_SPEED_MUL,
   RAVITO_ZOMBIES, REPIT_BREAK_MUL, REPIT_MAX, ROLLAMMO_SHARE, SABLIER_DRAIN, SABLIER_HOLD, SABLIER_POINTS_MUL,
-  SILENCE_POINTS_MUL, SPECIALISTE_DAMAGE_MUL, TOUTOURIEN_KILLS_PER_MULTIPLIER, UNEVIE_POINTS_MUL, VAMPIRE_DRAIN,
-  VAMPIRE_HEAL, VERRE_DAMAGE_MUL, VERRE_HP,
+  SHOTS, SILENCE_POINTS_MUL, SPECIALISTE_DAMAGE_MUL, TOUTOURIEN_KILLS_PER_MULTIPLIER, TURRET_EVERY, UNEVIE_POINTS_MUL, VAMPIRE_DRAIN,
+  VAMPIRE_HEAL, VERRE_DAMAGE_MUL, VERRE_HP, WALL_HP,
 } from '../config.js';
 
 const pct = x => Math.round(x * 100) + '%';
@@ -48,9 +48,22 @@ export default {
   touchRoll: 'ROLL button, in the direction of the left thumb',
   touchWeapons: 'WEAPON button or the slots at the top',
   bestiary: 'Bestiary',
-  bestiaryText: 'Moving and shooting are separate: you can back away while hosing down the horde. During a roll nothing can hurt you and you pass through the horde. Bloaters explode when they die and when they reach you: take them down in the middle of the horde, not up close. Runners charge in packs: fast, but one bullet is enough. Spitters keep their distance and lob acid: get out of the puddle, or roll through it. Armored zombies shrug off bullets from the front: flank them, blow them up, or break their shield. Between two waves, pick one card out of three to strengthen your survivor. A bullet sets off a barrel; a barricade holds the horde back until they smash it. Chasms stop the horde, not your bullets: an explosion can knock zombies into them, and a well-placed roll gets you across.',
+  bestiaryText: 'In the order they arrive. Their HP grows every wave.',
+  beastWave: n => `wave ${n}`, beastHp: (hp, per) => `HP <b>${hp}</b> +${num(per)}/wave`, beastPts: n => `<b>${n}</b> pts`,
+  beasts: {
+    z: { name: 'Zombie', role: () => 'Slow but numerous: the bulk of every wave.', tip: 'Back away while shooting, don\'t get surrounded.', hit: () => `hit <b>${ENEMY_MELEE_DAMAGE.z}</b>` },
+    b: { name: 'Bloater', role: () => `Explodes when it dies or touches you: ${BLOATER_DAMAGE} damage all around.`, tip: 'Shoot it deep in the horde, never point-blank.', hit: () => `explosion <b>${BLOATER_DAMAGE}</b>` },
+    d: { name: 'Devil', role: () => 'Faster than a zombie, it throws fireballs from afar.', tip: 'A roll dodges its fireballs.', hit: () => `hit <b>${ENEMY_MELEE_DAMAGE.d}</b>, fireball <b>${FIREBALL_DAMAGE}</b>` },
+    r: { name: 'Runner', role: () => 'Rushes in packs, far faster than a zombie.', tip: 'Fragile: one bullet is enough. Hose the pack down before it reaches you.', hit: () => `hit <b>${ENEMY_MELEE_DAMAGE.r}</b>` },
+    s: { name: 'Spitter', role: () => 'Keeps its distance and spits acid that leaves a puddle.', tip: 'Get out of the puddle, or roll through it.', hit: () => `hit <b>${ENEMY_MELEE_DAMAGE.s}</b>, acid <b>${ACID_SPLASH_DAMAGE}</b> then <b>${ACID_DAMAGE}</b> every ${num(ACID_TICK)} s` },
+    a: { name: 'Armored', role: () => `Its ${ENEMY_STATS.a.shield}-point shield stops bullets coming from the front.`, tip: 'Flank it, blow it up, or break its shield.', hit: () => `hit <b>${ENEMY_MELEE_DAMAGE.a}</b>` },
+  },
   arsenal: 'Arsenal',
   arsenalText: 'Each score milestone unlocks a weapon, with two refills of ammo. Its number is its key.',
+  armDmg: n => `damage <b>${n}</b>`, armPellets: (n, d) => `damage <b>${n} × ${d}</b>`, armRate: n => `<b>${num(n)}</b> shots/s`,
+  armRange: n => `range <b>${n}</b>`, armRefill: n => `crate <b>+${n}</b>`, armInfinite: 'ammo <b>unlimited</b>',
+  armBlast: n => `blast <b>${n}</b>`, armRadius: n => `radius <b>${n}</b>`, armWall: n => `wall <b>${n}</b> HP`,
+  armTurret: n => `turret <b>${n}</b> damage`, armPierce: 'pierces <b>all</b>',
   cardsTitle: 'Cards',
   cardsText: 'Between two waves, pick one card out of three. Pacts give an advantage at a cost; only one major pact per run, from wave 5 on.',
   options: 'Options',
@@ -117,15 +130,15 @@ export default {
 
   /* ---------- Armes, raretés, cartes ---------- */
   weapons: {
-    pistol: { name: 'Pistol', short: 'Pistol' },
-    uzi: { name: 'Uzi', short: 'Uzi' },
-    rifle: { name: 'Assault rifle', short: 'Rifle' },
-    shotgun: { name: 'Shotgun', short: 'Shotgun' },
-    wall: { name: 'Barricade', short: 'Barricade' },
-    barrel: { name: 'Barrel', short: 'Barrel' },
-    grenade: { name: 'Grenade', short: 'Grenade' },
-    rocket: { name: 'Rocket launcher', short: 'Rocket' },
-    rail: { name: 'Railgun', short: 'Railgun' },
+    pistol: { name: 'Pistol', short: 'Pistol', role: () => 'Accurate, unlimited ammo: your fallback weapon.', tip: 'When everything else is empty, it\'s still there.' },
+    uzi: { name: 'Uzi', short: 'Uzi', role: () => 'Fires very fast, but sprays its bullets.', tip: 'Hose the horde up close, not a lone enemy far away.' },
+    rifle: { name: 'Assault rifle', short: 'Rifle', role: () => 'Fast and accurate, with a long reach.', tip: 'The all-rounder of the mid game.' },
+    shotgun: { name: 'Shotgun', short: 'Shotgun', role: () => `${SHOTS.shotgun.pellets} pellets in a fan, devastating up close.`, tip: 'Let them come close, then clear the corridor.' },
+    wall: { name: 'Barricade', short: 'Barricade', role: () => `Places a ${WALL_HP} HP wall in front of you. One barricade in ${TURRET_EVERY} carries a turret.`, tip: 'Block a corridor: the horde wastes time breaking it.' },
+    barrel: { name: 'Barrel', short: 'Barrel', role: () => 'Places an explosive barrel. One bullet sets it off.', tip: 'Drop it in their path, shoot when they surround it.' },
+    grenade: { name: 'Grenade', short: 'Grenade', role: () => `Lobbed in an arc, it explodes after ${num(GRENADE_FUSE)} s.`, tip: 'Throw it into the horde and back off: the blast hurts you too.' },
+    rocket: { name: 'Rocket launcher', short: 'Rocket', role: () => 'The rocket flies straight and explodes on first contact.', tip: 'Not at an enemy in your face: the blast hits you too.' },
+    rail: { name: 'Railgun', short: 'Railgun', role: () => 'A beam that pierces the whole line and ignores armored shields.', tip: 'Line the horde up in a corridor: one shot goes through them all.' },
   },
   rar: { c: 'Common', r: 'Rare', l: 'Legendary', p: 'Pact', m: 'Major pact' },
   cards: {

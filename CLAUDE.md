@@ -34,7 +34,7 @@ et les questions ouvertes : lis-le avant tout changement structurel.
 | `src/rules/` | décisions pures, testées | `config.js`, d'autres règles |
 | `src/state/` | état de la partie (`world.js`) et arène (`arena.js`) | `config`, `rules`, `util` |
 | `src/game/` | orchestration : règle → état → effets (sons, particules, bannières) | tout sauf `loop/` |
-| `src/render/` | canvas, sprites, scène, sol, HUD, FPS, mini-plan de l'accueil | `config`, `state`, `util`, `i18n` (exception assumée : `hud.js` importe `sfx` pour la bannière et `selectWeapon` pour le clic sur une case d'arme) |
+| `src/render/` | canvas, sprites, scène, sol, HUD, FPS, mini-plan, bestiaire et arsenal de l'accueil | `config`, `state`, `util`, `i18n` (exception assumée : `hud.js` importe `sfx` pour la bannière et `selectWeapon` pour le clic sur une case d'arme) |
 | `src/audio/` | sons synthétisés | `util`, `i18n` (libellé du bouton Son) |
 | `src/input/` | écouteurs clavier/souris, tactile, boutons, manette ; appellent directement les actions de `game/` | tout sauf `loop/` |
 | `src/loop/` | `update(dt)` et boucle `requestAnimationFrame` | tout |
