@@ -206,8 +206,13 @@ Spécification : `docs/prd/themes-palettes.md`.
   du fond en briques avec tuyaux, lampes grillagées et tags sans texte, piliers moussus, caisses pourries et
   fûts toxiques ; pénombre verdâtre, cinq rais de lumière des plaques d'égout (dont un sur la case de départ),
   gouttes et ronds dans l'eau.
+- Camp militaire (maquette https://claude.ai/artifact/JwvJqZxMVfDg9sMUiGutAQ), plan inchangé : conteneurs nervurés
+  à numéros au pochoir (« C-07 », hors traduction), les quatre plus proches du centre en laboratoires mobiles
+  (danger biologique, lueur verte : « c'est là que tout a commencé »), postes de sacs de sable et mitrailleuses,
+  caisses de munitions, héliport au centre, clôture grillagée, postes de garde à gyrophare, barrières ;
+  crépuscule violacé, projecteur qui balaie l'arène depuis le poste du nord, réverbères, cendres.
 - Chaque décor règle son ambiance : `NIGHT` (teinte multipliée ou `null`), `FOG` (voile ou `null`), `WEATHER`
-  (`'rain'`, `'snow'`), `VIGNETTE` (teinte des bords). Un décor peint aussi son vide : le rendu générique des
+  (`'rain'`, `'snow'`, `'ash'`), `VIGNETTE` (teinte des bords). Un décor peint aussi son vide : le rendu générique des
   crevasses est sauté.
 - Option « Ambiance » (Options et pause, clé `STORAGE_AMBIANCE`, `tete-carree-ambiance`) : coupe la teinte de
   nuit, le voile, la pluie, la neige, la vapeur et la vignette ; le décor et ses lumières restent. Halos pré-rendus une fois par

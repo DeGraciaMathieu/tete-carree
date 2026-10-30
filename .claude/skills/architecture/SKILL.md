@@ -60,7 +60,8 @@ de fin (`'over'`, `'win'`), seul `S.time` avance ; en `'talk'` (scènes du mode 
 | `src/render/decor/chinatown.js` | décor de Chinatown : `paintGround` (sol), `prepare` (objets du plan, cases `covered`, calques des façades et enseignes, guirlandes), `drawBack`, `drawOver` (portique), `drawLights` ; `NIGHT`, `FOG`, `WEATHER`, `VIGNETTE` | render/canvas, render/ambiance, state/arena |
 | `src/render/decor/siberie.js` | décor du Camp de Sibérie (blizzard) : mêmes fonctions ; `prepare` reconnaît baraquements, miradors, braseros et bûches dans `map` | render/canvas, render/ambiance, state/arena |
 | `src/render/decor/egouts.js` | décor des égouts : mêmes fonctions ; `drawBack(time, ambiance, tx0, tx1, ty0, ty1)` anime l'eau des seules cases visibles | render/canvas, render/ambiance, state/arena |
-| `src/render/ambiance.js` | `glow` (halos pré-rendus par teinte), `nightTint`, `drawRain`, `drawSnow`, `drawVignette(edge)`, option `ambianceOn`/`setAmbiance` (`STORAGE_AMBIANCE`) | config, i18n, render/canvas |
+| `src/render/decor/militaire.js` | décor du camp militaire : mêmes fonctions ; `prepare` distingue conteneurs (blocs de murs pleins, laboratoires près du centre) et sacs de sable | render/canvas, render/ambiance, state/arena |
+| `src/render/ambiance.js` | `glow` (halos pré-rendus par teinte), `nightTint`, `drawRain`, `drawSnow` (neige, ou cendres), `drawVignette(edge)`, option `ambianceOn`/`setAmbiance` (`STORAGE_AMBIANCE`) | config, i18n, render/canvas |
 | `src/audio/sfx.js` | `audio()` (démarrage au premier geste), `sfx(name)`, bouton son (`showMute`) | i18n |
 | `src/input/keyboard.js` | `keys`, `mouseFire`, `releaseFire`, raccourcis, pause sur `blur`/`visibilitychange` | game |
 | `src/input/touch.js` | `stick`, `aim`, boutons ROULER/ARME | game |

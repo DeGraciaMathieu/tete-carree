@@ -71,22 +71,25 @@ export function drawRain(time, x0, y0, w, h) {
 }
 
 // Neige de blizzard : flocons en coordonnées de la vue, poussés par le vent, quelques rafales en traits.
+// Avec ash, des cendres : plus lentes, grises, sans rafales.
 const FLAKES = 260, WIND = 70, GUSTS = 70;
 const fx = new Float32Array(FLAKES), fy = new Float32Array(FLAKES), fz = new Float32Array(FLAKES), fp = new Float32Array(FLAKES);
 let snowT = -1, snowW = 0, snowH = 0;
-export function drawSnow(time, x0, y0, w, h) {
+export function drawSnow(time, x0, y0, w, h, ash = false) {
   if (w !== snowW || h !== snowH || snowT < 0) {
     snowW = w; snowH = h;
     for (let i = 0; i < FLAKES; i++) { fx[i] = Math.random() * w; fy[i] = Math.random() * h; fz[i] = .5 + Math.random(); fp[i] = Math.random() * 7; }
   }
   const dt = snowT < 0 ? 0 : Math.max(0, Math.min(.05, time - snowT)); snowT = time;
-  ctx.fillStyle = 'rgba(255,255,255,.95)';
+  ctx.fillStyle = ash ? 'rgba(230,220,230,.55)' : 'rgba(255,255,255,.95)';
+  const fall = ash ? .2 : 1, wind = ash ? 14 : WIND;
   for (let i = 0; i < FLAKES; i++) {
-    fy[i] += (20 + 40 * fz[i]) * dt; fx[i] += WIND * fz[i] * dt + Math.sin(time * 1.3 + fp[i]) * 10 * dt;
+    fy[i] += (20 + 40 * fz[i]) * fall * dt; fx[i] += wind * fz[i] * dt + Math.sin(time * 1.3 + fp[i]) * 10 * dt;
     if (fy[i] > h) { fy[i] -= h; fx[i] = Math.random() * w; }
     if (fx[i] > w) fx[i] -= w;
     const r = fz[i] * 1.8; ctx.fillRect(x0 + fx[i], y0 + fy[i], r, r);
   }
+  if (ash) return;
   ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.lineWidth = 1; ctx.beginPath();
   for (let i = 0; i < GUSTS; i++) { const px = x0 + fx[i], py = y0 + fy[i]; ctx.moveTo(px, py); ctx.lineTo(px - 18, py - 3); }
   ctx.stroke();

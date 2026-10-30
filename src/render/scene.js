@@ -384,7 +384,7 @@ export function render() {
   }
   ctx.globalAlpha = 1;
   if (dec && ambianceOn && dec.WEATHER === 'rain') drawRain(S.time, cam.x - hw - 40, cam.y - hh - 40, 2 * hw + 80, 2 * hh + 80);
-  if (dec && ambianceOn && dec.WEATHER === 'snow') drawSnow(S.time, cam.x - hw - 40, cam.y - hh - 40, 2 * hw + 80, 2 * hh + 80);
+  if (dec && ambianceOn && (dec.WEATHER === 'snow' || dec.WEATHER === 'ash')) drawSnow(S.time, cam.x - hw - 40, cam.y - hh - 40, 2 * hw + 80, 2 * hh + 80, dec.WEATHER === 'ash');
   if (mod('aveugle')) drawBlindness();
   // indicateur de pose de bloc
   if (world.state === 'play' && !player.dead && (W[player.weapon].id === 'wall' || W[player.weapon].id === 'barrel')) {
