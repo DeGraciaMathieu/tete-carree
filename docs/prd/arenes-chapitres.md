@@ -35,13 +35,16 @@ actuelles : bordure, deux cases de porte au milieu de chaque côté, case de dé
 (22, 15). À reporter tels quels dans `PLANS` :
 
 ```js
-  // quatre pâtés de boutiques séparés par des ruelles, une grande rue est-ouest et une nord-sud,
-  // un portique à chaque entrée nord et sud, des étals dans les rues
+  // une rue la nuit : façades de boutiques au nord et portique sur la porte, mur de briques au sud et ruelle
+  // sur la porte ; sur la chaussée, taxis abandonnés, étals, tables de mahjong et piles de caisses
+  // (plan révisé le 30 octobre d'après la maquette https://claude.ai/artifact/BaHbmjfWqCZF8i2ADFnYdk)
   chinatown() {
-    rect4(3, 3, 7, 6, 1); rect4(12, 3, 6, 6, 1);
-    rect4(3, 11, 7, 2, 1); rect4(12, 11, 4, 2, 1);
-    set4(19, 2, 1);
-    set4(7, 14, 2); set4(14, 14, 2); set4(20, 7, 2);
+    rect(1, 1, MW - 2, 3, 1); rect(20, 1, 4, 3, 0);
+    rect(1, 26, MW - 2, 3, 1); rect(20, 26, 4, 3, 0);
+    rect4(16, 8, 3, 1, 1);
+    rect4(5, 8, 2, 1, 2); rect4(11, 11, 2, 1, 2);
+    set4(8, 13, 2);
+    rect4(1, 5, 2, 2, 2);
   },
   // baraquements en long, un mirador dans chaque coin, enceinte de barbelés autour de la place
   // d'appel, ouverte face aux portes ; braseros sur la place. Les barbelés sont du vide : ils arrêtent
@@ -77,7 +80,7 @@ Sibérie passés en vide :
 
 | Arène | Murs hors bordure | Caisses | Vide | Sol relié au centre |
 | --- | --- | --- | --- | --- |
-| Chinatown | 404 | 12 | 0 | 100 % |
+| Chinatown (plan révisé) | 240 | 36 | 0 | 100 % |
 | Camp de Sibérie | 208 | 12 | 36 (barbelés) | 100 % |
 | Les égouts | 32 | 8 | 232 | 100 % |
 | Camp militaire | 148 | 8 | 0 | 100 % |

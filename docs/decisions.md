@@ -185,6 +185,20 @@ Spécification : `docs/prd/themes-palettes.md`.
 - Le vide change d'aspect selon le thème : crevasse noire (béton), eau (égouts), barbelés au ras de la neige
   (Sibérie). Ses règles ne changent pas.
 - Le rectangle pointillé jaune « façon entrepôt » ne reste que sur le thème béton.
+- Les palettes seules ne suffisaient pas : chaque arène des chapitres reçoit un **décor élaboré**
+  (`render/decor/<arène>.js`, choisi par `decorOf(mapId)` de `render/decor.js`), fait arène par arène sur une
+  maquette validée au cadrage réel. Un décor peint son sol, prépare une fois ses calques hors écran (façades,
+  enseignes), dessine les objets du plan triés avec les personnages, puis ses lumières après la teinte de nuit.
+  Les cases qu'il dessine sont marquées dans `covered` : le rendu générique des tuiles les saute.
+- Chinatown en premier (maquette https://claude.ai/artifact/BaHbmjfWqCZF8i2ADFnYdk) : son plan est devenu une
+  rue (façades au nord, portique sur la porte nord, ruelle au sud, taxis, étals, tables de mahjong, caisses),
+  à la place des quatre pâtés validés d'abord. Les enseignes sont en chinois, comme décor : hors traduction ;
+  la police Noto Serif SC est chargée pour leurs seuls caractères. Les deux guirlandes de lampions qui
+  croisaient la chaussée sur la maquette ont été retirées : au cadrage du jeu, leurs lampions couvraient la horde.
+- Option « Ambiance » (Options et pause, clé `STORAGE_AMBIANCE`, `tete-carree-ambiance`) : coupe la teinte de
+  nuit, la pluie, la vapeur et la vignette ; le décor et ses lumières restent. Halos pré-rendus une fois par
+  teinte (`render/ambiance.js`), pluie en tableaux typés : rien n'est alloué par image.
+- `npm run perf -- 20 <arène>` mesure une arène donnée.
 
 ## Écran titre : volet Cartes
 
@@ -310,7 +324,7 @@ Decisions the code does not settle and that were not made. Never resolved by gue
 
 - Corriger ou non le bug d'arrondi du champ de distances : le corriger change le déplacement de la horde.
   Il pèse davantage dans le Bunker : joueur au départ, 66 % du sol sans chemin (Entrepôt 11 %, Colonnade 11 %,
-  Le Pont 7 %, La Fosse 1 % ; arènes des chapitres : Camp militaire 33 %, Chinatown 9 %, Camp de Sibérie 5 %,
+  Le Pont 7 %, La Fosse 1 % ; arènes des chapitres : Camp militaire 33 %, Chinatown 14 %, Camp de Sibérie 5 %,
   Les égouts 1 %). Ces chiffres sont pris joueur au centre. En moyenne sur les positions du joueur, la part
   du sol où un ennemi sans chemin bute contre un mur est de 3 à 14 % (Camp militaire 13,8 %, Colonnade 11,1 %,
   Entrepôt 10,2 %), et de 23 % pour le Bunker ; les ennemis de ces tuiles marchent droit sur le joueur et butent sur les murs

@@ -53,6 +53,9 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/render/bestiary.js` | `buildBestiary`, `drawBestiary` (portraits animés, volet ouvert seulement) | config (`ENEMY_STATS`, `KILL_POINTS`), i18n, rules/waves (`firstWave`), render/canvas (`drawOn`), render/sprites |
 | `src/render/minimap.js` | `drawArenaMap` | config (`MW`, `MH`, `T`), state (`map`, `doors`, `player`, `world`) |
 | `src/render/themes.js` | `themeOf(id)` : couleurs du sol, des murs, des caisses de plan, du vide et du mini-plan par arène (`beton` pour les cinq arènes d'origine) | rien |
+| `src/render/decor.js` | `decorOf(id)` : décor élaboré d'une arène des chapitres, ou `null` (rendu générique des tuiles) | render/decor/* |
+| `src/render/decor/chinatown.js` | décor de Chinatown : `paintGround` (sol), `prepare` (objets du plan, cases `covered`, calques des façades et enseignes, guirlandes), `drawBack`, `drawOver` (portique), `drawLights` ; `NIGHT`, `RAIN` | render/canvas, render/ambiance, state/arena |
+| `src/render/ambiance.js` | `glow` (halos pré-rendus par teinte), `nightTint`, `drawRain`, `drawVignette`, option `ambianceOn`/`setAmbiance` (`STORAGE_AMBIANCE`) | config, i18n, render/canvas |
 | `src/audio/sfx.js` | `audio()` (démarrage au premier geste), `sfx(name)`, bouton son (`showMute`) | i18n |
 | `src/input/keyboard.js` | `keys`, `mouseFire`, `releaseFire`, raccourcis, pause sur `blur`/`visibilitychange` | game |
 | `src/input/touch.js` | `stick`, `aim`, boutons ROULER/ARME | game |

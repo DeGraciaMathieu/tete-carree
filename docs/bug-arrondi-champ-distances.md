@@ -63,7 +63,7 @@ tour sur une case sur quatre de l'arène (une colonne et une rangée sur deux).
 | Camp de Sibérie | 5 % | 9 % | 5,2 % |
 | Les égouts | 1 % | 8 % | 5,2 % |
 | Le Pont | 7 % | 11 % | 5,8 % |
-| Chinatown | 9 % | 12 % | 7,9 % |
+| Chinatown (plan révisé, la rue) | 14 % | 21 % | 8,9 % |
 | Entrepôt | 11 % | 18 % | 10,2 % |
 | Colonnade | 11 % | 22 % | 11,1 % |
 | Camp militaire | 33 % | 24 % | 13,8 % |

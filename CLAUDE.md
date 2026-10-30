@@ -15,7 +15,7 @@ cartes de modificateurs entre les vagues. Publié sur itch.io comme jeu HTML jou
 | `npm test` | suite Vitest (`tests/*.test.js`) |
 | `npm run build` | `dist/` avec `index.html` à la racine, chemins relatifs |
 | `npm run package` | build + zip du **contenu** de `dist/` dans `tete-carree-itch.zip` (commande `zip` du système) |
-| `npm run perf` | 20 s de partie dans Chrome sans interface ; échoue si les allocations JS dépassent le budget (10 Mo/s) |
+| `npm run perf` | 20 s de partie dans Chrome sans interface ; échoue si les allocations JS dépassent le budget (10 Mo/s) ; `npm run perf -- 20 chinatown` pour une arène donnée |
 
 Pas de linter ni de formateur : n'en ajoute pas sans qu'on le demande.
 Ouvrir `index.html` par double-clic ne marche pas (ESM non servi en `file://`).
@@ -55,8 +55,8 @@ et les questions ouvertes : lis-le avant tout changement structurel.
   `cam` ne sont réaffectés que par `resetWorld`.
 - **Un module qui pose des écouteurs à l'import doit être importé dans `src/main.js`** — sinon il
   n'est jamais exécuté (c'est arrivé : boutons des écrans morts).
-- **Ne change pas** les clés `localStorage` (`STORAGE_BEST`, `STORAGE_FPS`, `STORAGE_OUTLINE`, `STORAGE_RUNS`, `STORAGE_LANG`, `STORAGE_ARENA` :
-  `tete-carree-best`, `tete-carree-fps`, `tete-carree-outline`, `tete-carree-runs`, `tete-carree-lang`, `tete-carree-arena`), ni `base: './'` dans
+- **Ne change pas** les clés `localStorage` (`STORAGE_BEST`, `STORAGE_FPS`, `STORAGE_OUTLINE`, `STORAGE_RUNS`, `STORAGE_LANG`, `STORAGE_ARENA`, `STORAGE_AMBIANCE` :
+  `tete-carree-best`, `tete-carree-fps`, `tete-carree-outline`, `tete-carree-runs`, `tete-carree-lang`, `tete-carree-arena`, `tete-carree-ambiance`), ni `base: './'` dans
   `vite.config.js`, ni les chemins relatifs (`./src/…`) de `index.html`.
 - **Ne retire pas** les protections navigateur : son démarré au premier geste, pause sur `blur` et
   `visibilitychange`, `navigator.getGamepads` sous `try/catch`, accès `localStorage` sous `try/catch`.
@@ -65,7 +65,7 @@ et les questions ouvertes : lis-le avant tout changement structurel.
 - En dessin, n'utilise dans une fonction passée à `outlined()` que les méthodes de contexte que le
   proxy `OLP` de `render/canvas.js` connaît, ou ajoute-les au proxy.
 - **Pas d'allocation évitable dans les chemins chauds** (tout ce qui tourne à chaque image ou plusieurs
-  fois par seconde : `loop/`, `render/scene.js`, `render/sprites.js`, `rules/pathfield.js`) : pas
+  fois par seconde : `loop/`, `render/scene.js`, `render/sprites.js`, `render/ambiance.js`, `render/decor/`, `rules/pathfield.js`) : pas
   d'échange `[a, b] = [b, a]`, pas de tableau renvoyé pour transporter plusieurs valeurs, pas de
   `for…of` ni de `filter`/`map` évitables. Le ramasse-miettes provoque des baisses de fps : le tas du
   champ de distances allouait 140 Mo/s avant correction.

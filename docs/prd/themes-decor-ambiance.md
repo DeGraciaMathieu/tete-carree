@@ -2,6 +2,16 @@
 
 Partie du [mode Histoire](mode-histoire.md). Suppose l'[étape 2](themes-palettes.md) livrée.
 
+> **Révision du 30 octobre.** Le niveau de détail visé est celui des maquettes animées, pas celui d'un
+> habillage case par case. Chaque arène est faite à part : une maquette sur le vrai plan 44 × 30, validée au
+> cadrage du jeu, puis un module `render/decor/<arène>.js`. Ce module peint le sol et prépare une fois ses
+> calques hors écran. Il dessine ses objets triés avec les personnages, puis ses lumières après la teinte de
+> nuit (`docs/decisions.md`, « Thèmes des arènes »). Le plan d'une arène peut changer pour suivre sa
+> maquette : c'est le cas de Chinatown, devenue une rue. Le tableau `look` et les variantes de case décrits
+> plus bas ne sont pas utilisés : le module de l'arène reconnaît lui-même ses objets dans `map`. L'option
+> « Ambiance », la pluie, les halos pré-rendus et `npm run perf -- 20 <arène>` sont faits avec Chinatown.
+> Restent à faire : Camp de Sibérie, Les égouts, Camp militaire.
+
 ## Objectif
 
 Donner à chaque chapitre son décor et son ambiance, comme sur la maquette des ambiances :
