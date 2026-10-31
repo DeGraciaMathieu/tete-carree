@@ -88,7 +88,7 @@ Spécification : `docs/prd/butin.md`. Les ennemis lâchent des pièces (`rollCoi
 `world.coins`, ramassées dans `updateCoins` (`loop/update.js`, Aimant compris) ; `S.money` reçoit aussi `waveCoins` en
 fin de vague. Sur l'écran des cartes (`game/flow.js`) : relancer (`rerollCost`, garanties de l'écran gardées par
 `pickLegend` et `majorDue`), carte en plus (`canBuyExtra`, tirage `free` hors table), bannir (`S.banned`, passé à
-`rollCards`), racheter un pacte ordinaire (`withoutPact`, effets immédiats annulés dans `buybackPact`, pacte banni).
+`rollCards`), racheter un pacte ordinaire (`withoutPact`, effets immédiats annulés par `undoPact`, pacte banni).
 Aucune pièce en démo.
 
 ## Combo, multiplicateur, score

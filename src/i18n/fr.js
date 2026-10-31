@@ -127,7 +127,7 @@ export default {
   enemiesN: n => `${n} ennemis`,
   waveBonus: 'Bonus +',
   lifeRestored: 'Vie restaurée',
-  coinsGained: n => `+${n} pièces`,
+  coinsGained: n => `+${n} pièce${n > 1 ? 's' : ''}`,
   medkit: n => `+${n} santé`,
   shieldBroken: 'Bouclier brisé',
   fall: 'Chute ! +',

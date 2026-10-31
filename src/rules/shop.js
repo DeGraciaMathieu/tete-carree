@@ -1,5 +1,5 @@
 // Boutique de l'écran des cartes : prix de la relance, achats permis, rachat d'un pacte.
-import { MODS, REROLL_COST, REROLL_STEP } from '../config.js';
+import { DIABLE_HP, MODS, REROLL_COST, REROLL_STEP, VERRE_HP } from '../config.js';
 import { modLevel, takeAllCards } from './modifiers.js';
 
 // Relance : REROLL_COST, puis REROLL_STEP de plus à chaque relance du même écran.
@@ -16,4 +16,14 @@ export function withoutPact(mods, id) {
   const out = { ...mods };
   delete out[id];
   return out;
+}
+
+// Effets immédiats annulés par le rachat : vie max rendue (Marché du diable, Canon de verre), Légendaire promise
+// annulée (Marché du diable), crans perdus (Sans répit). La vie actuelle ne change pas.
+export function undoPact(id, { maxHp, legendNext, repit }) {
+  return {
+    maxHp: maxHp + (id === 'diable' ? DIABLE_HP : id === 'verre' ? VERRE_HP : 0),
+    legendNext: id === 'diable' ? false : legendNext,
+    repit: id === 'repit' ? 0 : repit,
+  };
 }

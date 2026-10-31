@@ -11,7 +11,7 @@ import { banner, buildSlots, renderRuns, resetHud } from '../render/hud.js';
 import { isPact, rollCards } from '../rules/cards.js';
 import { takeAllCards, waveBreak } from '../rules/modifiers.js';
 import { rankRun } from '../rules/records.js';
-import { buybackable, canBuyExtra, rerollCost, withoutPact } from '../rules/shop.js';
+import { buybackable, canBuyExtra, rerollCost, undoPact, withoutPact } from '../rules/shop.js';
 import { S, ammo, comboTime, mod, player, resetWorld, rng, rollMax, unlocked, world } from '../state/world.js';
 import { $, clamp, fmt } from '../util.js';
 
@@ -189,9 +189,8 @@ export function buybackPact(id) {
   if (!shopReady() || pickBanning || S.money < BUYBACK_COST || !buybackable(S.mods).some(m => m.id === id)) return;
   S.money -= BUYBACK_COST;
   S.mods = withoutPact(S.mods, id); S.banned.push(id);
-  if (id === 'diable') { player.maxHp += DIABLE_HP; S.legendNext = false; }
-  if (id === 'verre') player.maxHp += VERRE_HP;
-  if (id === 'repit') S.repit = 0;
+  const undone = undoPact(id, { maxHp: player.maxHp, legendNext: S.legendNext, repit: S.repit });
+  player.maxHp = undone.maxHp; S.legendNext = undone.legendNext; S.repit = undone.repit;
   sfx('unlock');
   renderShop();
 }

@@ -28,7 +28,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/rules/map.js` | `tileAt`, `passable`, `openT`, `shotTile`, `isVoid`, `circleTouchesVoid`, `walkLine`, `los` (grille passée en paramètre) | config |
 | `src/rules/pathfield.js` | `computeField`, `nextStep`, `UNREACHABLE` (Dijkstra de la horde) | config, map |
 | `src/rules/cards.js` | `rollCards(mods, rng, legend, ctx)` (`ctx.banned`, `without`, `count`, `free` pour la boutique) | config, modifiers |
-| `src/rules/shop.js` | boutique de l'écran des cartes : `rerollCost`, `canBuyExtra`, `buybackable`, `withoutPact` | config, modifiers |
+| `src/rules/shop.js` | boutique de l'écran des cartes : `rerollCost`, `canBuyExtra`, `buybackable`, `withoutPact`, `undoPact` | config, modifiers |
 | `src/rules/waves.js` | `waveQueue`, `queueCount`, `spawnBurst`, `spawnGap` | config, modifiers |
 | `src/rules/scoring.js` | `killPoints`, `soifHeal`, `rollDrop`, `rollCoins`, `waveCoins` | config, modifiers |
 | `src/rules/records.js` | `rankRun` (classement des meilleures parties) | — |
