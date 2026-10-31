@@ -6,6 +6,7 @@
   --text:#eef0ea;
   --muted:#9ea59f;
   --hazard:#f2c230;
+  --coin:#e8b23a;
   --blood:#d0352c;
   --life:#62c46e;
   --r-c:#b9c0b8;
@@ -48,6 +49,11 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 #hpFill::after{content:'';position:absolute;inset:0 0 50% 0;background:rgba(255,255,255,.18)}
 #hpTicks{position:absolute;inset:0;background:linear-gradient(90deg,transparent calc(100% - 1px),rgba(0,0,0,.45) 0) 0 0/var(--tick,25%) 100%}
 #score{font-family:var(--display);font-size:22px;letter-spacing:.02em;line-height:1;font-variant-numeric:tabular-nums}
+/* Pièces : icône dorée en vue 3/4 (deux ellipses), compteur sous le score et sur l'écran des cartes */
+.coinico{display:inline-block;width:12px;height:9px;flex:none;border-radius:50%;background:#e8b23a;border:1.5px solid #17191a;box-shadow:0 2px 0 -.5px #9a6f12,0 2px 0 1px #17191a;vertical-align:-1px}
+.money{font-size:12px;color:var(--coin);margin-top:3px;font-variant-numeric:tabular-nums}
+.money .coinico{margin-right:5px}
+.money #money{font-size:13px}
 #pot{font-size:11px;color:var(--r-m);margin-top:2px}
 #pot b{font-weight:400;color:var(--text)}
 #next{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -159,12 +165,31 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .mcard.flash::after{content:'';position:absolute;inset:-30%;border-radius:50%;background:radial-gradient(circle,rgba(255,226,140,.75),transparent 60%);animation:burst .7s ease-out forwards;pointer-events:none}
 .mkey{display:block;width:max-content;margin:12px auto 0;font-size:11px;color:var(--muted);border:1px solid var(--line);padding:1px 6px}
 .pickhint{font-size:12px;color:var(--muted);margin:0}
+/* Boutique de l'écran des cartes : bourse, achats, rachat des pactes */
+.pickhead{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap}
+.purse{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:6px 12px 6px 10px}
+.purse b{font-family:var(--display);font-weight:400;font-size:24px;line-height:1;color:var(--coin);font-variant-numeric:tabular-nums}
+.cards.four{grid-template-columns:repeat(4,minmax(0,190px))}
+.cards.banning .mcard{outline:2px dashed var(--blood);outline-offset:4px}
+.shop{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.sbtn{display:flex;align-items:center;gap:8px;background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:7px 12px;cursor:pointer}
+.sbtn:hover:not(:disabled){border-color:var(--coin)}
+.sbtn:disabled{opacity:.4;cursor:not-allowed}
+.sbtn.on{border-color:var(--blood);box-shadow:inset 0 -3px 0 var(--blood)}
+.sbtn kbd{font:inherit;font-size:11px;color:var(--muted);border:1px solid var(--line);padding:0 5px}
+.price{display:inline-flex;align-items:center;gap:5px;color:var(--coin);font-variant-numeric:tabular-nums}
+.buyback{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;align-items:center}
+.buyback:empty{display:none}
+.buyback .label{margin-right:4px}
+.buyback .mchip{cursor:pointer;display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);color:var(--text)}
+.buyback .mchip:hover:not(:disabled),.buyback .mchip.focus{border-color:var(--coin);border-left-color:var(--rc)}
+.buyback .mchip:disabled{opacity:.45;cursor:not-allowed}
 @keyframes cardin{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes pip{50%{background:transparent}}
 @keyframes burst{from{opacity:1;transform:scale(.4)}to{opacity:0;transform:scale(1.5)}}
 /* Téléphone : cartes couchées, coin à gauche, texte à droite */
 @media (max-width:640px){
-  .cards{grid-template-columns:1fr;gap:10px}
+  .cards,.cards.four{grid-template-columns:1fr;gap:10px}
   .cards.weapons{grid-template-columns:1fr 1fr}
   .mcard.wcard{display:flex;min-height:72px;text-align:center}
   .mcard.wcard .rar{position:static}

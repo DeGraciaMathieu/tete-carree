@@ -1,6 +1,6 @@
 // Boutons des écrans et des réglages.
 import { showMute } from '../audio/sfx.js';
-import { chooseArena, pause, resume, showArena, startGame } from '../game/flow.js';
+import { buyExtraCard, buybackPact, chooseArena, pause, rerollPick, resume, showArena, startGame, toggleBan } from '../game/flow.js';
 import { lang, setLang } from '../i18n/index.js';
 import { buildArsenal } from '../render/arsenal.js';
 import { buildBestiary } from '../render/bestiary.js';
@@ -16,6 +16,10 @@ $('resumeBtn').addEventListener('click', resume);
 $('restartBtn').addEventListener('click', startGame);
 $('arenaBtn').addEventListener('click', () => chooseArena(1));
 $('pauseBtn').addEventListener('click', () => { if (world.state === 'play') pause(); });
+$('rerollBtn').addEventListener('click', rerollPick);
+$('extraBtn').addEventListener('click', buyExtraCard);
+$('banBtn').addEventListener('click', toggleBan);
+$('buyback').addEventListener('click', e => { const b = e.target.closest('.mchip'); if (b) buybackPact(b.dataset.id); });
 for (const b of document.querySelectorAll('.optFps')) b.addEventListener('click', () => setFps(!fpsOn));
 for (const b of document.querySelectorAll('.optOl')) b.addEventListener('click', () => setOutline(!outlineOn));
 

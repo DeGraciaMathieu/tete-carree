@@ -27,9 +27,10 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/rules/unlock.js` | `weaponsToUnlock`, `ammoOnUnlock` | config |
 | `src/rules/map.js` | `tileAt`, `passable`, `openT`, `shotTile`, `isVoid`, `circleTouchesVoid`, `walkLine`, `los` (grille passée en paramètre) | config |
 | `src/rules/pathfield.js` | `computeField`, `nextStep`, `UNREACHABLE` (Dijkstra de la horde) | config, map |
-| `src/rules/cards.js` | `rollCards(mods, rng)` | config, modifiers |
+| `src/rules/cards.js` | `rollCards(mods, rng, legend, ctx)` (`ctx.banned`, `without`, `count`, `free` pour la boutique) | config, modifiers |
+| `src/rules/shop.js` | boutique de l'écran des cartes : `rerollCost`, `canBuyExtra`, `buybackable`, `withoutPact` | config, modifiers |
 | `src/rules/waves.js` | `waveQueue`, `queueCount`, `spawnBurst`, `spawnGap` | config, modifiers |
-| `src/rules/scoring.js` | `killPoints`, `soifHeal`, `rollDrop` | config, modifiers |
+| `src/rules/scoring.js` | `killPoints`, `soifHeal`, `rollDrop`, `rollCoins`, `waveCoins` | config, modifiers |
 | `src/rules/records.js` | `rankRun` (classement des meilleures parties) | — |
 | `src/rules/damage.js` | `resolveEnemyHit`, `playerProtected`, `secondWind` | config, modifiers |
 | `src/state/world.js` | `world` (écran, collections, `shake`, `fieldDirty`, `best`, `runs`, `arena`), `S` (session), `player`, `blocks`, `unlocked`, `ammo`, `cam`, `rng`, `jitter`, raccourcis `mod`/`frenzy`/`fireMul`…, `resetWorld` | config, rules, arena |
@@ -39,7 +40,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/game/enemies.js` | `spawnEnemy`, `startWave`, `spit`, `updateGlobs` | rules/waves |
 | `src/game/player.js` | `moveInput`, `tryRoll`, `updateRoll`, `updateFires` (traînée de feu) | input, combat |
 | `src/game/score.js` | `addScore` (+ déblocage des armes) | rules/unlock |
-| `src/game/flow.js` | `newGame`, `startDemo`, `chooseArena`, `showArena`, `startGame`, `pause`, `resume`, `gameOver`, `openPick`, `choosePick`, `demoPick`, `focusCard` ; `gameOver` enregistre la partie dans `world.runs` | rules/cards, render |
+| `src/game/flow.js` | `newGame`, `startDemo`, `chooseArena`, `showArena`, `startGame`, `pause`, `resume`, `gameOver`, `openPick`, `choosePick`, `demoPick`, `focusCard`, boutique (`rerollPick`, `buyExtraCard`, `toggleBan`, `cancelBan`, `buybackPact`, `focusPact`) ; `gameOver` enregistre la partie dans `world.runs` | rules/cards, render |
 | `src/game/demo.js` | partie de démo de l'écran titre : `demoStart` (vague de départ, armes à feu débloquées), `demoControl` (pilote automatique, commandes dans `ctl`), `demoOver`, `DEMO_FIRST_WAVE`, `DEMO_LAST_WAVE`, `DEMO_BREAK` | rules/unlock, state, game/player, game/weapons |
 | `src/render/canvas.js` | `cv`, `ctx` (liaison vivante), `resize`, `zoom`, passe de contour `outlined` + proxy `OLP`, `setOutline` | — |
 | `src/render/floor.js` | sol peint hors écran (`floorC`, `fctx`), `paintFloor`, `stampBlood`, `stampScorch` | arena |
@@ -57,7 +58,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/input/touch.js` | `stick`, `aim`, boutons ROULER/ARME | game |
 | `src/input/gamepad.js` | `pad`, `pollPad`, `rumble` (`getGamepads` sous `try/catch`) | game |
 | `src/input/buttons.js` | boutons des écrans (Jouer, Reprendre, FPS, contours, langue…) ; `applyLang` réécrit l'accueil et les réglages dans la langue courante ; menu de l'accueil : `openPanel`, `panelOpen`, `moveMenu` (flèches et croix de la manette) | game/flow, i18n |
-| `src/loop/update.js` | `update(dt)` : acide, joueur, champ de distances, ennemis, séparation, projectiles, ramassage, blocs, particules, caméra | tout |
+| `src/loop/update.js` | `update(dt)` : acide, joueur, champ de distances, ennemis, séparation, projectiles, ramassage (caisses, pièces `updateCoins`), blocs, particules, caméra | tout |
 | `src/loop/frame.js` | `frame` (rAF) | update, render |
 
 ## Où va le nouveau code

@@ -19,6 +19,7 @@
         </div>
       </div>
       <div id="score">0</div>
+      <div class="money"><i class="coinico" aria-hidden="true"></i><span id="money">0</span> <span data-i18n="coins"></span></div>
       <div id="pot" hidden></div>
       <div id="next"></div>
     </div>
@@ -95,6 +96,7 @@
       <dt data-i18n="pause"></dt><dd data-i18n="deskPause"></dd>
       <dt data-i18n="kFps"></dt><dd data-i18n="deskFps"></dd>
       <dt data-i18n="kWave"></dt><dd data-i18n="deskWave"></dd>
+      <dt data-i18n="kShop"></dt><dd data-i18n="deskShop"></dd>
     </dl>
     <dl class="keys only-pad">
       <dt data-i18n="kMove"></dt><dd data-i18n="padMove"></dd>
@@ -102,6 +104,7 @@
       <dt data-i18n="kRoll"></dt><dd data-i18n="padRoll"></dd>
       <dt data-i18n="kWeapons"></dt><dd data-i18n="padWeapons"></dd>
       <dt data-i18n="kWave"></dt><dd data-i18n="padWave"></dd>
+      <dt data-i18n="kShop"></dt><dd data-i18n="padShop"></dd>
       <dt data-i18n="pause"></dt><dd data-i18n="padPause"></dd>
     </dl>
     <dl class="keys only-touch">
@@ -109,6 +112,7 @@
       <dt data-i18n="kShoot"></dt><dd data-i18n="touchShoot"></dd>
       <dt data-i18n="kRoll"></dt><dd data-i18n="touchRoll"></dd>
       <dt data-i18n="kWeapons"></dt><dd data-i18n="touchWeapons"></dd>
+      <dt data-i18n="kShop"></dt><dd data-i18n="touchShop"></dd>
     </dl>
     <button class="btn ghost tclose" data-i18n="close"></button>
   </div>
@@ -144,8 +148,17 @@
 
 <div class="overlay pick" id="pickScreen" hidden>
   <div class="pickwrap">
-    <div class="picktitle"><span id="pickWave"></span><h2 id="pickTitle"></h2></div>
+    <div class="pickhead">
+      <div class="picktitle"><span id="pickWave"></span><h2 id="pickTitle"></h2></div>
+      <div class="purse" id="purse"><i class="coinico" aria-hidden="true"></i><span class="label" data-i18n="coins"></span><b id="purseNum">0</b></div>
+    </div>
     <div class="cards" id="cards"></div>
+    <div class="shop" id="shop">
+      <button class="sbtn" id="rerollBtn"><kbd class="only-desk">R</kbd><span data-i18n="reroll"></span><span class="price" id="rerollPrice"></span></button>
+      <button class="sbtn" id="extraBtn"><kbd class="only-desk">C</kbd><span data-i18n="extraCard"></span><span class="price" id="extraPrice"></span></button>
+      <button class="sbtn" id="banBtn"><kbd class="only-desk">B</kbd><span id="banLabel"></span><span class="price" id="banPrice"></span></button>
+    </div>
+    <div class="buyback" id="buyback"></div>
     <p class="pickhint only-desk" id="pickHint"></p>
     <p class="pickhint only-pad" data-i18n="pickHintPad"></p>
   </div>

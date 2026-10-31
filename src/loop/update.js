@@ -17,7 +17,7 @@ import { addPart, casing, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood } from '../render/floor.js';
 import { banner } from '../render/hud.js';
 import { blastRadius, boxKind, boxPeriod, fragShards, hpRate, pickAfter, refillOf, repitBonus, speedMul, waveBreak, waveEndHp } from '../rules/modifiers.js';
-import { waveBonus } from '../rules/scoring.js';
+import { potsKill, waveBonus, waveCoins } from '../rules/scoring.js';
 import * as Waves from '../rules/waves.js';
 import { computeField, dist, isVoid, los, moveCircle, nextStep, openT, passable, shotTile, unstick, walkLine } from '../state/arena.js';
 import { S, ammo, blocks, cam, frenzy, jitter, mod, player, rng, rollCooldown, rollMax, unlocked, world } from '../state/world.js';
@@ -94,6 +94,7 @@ export function update(dt) {
         S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = pickAfter(S.mods, S.wave) ? PICK_DELAY : 0; S.repit = repitBonus(S.mods, S.repit);
         const bonus = waveBonus(S.wave, S.mods) + S.pot; S.pot = 0; addScore(bonus); // Tout ou rien : la cagnotte est versée
         banner(tr.waveCleared, tr.waveBonus, 'end', bonus);
+        if (!world.demo) { const coins = waveCoins(S.wave) + S.coinPot; S.coinPot = 0; S.money += coins; pop(player.x, player.y - 62, tr.coinsGained(coins), '#e8b23a'); }
         const hp = waveEndHp(S.mods, player.hp, player.maxHp);
         if (hp > player.hp && !player.dead) { player.hp = hp; pop(player.x, player.y - 46, tr.lifeRestored, '#62c46e'); }
       }
@@ -283,6 +284,7 @@ export function update(dt) {
     }
   }
   world.pickups = world.pickups.filter(p => !p.taken);
+  updateCoins(dt);
 
   // blocs
   for (const b of blocks.values()) { b.flash -= dt; b.drop = Math.max(0, b.drop - dt * 6); if (b.turret && playing) updateTurret(b, dt); }
@@ -327,4 +329,28 @@ export function update(dt) {
   cam.kx += cam.kvx * dt; cam.ky += cam.kvy * dt;
   player.recoilV += (-500 * player.recoil - 30 * player.recoilV) * dt;
   player.recoil = Math.max(0, player.recoil + player.recoilV * dt);
+}
+
+const COIN_GRAVITY = 320; // saut cosmétique d'une pièce qui tombe (px/s²)
+// Pièces au sol : petit saut à la chute, attraction d'Aimant, ramassage, disparition au bout de COIN_LIFE.
+// Retrait par compactage en place : aucun tableau alloué à chaque image.
+function updateCoins(dt) {
+  const coins = world.coins, reach = AIMANT_RANGE * mod('aimant');
+  let kept = 0;
+  for (let i = 0; i < coins.length; i++) {
+    const c = coins[i];
+    c.life -= dt;
+    if (c.vz || c.z > 0) { c.vz += COIN_GRAVITY * dt; c.z -= c.vz * dt; if (c.z <= 0) { c.z = 0; c.vz = 0; } }
+    if (!player.dead) {
+      const ax = player.x - c.x, ay = player.y - c.y, d = Math.hypot(ax, ay);
+      if (d < reach && d > 1) { const sp = Math.min(d, AIMANT_SPEED * dt); c.x += ax / d * sp; c.y += ay / d * sp; }
+      if (d < PICKUP_RADIUS) {
+        if (potsKill(S.mods, S.waveActive)) S.coinPot++; else S.money++; // Tout ou rien : en jeu jusqu'à la fin de la vague
+        sfx('coin', 45); pop(c.x, c.y - 24, '+1', '#e8b23a'); continue;
+      }
+    }
+    if (c.life <= 0) continue;
+    coins[kept++] = c;
+  }
+  coins.length = kept;
 }

@@ -262,6 +262,17 @@ export const AMMO_REFILL_WEAPONS = 2;    // armes rechargées par une caisse de 
 export const AMMO_NO_WEAPON_BONUS = 150; // points si aucune arme à recharger
 export const AIMANT_RANGE = 160, AIMANT_SPEED = 300; // Aimant : portée par niveau (px), vitesse d'attraction (px/s)
 
+/* ---------- Butin : pièces et boutique de l'écran des cartes ---------- */
+// Chance qu'un ennemi abattu lâche des pièces, et combien.
+export const COIN_CHANCE = { z: .3, r: .2, s: .6, b: 1, d: 1, a: 1 };
+export const COIN_VALUE = { z: 1, r: 1, s: 2, b: 2, d: 3, a: 5 };
+export const COIN_LIFE = 6, COIN_BLINK = 2; // durée au sol, dont les dernières secondes en clignotant (s)
+export const COIN_MAX = 80;                 // pièces au sol au plus : au-delà, la plus ancienne disparaît
+export const COIN_SCATTER = 14;             // éparpillement autour du corps (px)
+export const COIN_WAVE_BONUS = 1;           // pièces par numéro de vague, en fin de vague
+export const REROLL_COST = 10, REROLL_STEP = 5; // relance : prix de départ, hausse à chaque relance du même écran
+export const EXTRA_CARD_COST = 25, BAN_COST = 15, BUYBACK_COST = 60;
+
 /* ---------- Moteur ---------- */
 export const MAX_PARTS = 1600;
 export const FIELD_PERIOD = .22; // recalcul du champ de distances (s)

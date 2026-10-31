@@ -1,6 +1,6 @@
 // Enchaînement des écrans : titre, partie, pause, choix de carte, fin de partie.
 import { audio, sfx, silence } from '../audio/sfx.js';
-import { ARENAS, CONSTITUTION_HP, DIABLE_HP, MITRAILLE_PISTOL_AMMO, STORAGE_ARENA, STORAGE_BEST, STORAGE_RUNS, TOP_RUNS, VERRE_HP, W } from '../config.js';
+import { ARENAS, BAN_COST, BUYBACK_COST, CONSTITUTION_HP, DIABLE_HP, EXTRA_CARD_COST, MITRAILLE_PISTOL_AMMO, STORAGE_ARENA, STORAGE_BEST, STORAGE_RUNS, TOP_RUNS, VERRE_HP, W } from '../config.js';
 import { demoStart } from './demo.js';
 import { tr } from '../i18n/index.js';
 import { pad } from '../input/gamepad.js';
@@ -11,6 +11,7 @@ import { banner, buildSlots, renderRuns, resetHud } from '../render/hud.js';
 import { isPact, rollCards } from '../rules/cards.js';
 import { takeAllCards, waveBreak } from '../rules/modifiers.js';
 import { rankRun } from '../rules/records.js';
+import { buybackable, canBuyExtra, rerollCost, withoutPact } from '../rules/shop.js';
 import { S, ammo, comboTime, mod, player, resetWorld, rng, rollMax, unlocked, world } from '../state/world.js';
 import { $, clamp, fmt } from '../util.js';
 
@@ -47,6 +48,8 @@ export function gameOver() {
   renderRuns(); $('overScreen').hidden = false;
 }
 let pickChoices = [], pickTimers = [], pickLocked = false, weaponChoices = null;
+// Boutique de l'écran : relances payées, carte en plus achetée, mode bannissement, Légendaire promise (gardée à la relance).
+let pickRerolls = 0, pickExtra = false, pickBanning = false, pickLegend = false;
 // Distribution : les cartes arrivent face cachée puis se retournent une à une, Légendaire et pacte majeur en dernier.
 const DEAL_FIRST_MS = 350, DEAL_STEP_MS = 300, DEAL_LEGEND_MS = 250, DEAL_OUT_MS = 320;
 function cardHtml(m, i) {
@@ -76,31 +79,125 @@ function dealCards(slots) {
 export function openPick() {
   // Pas de pause : le joueur gagne toutes les cartes proposées, tirées hors pactes
   const all = takeAllCards(S.mods);
-  pickChoices = rollCards(S.mods, rng, S.legendNext, { wave: S.wave, noPacts: all, weapons: unlocked.filter(Boolean).length });
+  pickLegend = S.legendNext;
+  pickChoices = rollCards(S.mods, rng, pickLegend, pickCtx());
   if (!pickChoices.length) return;
   S.legendNext = false;
   world.state = 'pick'; releaseFire();
   pickTimers.forEach(clearTimeout); pickTimers = []; pickLocked = false;
+  pickRerolls = 0; pickExtra = false; pickBanning = false; pactFocus = -1;
   $('pickWave').textContent = tr.pickWave(S.wave);
-  $('pickHint').textContent = all ? tr.pickHintAll : tr.pickHint;
   $('pickTitle').textContent = all ? tr.pickTitleAll(pickChoices.length) : tr.pickTitle;
+  $('shop').hidden = false;
+  layHand(true);
+  $('pickScreen').hidden = false;
+  pickFocus = 0; if (pad.on) focusCard(0);
+  sfx('pickup');
+}
+// Contexte de tirage de l'écran en cours, complété par `more` (nombre de cartes, carte d'appoint…).
+function pickCtx(more) {
+  return { wave: S.wave, noPacts: takeAllCards(S.mods), weapons: unlocked.filter(Boolean).length, banned: S.banned, ...more };
+}
+// Pose les cartes de pickChoices : distribuées face cachée puis retournées (deal), ou posées face visible.
+function layHand(deal) {
   const box = $('cards'); box.innerHTML = ''; box.classList.remove('weapons');
+  box.classList.toggle('four', pickChoices.length > 3);
   pickChoices.forEach((m, i) => {
     const slot = document.createElement('div');
-    slot.className = 'mslot'; slot.style.animationDelay = (i * 80) + 'ms';
+    slot.className = 'mslot'; slot.style.animationDelay = (deal ? i * 80 : 0) + 'ms';
     slot.innerHTML = cardHtml(m, i);
     const b = slot.querySelector('.mcard');
     b.addEventListener('click', () => choosePick(i));
     b.addEventListener('pointerenter', () => { pickFocus = i; });
     box.appendChild(slot);
   });
-  $('pickScreen').hidden = false;
-  pickFocus = 0; if (pad.on) focusCard(0);
-  dealCards(box.children);
+  if (deal) dealCards(box.children);
+  else for (let k = 0; k < box.children.length; k++) box.children[k].firstChild.classList.remove('down');
+  renderShop();
+}
+// La boutique n'agit que sur l'écran des cartes, toutes retournées, avant le choix.
+function shopReady() {
+  if (world.state !== 'pick' || pickLocked || weaponChoices) return false;
+  const slots = $('cards').children;
+  for (let k = 0; k < slots.length; k++) if (slots[k].firstChild.classList.contains('down')) return false;
+  return true;
+}
+const coinPrice = n => `<i class="coinico" aria-hidden="true"></i>${n}`;
+// Bourse, prix, boutons grisés, pactes rachetables et aide selon le mode.
+function renderShop() {
+  const all = takeAllCards(S.mods), reroll = rerollCost(pickRerolls);
+  $('purseNum').textContent = S.money;
+  $('rerollPrice').innerHTML = coinPrice(reroll);
+  $('rerollBtn').disabled = pickBanning || S.money < reroll;
+  $('extraPrice').innerHTML = coinPrice(EXTRA_CARD_COST);
+  $('extraBtn').hidden = all;
+  $('extraBtn').disabled = pickBanning || !canBuyExtra(S.mods, pickExtra) || S.money < EXTRA_CARD_COST;
+  $('banPrice').innerHTML = coinPrice(BAN_COST);
+  $('banLabel').textContent = pickBanning ? tr.banCancel : tr.ban;
+  $('banBtn').disabled = !pickBanning && S.money < BAN_COST;
+  $('banBtn').classList.toggle('on', pickBanning);
+  $('cards').classList.toggle('banning', pickBanning);
+  $('pickHint').textContent = pickBanning ? tr.banHint : all ? tr.pickHintAll : tr.pickHint;
+  const pacts = buybackable(S.mods), off = pickBanning || S.money < BUYBACK_COST ? ' disabled' : '';
+  $('buyback').innerHTML = pacts.length ? `<span class="label">${tr.buyback}</span>` + pacts.map(m =>
+    `<button class="mchip r-p" data-id="${m.id}"${off}><b>${tr.cards[m.id].name}</b><span class="price">${coinPrice(BUYBACK_COST)}</span></button>`).join('') : '';
+  if (pactFocus >= 0) focusPact(pactFocus);
+}
+export function rerollPick() {
+  const cost = rerollCost(pickRerolls);
+  if (!shopReady() || pickBanning || S.money < cost) return;
+  const cards = rollCards(S.mods, rng, pickLegend, pickCtx({ count: pickChoices.length }));
+  if (!cards.length) return;
+  S.money -= cost; pickRerolls++; pickChoices = cards;
+  if (takeAllCards(S.mods)) $('pickTitle').textContent = tr.pickTitleAll(pickChoices.length);
+  sfx('toss');
+  layHand(true);
+  pickFocus = 0; if (pad.on && pactFocus < 0) focusCard(0);
+}
+// Carte d'appoint : hors de la table, sans Légendaire promise ni pacte majeur garanti.
+const extraCard = () => rollCards(S.mods, rng, false, pickCtx({ free: true, count: 1, without: pickChoices.map(m => m.id) }))[0];
+export function buyExtraCard() {
+  if (!shopReady() || pickBanning || !canBuyExtra(S.mods, pickExtra) || S.money < EXTRA_CARD_COST) return;
+  const m = extraCard();
+  if (!m) return;
+  S.money -= EXTRA_CARD_COST; pickExtra = true; pickChoices.push(m);
+  if (takeAllCards(S.mods)) $('pickTitle').textContent = tr.pickTitleAll(pickChoices.length);
   sfx('pickup');
+  layHand(false);
+  if (pad.on && pactFocus < 0) focusCard(pickChoices.length - 1);
+}
+export function toggleBan() {
+  if (!shopReady() || (!pickBanning && S.money < BAN_COST)) return;
+  pickBanning = !pickBanning; sfx('click');
+  renderShop();
+}
+export function cancelBan() { if (pickBanning) toggleBan(); }
+// Carte bannie : remplacée par une carte d'appoint, jamais plus proposée. S'il n'y a plus rien à proposer, l'écran se ferme.
+function banCard(i) {
+  const m = pickChoices[i];
+  if (!m || S.money < BAN_COST) return;
+  S.money -= BAN_COST; S.banned.push(m.id); pickBanning = false;
+  const r = extraCard();
+  if (r) pickChoices[i] = r; else pickChoices.splice(i, 1);
+  sfx('crumble');
+  if (!pickChoices.length) { $('pickScreen').hidden = true; world.state = 'play'; return; }
+  layHand(false);
+  if (pad.on && pactFocus < 0) focusCard(Math.min(i, pickChoices.length - 1));
+}
+// Rachat d'un pacte ordinaire : il disparaît avec son avantage et sa contrepartie, et ne ressortira plus.
+export function buybackPact(id) {
+  if (!shopReady() || pickBanning || S.money < BUYBACK_COST || !buybackable(S.mods).some(m => m.id === id)) return;
+  S.money -= BUYBACK_COST;
+  S.mods = withoutPact(S.mods, id); S.banned.push(id);
+  if (id === 'diable') { player.maxHp += DIABLE_HP; S.legendNext = false; }
+  if (id === 'verre') player.maxHp += VERRE_HP;
+  if (id === 'repit') S.repit = 0;
+  sfx('unlock');
+  renderShop();
 }
 export function choosePick(i) {
   if (weaponChoices) { chooseWeapon(i); return; }
+  if (pickBanning) { if (shopReady()) banCard(i); return; }
   const m = pickChoices[i], slots = $('cards').children;
   // une carte encore face cachée ne se choisit pas
   if (!m || world.state !== 'pick' || pickLocked || slots[i].firstChild.classList.contains('down')) return;
@@ -116,6 +213,7 @@ export function choosePick(i) {
 // Spécialiste : le pacte pris, le joueur choisit parmi ses armes débloquées celle qu'il gardera. Pas de retour en arrière.
 function openWeaponPick() {
   weaponChoices = W.map((w, i) => i).filter(i => unlocked[i]); pickLocked = false;
+  $('shop').hidden = true; $('buyback').innerHTML = ''; pactFocus = -1;
   $('pickWave').textContent = tr.weaponPickWave;
   $('pickTitle').textContent = tr.weaponPickTitle;
   $('pickHint').textContent = tr.weaponPickHint(weaponChoices.length);
@@ -180,4 +278,25 @@ export function focusCard(i) {
   pickFocus = clamp(i, 0, cards.length - 1);
   for (let k = 0; k < cards.length; k++) cards[k].classList.toggle('focus', k === pickFocus);
   try { cards[pickFocus].focus({ preventScroll: false }); } catch (e) {}
+}
+// Manette : rangée des pactes à racheter, sous les cartes (-1 : le focus est sur les cartes). Faux s'il n'y en a aucun.
+export let pactFocus = -1;
+export function focusPact(i) {
+  const chips = $('buyback').querySelectorAll('.mchip');
+  if (i < 0 || !chips.length) {
+    pactFocus = -1;
+    for (let k = 0; k < chips.length; k++) chips[k].classList.remove('focus');
+    if (pad.on) focusCard(pickFocus);
+    return false;
+  }
+  pactFocus = clamp(i, 0, chips.length - 1);
+  const cards = $('cards').querySelectorAll('.mcard');
+  for (let k = 0; k < cards.length; k++) cards[k].classList.remove('focus');
+  for (let k = 0; k < chips.length; k++) chips[k].classList.toggle('focus', k === pactFocus);
+  try { chips[pactFocus].focus({ preventScroll: false }); } catch (e) {}
+  return true;
+}
+export function buybackFocused() {
+  const chip = $('buyback').querySelectorAll('.mchip')[pactFocus];
+  if (chip) buybackPact(chip.dataset.id);
 }

@@ -1,5 +1,5 @@
 // Composition de chaque image : décor, crevasses, constructions, caisses, entités triées, repères, vignette.
-import { AVEUGLE_SIGHT, LOW_HP, MH, MW, T, W } from '../config.js';
+import { AVEUGLE_SIGHT, COIN_BLINK, LOW_HP, MH, MW, T, W } from '../config.js';
 import { ctx, cv, dpr, outlined, zoom } from './canvas.js';
 import { floorC } from './floor.js';
 import { aimMuzzle, drawAcidGround, drawArmored, drawBloater, drawChar, drawGlobs, drawPlayerState, drawRunner, drawSpitter } from './sprites.js';
@@ -191,6 +191,37 @@ function drawPickup(p) {
   ctx.restore();
 }
 
+// Pièces au sol, dessinées avant le tri en profondeur (aucun objet alloué par pièce) : debout, elles tournent sur
+// elles-mêmes pour trancher avec ce qui est à plat au sol, sur une ombre sombre ; une étoile blanche scintille de temps
+// en temps. Elles clignotent pendant leurs COIN_BLINK dernières secondes.
+const coinVisible = (c, x0, x1, y0, y1) => c.x >= x0 && c.x <= x1 && c.y >= y0 && c.y <= y1 && !(c.life < COIN_BLINK && (c.life * 8 | 0) & 1);
+function drawCoins(x0, x1, y0, y1) {
+  const coins = world.coins;
+  // ombres de toutes les pièces en un seul remplissage
+  ctx.fillStyle = 'rgba(20,22,24,.55)'; ctx.beginPath();
+  for (let i = 0; i < coins.length; i++) {
+    const c = coins[i];
+    if (!coinVisible(c, x0, x1, y0, y1)) continue;
+    ctx.moveTo(c.x + 5.5, c.y + 1); ctx.ellipse(c.x, c.y + 1, 5.5, 2.4, 0, 0, 7);
+  }
+  ctx.fill();
+  ctx.lineWidth = 2; ctx.strokeStyle = '#17191a';
+  for (let i = 0; i < coins.length; i++) {
+    const c = coins[i];
+    if (!coinVisible(c, x0, x1, y0, y1)) continue;
+    const a = Math.cos(S.time * 4.2 + c.ph), rx = Math.max(.9, Math.abs(a) * 4.6), y = c.y - 4.6 - c.z;
+    ctx.fillStyle = Math.abs(a) < .35 ? '#9a6f12' : '#e8b23a'; // de profil, on voit la tranche
+    ctx.beginPath(); ctx.ellipse(c.x, y, rx, 4.6, 0, 0, 7); ctx.fill(); ctx.stroke();
+    if (rx > 2.2) { ctx.fillStyle = '#fff1b8'; ctx.fillRect(c.x - rx * .45, y - 2.9, 1.6, 3); }
+    // étoile : 0,3 s toutes les 1,6 s, déphasée d'une pièce à l'autre
+    const k = (S.time * .8 + c.ph * .37) % 1.6;
+    if (k < .3) {
+      const r = Math.sin(k / .3 * Math.PI) * 4.5, sx = c.x + 3, sy = y - 5.4;
+      ctx.fillStyle = '#ffffff'; ctx.fillRect(sx - .75, sy - r, 1.5, r * 2); ctx.fillRect(sx - r, sy - .75, r * 2, 1.5);
+    }
+  }
+}
+
 // Aveugle : voile sombre au-delà de AVEUGLE_SIGHT cases autour du joueur, en ellipse écrasée par la vue 3/4, fondu sur
 // la dernière case. Le dégradé est créé une fois (repère centré sur le joueur) et réutilisé à chaque image.
 const BLIND_DARK = 'rgba(10,11,12,.94)', BLIND_SQUASH = .55, BLIND_COVER = 4000;
@@ -240,6 +271,7 @@ export function render() {
     if (e.type === 'b') drawBloater(e); else if (e.type === 'r') drawRunner(e); else if (e.type === 's') drawSpitter(e); else if (e.type === 'a') drawArmored(e); else drawChar(e, e.type);
     ctx.restore();
   }
+  drawCoins(cam.x - hw - 20, cam.x + hw + 20, cam.y - hh - 20, cam.y + hh + 40);
   const list = [];
   for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
     const v = map[ty * MW + tx]; if (v === 1 || v === 2) list.push({ k: (ty + 1) * T, t: 0, tx, ty, v });

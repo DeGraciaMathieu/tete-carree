@@ -1,7 +1,7 @@
 // Manette : sondage à chaque image (getGamepads protégé), vibrations, navigation dans les cartes.
 import { audio } from '../audio/sfx.js';
 import { PAD_AIM_DEADZONE, PAD_MOVE_DEADZONE } from '../config.js';
-import { chooseArena, choosePick, focusCard, pause, pickFocus, resume, startGame } from '../game/flow.js';
+import { buyExtraCard, buybackFocused, cancelBan, chooseArena, choosePick, focusCard, focusPact, pactFocus, pause, pickFocus, rerollPick, resume, startGame, toggleBan } from '../game/flow.js';
 import { tryRoll } from '../game/player.js';
 import { cycleWeapon } from '../game/weapons.js';
 import { moveMenu, openPanel, panelOpen } from './buttons.js';
@@ -67,6 +67,19 @@ export function pollPad() {
   if (world.state === 'over') { if (hit(0) || hit(9)) startGame(); return; }
   if (world.state === 'pause') { if (hit(0) || hit(1) || hit(9)) resume(); return; }
   if (world.state === 'pick') {
+    // boutique : X relancer, Y carte en plus, LB bannir (B annule) ; croix bas : rangée des pactes à racheter
+    if (hit(2)) rerollPick();
+    if (hit(3)) buyExtraCard();
+    if (hit(4)) toggleBan();
+    if (hit(1)) cancelBan();
+    if (pactFocus >= 0) {
+      if (hit(12)) focusPact(-1);
+      else if (hit(14) || flick < 0) focusPact(pactFocus - 1);
+      else if (hit(15) || flick > 0) focusPact(pactFocus + 1);
+      else if (hit(0)) buybackFocused();
+      return;
+    }
+    if (hit(13) && focusPact(0)) return;
     if (hit(14) || hit(12) || flick < 0) focusCard(pickFocus - 1);
     if (hit(15) || hit(13) || flick > 0) focusCard(pickFocus + 1);
     if (hit(0)) choosePick(pickFocus);

@@ -1,5 +1,5 @@
-// Ce que rapporte un ennemi abattu : points, soin de Soif de sang, caisse au sol.
-import { KILL_POINTS, WAVE_BONUS, UNEVIE_POINTS_MUL, SABLIER_POINTS_MUL, ELITE_POINTS_MUL, SILENCE_POINTS_MUL, DROP_CHANCE, DROP_HP_CHANCE, SOIF_MULTIPLIER, PRIME_POINTS_MUL, CHAIR_POINTS_MUL, VAMPIRE_HEAL } from '../config.js';
+// Ce que rapporte un ennemi abattu : points, soin de Soif de sang, caisse et pièces au sol.
+import { COIN_CHANCE, COIN_VALUE, COIN_WAVE_BONUS, KILL_POINTS, WAVE_BONUS, UNEVIE_POINTS_MUL, SABLIER_POINTS_MUL, ELITE_POINTS_MUL, SILENCE_POINTS_MUL, DROP_CHANCE, DROP_HP_CHANCE, SOIF_MULTIPLIER, PRIME_POINTS_MUL, CHAIR_POINTS_MUL, VAMPIRE_HEAL } from '../config.js';
 import { boxKind, modLevel, quittePoints } from './modifiers.js';
 
 // Types d'ennemis : 'z' zombie, 'b' gonflé, 'r' coureur, 's' cracheur, 'a' blindé, 'd' diable.
@@ -33,3 +33,11 @@ export function rollDrop(type, onVoid, rng, mods) {
   if (!(rng() < byType(DROP_CHANCE, type) && !onVoid)) return null;
   return boxKind(mods, rng(), DROP_HP_CHANCE);
 }
+
+// Pièces lâchées par l'ennemi (0 si rien). Comme pour les caisses, rien ne tombe au-dessus d'une crevasse.
+export function rollCoins(type, onVoid, rng) {
+  return rng() < byType(COIN_CHANCE, type) && !onVoid ? byType(COIN_VALUE, type) : 0;
+}
+
+// Pièces versées en fin de vague : COIN_WAVE_BONUS × numéro de vague.
+export function waveCoins(wave) { return COIN_WAVE_BONUS * wave; }
