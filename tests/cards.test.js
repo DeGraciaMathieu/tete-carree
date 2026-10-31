@@ -94,3 +94,45 @@ test('Spécialiste n\'est pas proposé tant que seul le pistolet est débloqué'
 test('chaque carte a son pictogramme', () => {
   for (const m of MODS) assert.match(cardIcon(m.id), /<(path|circle)/, m.id);
 });
+
+test('une carte bannie n\'est plus jamais proposée', () => {
+  for (let seed = 0; seed < 200; seed++) assert.ok(!ids(rollCards({}, createRng(seed), false, { banned: ['cadence', 'perce'] })).some(id => id === 'cadence' || id === 'perce'), seed);
+});
+
+test('la carte en plus est différente des cartes déjà sur la table', () => {
+  for (let seed = 0; seed < 100; seed++) {
+    const table = ids(rollCards({}, createRng(seed)));
+    const extra = rollCards({}, createRng(seed + 1000), false, { without: table, count: 1, free: true });
+    assert.equal(extra.length, 1);
+    assert.ok(!table.includes(extra[0].id), seed);
+  }
+});
+
+test('relancer après le Marché du diable propose toujours une Légendaire', () => {
+  for (let seed = 0; seed < 50; seed++) {
+    const rng = createRng(seed);
+    rollCards({ diable: 1 }, rng, true);
+    assert.ok(rollCards({ diable: 1 }, rng, true).some(c => c.rar === 'l'), seed);
+  }
+});
+
+test('un pacte majeur dû reste garanti après une relance', () => {
+  for (let seed = 0; seed < 50; seed++) {
+    const rng = createRng(seed);
+    rollCards({}, rng, false, { wave: 5 });
+    assert.ok(rollCards({}, rng, false, { wave: 5 }).some(c => c.rar === 'm'), seed);
+  }
+});
+
+test('une carte d\'appoint de la boutique n\'impose ni Légendaire ni pacte majeur', () => {
+  let forced = 0;
+  for (let seed = 0; seed < 200; seed++) {
+    const [m] = rollCards({}, createRng(seed), true, { wave: 5, count: 1, free: true });
+    if (m.rar === 'l' || m.rar === 'm') forced++;
+  }
+  assert.ok(forced < 100, forced);
+});
+
+test('sans carte bannie ni carte sur la table, le tirage est inchangé pour une même graine', () => {
+  for (let seed = 0; seed < 50; seed++) assert.deepEqual(ids(rollCards({}, createRng(seed), false, { banned: [], without: [] })), ids(rollCards({}, createRng(seed))));
+});

@@ -72,9 +72,10 @@ Noms de tests en français, phrase complète qui se lit comme la règle.
 | `tests/map.test.js` | `rules/map.js` : tir au-dessus d'une crevasse mais pas d'un mur, ligne de vue bloquée par une barricade, marche bloquée par une crevasse, case occupée, contact avec le bord d'une crevasse |
 | `tests/pathfield.test.js` | `rules/pathfield.js` : suivi d'un couloir, barricade qui allonge le chemin, zone coupée qui converge vers le bord ; `test.fails` du bug connu |
 | `tests/arenas.test.js` | plans de `state/arena.js`, pour chaque arène : départ sur du sol, chaque porte reliée au départ à pied, aucune case de sol enfermée (parcours case à case, pas le champ de distances) |
-| `tests/cards.test.js` | `rules/cards.js` : trois cartes différentes, même graine ⇒ mêmes cartes, carte au max exclue, plus rien à proposer |
+| `tests/cards.test.js` | `rules/cards.js` : trois cartes différentes, même graine ⇒ mêmes cartes, carte au max exclue, plus rien à proposer, cartes bannies, carte en plus hors table, garanties gardées à la relance |
 | `tests/waves.test.js` | `rules/waves.js` : 13 zombies en vague 1, entrée de chaque type à sa vague, Prime de risque grossit les meutes, compteur de restants, apparition deux par deux après la vague 6 |
-| `tests/scoring.test.js` | `rules/scoring.js` : points par kill et multiplicateur, Chair à canon, Prime de risque, Soif de sang, caisse lâchée par un blindé |
+| `tests/scoring.test.js` | `rules/scoring.js` : points par kill et multiplicateur, Chair à canon, Prime de risque, Soif de sang, caisse lâchée par un blindé, pièces lâchées et pièces de fin de vague |
+| `tests/shop.test.js` | `rules/shop.js` : prix de la relance, carte en plus (une par écran, jamais sous Pas de pause), pactes rachetables, rachat sans mutation |
 | `tests/damage.test.js` | `rules/damage.js` : bouclier du blindé (face, dos, explosions et railgun, bouclier brisé), recul, invulnérabilité de roulade, Second souffle |
 
 `rules/rng.js` n'a pas de fichier dédié : il est exercé par `cards` et `waves`.

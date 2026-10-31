@@ -1,6 +1,6 @@
 // Dégâts infligés et subis, mort des ennemis, explosions et ondes de choc.
 import { sfx } from '../audio/sfx.js';
-import { BARREL_CHAIN_DELAY, BLAST_BLOCK_DAMAGE, BLAST_BLOCK_REACH, BLAST_FALLOFF, BLAST_KNOCK, BLAST_SELF_DAMAGE, BLAST_SELF_FALLOFF, BLAST_SELF_RANGE, BLOATER_DAMAGE, BLOATER_RADIUS, CHAIR_RADIUS_MUL, SECOND_WIND_SHOCK_DAMAGE, SECOND_WIND_SHOCK_KNOCK, SECOND_WIND_SHOCK_RADIUS, T } from '../config.js';
+import { BARREL_CHAIN_DELAY, BLAST_BLOCK_DAMAGE, BLAST_BLOCK_REACH, BLAST_FALLOFF, BLAST_KNOCK, BLAST_SELF_DAMAGE, BLAST_SELF_FALLOFF, BLAST_SELF_RANGE, BLOATER_DAMAGE, BLOATER_RADIUS, CHAIR_RADIUS_MUL, COIN_LIFE, COIN_MAX, COIN_SCATTER, SECOND_WIND_SHOCK_DAMAGE, SECOND_WIND_SHOCK_KNOCK, SECOND_WIND_SHOCK_RADIUS, T } from '../config.js';
 import { addScore } from './score.js';
 import { damageBlock } from './weapons.js';
 import { tr } from '../i18n/index.js';
@@ -10,9 +10,9 @@ import { fctx, stampBlood, stampScorch } from '../render/floor.js';
 import { banner } from '../render/hud.js';
 import { playerProtected, resolveEnemyHit, secondWind } from '../rules/damage.js';
 import { comboAfterHit, comboKillsAfterHit, ownBlastRadius, ownBlastSelfMul, specialMul } from '../rules/modifiers.js';
-import { killPoints, potAfterHit, potsKill, rollDrop, soifHeal } from '../rules/scoring.js';
-import { isVoid } from '../state/arena.js';
-import { S, blocks, comboTime, mod, multiplier, player, rng, world } from '../state/world.js';
+import { killPoints, potAfterHit, potsKill, rollCoins, rollDrop, soifHeal } from '../rules/scoring.js';
+import { isVoid, openT } from '../state/arena.js';
+import { S, blocks, comboTime, jitter, mod, multiplier, player, rng, world } from '../state/world.js';
 import { $, fmt, rnd } from '../util.js';
 
 // kind : 'blast' (explosions, ondes de choc) et 'ap' (railgun) ignorent le bouclier du blindé
@@ -56,6 +56,17 @@ export function killEnemy(e, dx, dy, fell) {
   sfx('splat', 25); sfx('kill', 30);
   const kind = rollDrop(e.type, isVoid(e.x, e.y), rng, S.mods);
   if (kind) world.pickups.push({ x: e.x, y: e.y, kind, ph: Math.random() * 6 });
+  if (!world.demo) dropCoins(e.x, e.y, rollCoins(e.type, isVoid(e.x, e.y), rng));
+}
+// Pièces éparpillées autour du corps, jamais dans un mur, une construction ou le vide ; au-delà de COIN_MAX, la plus ancienne disparaît.
+// z, vz : petit saut à la chute ; ph : phase de la rotation et de l'éclat. Cosmétiques.
+function dropCoins(x, y, n) {
+  for (let k = 0; k < n; k++) {
+    let cx = x + jitter(COIN_SCATTER), cy = y + jitter(COIN_SCATTER) * .55;
+    if (!openT(cx / T | 0, cy / T | 0)) { cx = x; cy = y; }
+    if (world.coins.length >= COIN_MAX) world.coins.shift();
+    world.coins.push({ x: cx, y: cy, z: 2, vz: -(60 + Math.random() * 50), life: COIN_LIFE, ph: Math.random() * 6 });
+  }
 }
 
 export function hurtPlayer(dmg, soft) {
@@ -63,6 +74,7 @@ export function hurtPlayer(dmg, soft) {
   if (playerProtected(player)) return;
   player.hp -= dmg; player.hurtT = .35; player.flash = .08; player.lastHurt = S.time;
   if (!soft) { world.shake = Math.min(16, world.shake + 4); S.combo = comboKillsAfterHit(S.mods, S.combo, S.comboT); S.comboT = comboAfterHit(S.mods, S.comboT); }
+  S.coinPot = potAfterHit(S.mods, S.coinPot); // Tout ou rien : les pièces en jeu sont perdues comme les points
   if (S.pot && !potAfterHit(S.mods, S.pot)) { pop(player.x, player.y - 46, `−${fmt(S.pot)} perdus`, '#ff8f84'); S.pot = 0; }
   blood(player.x, player.y, 4);
   sfx('hurt', 120);

@@ -68,7 +68,7 @@ Textes, dans `src/i18n/fr.js` et `src/i18n/en.js`, sous `cards[id]` (lus par `tr
 | `entrave` (pacte majeur) | `rollMax` rend 0 (charges vidées dans `applyCard`, clic à vide dans `tryRoll`) ; `speedMul` ; `shotDamageMul` |
 | `mitraille` (pacte majeur) | `weaponCdMul` et `ammoCost` dans `fireWeapon` (armes à feu seulement) ; munitions du pistolet dans `applyCard`, `refillOf` au ramassage et dans `rollPerks` ; `loadedWeapon` quand l'arme en main est vide |
 | `lourde` (pacte majeur) | `shotDamageMul` ; `shotKnockMul` dans `shoot` ; `extraSpread` (un tirage `jitter` de plus) et `selfPush` dans `fireWeapon` ; recul cosmétique ×1,5 dans `recoil` |
-| `toutourien` (pacte majeur) | `multiplier` (`TOUTOURIEN_KILLS_PER_MULTIPLIER`) ; `potsKill` dans `killEnemy` (cagnotte `S.pot`), `potAfterHit` dans `hurtPlayer`, versement avec le bonus de fin de vague dans `update` ; `#pot` dans `updateHud` |
+| `toutourien` (pacte majeur) | `multiplier` (`TOUTOURIEN_KILLS_PER_MULTIPLIER`) ; `potsKill` dans `killEnemy` (cagnotte `S.pot`) et dans `updateCoins` (pièces en jeu `S.coinPot`), `potAfterHit` dans `hurtPlayer` pour les deux, versement avec le bonus de fin de vague dans `update` ; `#pot` dans `updateHud` |
 | `sanspause` (pacte majeur) | `waveBreak` (`SANSPAUSE_BREAK`) ; `pickAfter` en fin de vague dans `update` ; `takeAllCards` : `openPick` tire hors pactes (`noPacts`), `takeAll` applique toutes les cartes |
 | `specialiste` (pacte majeur) | `choosePick` enchaîne sur `openWeaponPick` / `chooseWeapon` (`S.special`, munitions infinies) ; `canSwitch` dans `selectWeapon` et `cycleWeapon` ; `shotDamageMul`, `specialMul` (explosions du joueur dans `explosion`, PV des barricades dans `placeBlock`) ; caisses de munitions en points ; cases `.sealed` ; proposé à partir de `SPECIALISTE_MIN_WEAPONS` armes (`ctx.weapons` de `rollCards`) |
 | `silence` (pacte majeur) | `killPoints` (`SILENCE_POINTS_MUL`) ; classe `#hud.silence` posée par `renderMods` (CSS : cases d'armes gardées au tactile) ; `#pauseScore` dans `updateHud` |
@@ -81,6 +81,15 @@ pacte majeur qu'à partir de la fin de la vague `MAJOR_FROM_WAVE`, jamais en dé
 qu'un pacte majeur est possédé (un seul par partie). Tant qu'aucun n'est pris, `majorDue(wave)` en garantit un
 (tiré en premier, parmi ceux encore permis) à la fin de la vague `MAJOR_FROM_WAVE` puis toutes les `MAJOR_EVERY` vagues ;
 à la distribution, il se retourne en dernier comme la Légendaire.
+
+## Boutique de l'écran des cartes
+
+Spécification : `docs/prd/butin.md`. Les ennemis lâchent des pièces (`rollCoins`, `COIN_CHANCE`, `COIN_VALUE`) dans
+`world.coins`, ramassées dans `updateCoins` (`loop/update.js`, Aimant compris) ; `S.money` reçoit aussi `waveCoins` en
+fin de vague. Sur l'écran des cartes (`game/flow.js`) : relancer (`rerollCost`, garanties de l'écran gardées par
+`pickLegend` et `majorDue`), carte en plus (`canBuyExtra`, tirage `free` hors table), bannir (`S.banned`, passé à
+`rollCards`), racheter un pacte ordinaire (`withoutPact`, effets immédiats annulés par `undoPact`, pacte banni).
+Aucune pièce en démo.
 
 ## Combo, multiplicateur, score
 

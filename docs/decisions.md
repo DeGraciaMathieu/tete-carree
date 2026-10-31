@@ -207,6 +207,22 @@ Spécification : `docs/prd/pactes-majeurs.md`.
   diable) à la fin de la vague 5 puis toutes les `MAJOR_EVERY` (2) vagues ; entre-temps, chance normale.
 - La démo ne tire jamais de pacte majeur.
 
+## Butin : pièces et boutique
+
+Spécification : `docs/prd/butin.md`.
+
+- L'argent (`S.money`) est séparé du score : le score débloque les armes et fait le record, les pièces ne servent qu'à
+  la boutique de l'écran des cartes et sont perdues en fin de partie (rien dans `localStorage`).
+- Pièces dans leur propre collection `world.coins` (durée de vie, plafond `COIN_MAX`), pas dans `world.pickups`
+  (plafonné à 3, sans expiration). Dessinées à plat avant le tri en profondeur, sans objet alloué par pièce.
+- Aucune pièce en démo, ni pour un ennemi tombé dans une crevasse.
+- Sous Tout ou rien, les pièces ramassées pendant une vague vont dans la cagnotte `S.coinPot`, comme les points :
+  versées en fin de vague, perdues au premier coup encaissé.
+- Le tirage des pièces ajoute un `rng()` par ennemi tué : pour une même graine, la suite de la partie diffère
+  d'avant ce changement.
+- Écarts avec le PRD : la carte en plus s'achète par un bouton de la boutique (pas de dos de carte en
+  4ᵉ position) ; les pièces de fin de vague s'affichent en chiffre flottant au-dessus du joueur, pas dans la bannière.
+
 ## Langues : français et anglais
 
 - Tous les textes affichés au joueur vivent dans `src/i18n/fr.js` et `src/i18n/en.js`, mêmes clés
@@ -316,3 +332,5 @@ Decisions the code does not settle and that were not made. Never resolved by gue
   d'une explosion) : choix d'implémentation, annoncé sur la carte.
 - Ravitaillement : le zombie entre aussi pendant la pause entre les vagues ; il ne compte pas dans
   la file de la vague et prolonge celle en cours s'il arrive avant sa fin. À garder ?
+- Butin : rachat d'un pacte à 60 pièces, est-ce assez cher (Prime de risque prise, rentabilisée, puis rachetée) ?
+  Bannissement sans limite par écran : à garder ?

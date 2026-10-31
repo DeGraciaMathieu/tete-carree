@@ -1,6 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { killPoints, soifHeal, rollDrop, waveBonus, potsKill, potAfterHit } from '../src/rules/scoring.js';
+import { killPoints, soifHeal, rollDrop, waveBonus, potsKill, potAfterHit, rollCoins, waveCoins } from '../src/rules/scoring.js';
+import { createRng } from '../src/rules/rng.js';
 
 const fixed = (...values) => () => values.shift();
 
@@ -72,4 +73,30 @@ test('Tout ou rien : un coup encaissé vide la cagnotte', () => {
 
 test('Silence : chaque kill rapporte deux fois plus', () => {
   assert.equal(killPoints('z', { silence: 1 }, 1), 100);
+});
+
+test('un Blindé abattu lâche toujours 5 pièces', () => {
+  const rng = createRng(3);
+  for (let k = 0; k < 100; k++) assert.equal(rollCoins('a', false, rng), 5);
+});
+
+test('un zombie lâche une pièce environ une fois sur trois', () => {
+  const rng = createRng(11);
+  let coins = 0;
+  for (let k = 0; k < 10000; k++) coins += rollCoins('z', false, rng);
+  assert.ok(coins > 2700 && coins < 3300, coins);
+});
+
+test('un ennemi tué au-dessus du vide ne lâche aucune pièce', () => {
+  assert.equal(rollCoins('a', true, fixed(0)), 0);
+});
+
+test('la fin de la vague 6 rapporte 6 pièces', () => {
+  assert.equal(waveCoins(6), 6);
+});
+
+test('sous Tout ou rien, les pièces ramassées pendant la vague sont en jeu et un coup encaissé les fait perdre', () => {
+  assert.equal(potsKill({ toutourien: 1 }, true), true);
+  assert.equal(potAfterHit({ toutourien: 1 }, 7), 0);
+  assert.equal(potsKill({ toutourien: 1 }, false), false); // pendant la pause, elles vont droit dans la bourse
 });
