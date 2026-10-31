@@ -34,12 +34,12 @@ export function takeAllCards(mods) { return !!modLevel(mods, 'sanspause'); }
 // Ravitaillement : délai avant la prochaine caisse larguée (r : tirage entre 0 et 1).
 export function boxPeriod(mods, r) { return (BOX_PERIOD_MIN + r * BOX_PERIOD_RAND) * (modLevel(mods, 'ravito') ? RAVITO_PERIOD_MUL : 1); }
 // Points de vie gagnés (> 0) ou perdus (< 0) par seconde hors des coups : régénération après REGEN_DELAY s sans
-// dégât, aucune sous Sans armure ; Vampire : perte quand le combo est retombé.
+// dégât, aucune sous Sans armure ; Vampire : aucune régénération, perte quand le combo est retombé.
 // Plus de soins : aucune régénération. Sablier : en vague (inWave), perte dès SABLIER_HOLD s sans kill, jamais de régénération.
 export function hpRate(mods, combo, sinceHurt, sinceKill = Infinity, inWave = false) {
   if (modLevel(mods, 'sanssoin')) return 0;
   if (modLevel(mods, 'sablier') && inWave) return sinceKill > SABLIER_HOLD ? -SABLIER_DRAIN : 0;
-  if (modLevel(mods, 'vampire') && !combo) return -VAMPIRE_DRAIN;
+  if (modLevel(mods, 'vampire')) return combo ? 0 : -VAMPIRE_DRAIN;
   return !modLevel(mods, 'sansarmure') && sinceHurt > REGEN_DELAY ? REGEN_RATE : 0;
 }
 // Nature d'une caisse (r : tirage entre 0 et 1, hpChance : part des caisses de soin). Plus de soins, Une seule vie :

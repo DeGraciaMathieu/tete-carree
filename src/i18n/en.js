@@ -172,7 +172,7 @@ export default {
     ravito: { name: 'Resupply', short: 'Resupply', plus: () => `Supply crates drop twice as often`, minus: () => `Every dropped crate brings ${RAVITO_ZOMBIES > 1 ? RAVITO_ZOMBIES + ' zombies' : 'a zombie'} into the arena` },
     repit: { name: 'Relentless', short: 'Relentless', plus: () => `+1 multiplier step for every wave cleared, up to +${REPIT_MAX}`, minus: () => `Break between waves ${pct(1 - REPIT_BREAK_MUL)} shorter` },
     fidele: { name: 'Loyalty', short: 'Loyalty', plus: () => `Pistol damage ×${FIDELE_PISTOL_MUL}`, minus: () => `Ammo crates no longer refill other weapons` },
-    vampire: { name: 'Vampire', short: 'Vampire', plus: () => `Every kill heals ${VAMPIRE_HEAL} HP, and Bloodthirst works from ×1`, minus: () => `Without a combo, you lose ${VAMPIRE_DRAIN} HP per second instead of regenerating (never the last one)` },
+    vampire: { name: 'Vampire', short: 'Vampire', plus: () => `Every kill heals ${VAMPIRE_HEAL} HP, and Bloodthirst works from ×1`, minus: () => `No more regeneration: without a combo, you lose ${VAMPIRE_DRAIN} HP per second (never the last one)` },
     brulee: { name: 'Scorched earth', short: 'Scorched earth', plus: () => `The roll recharges twice as fast`, minus: () => `Every roll costs ${BRULEE_ROLL_HP} HP (never the last one)` },
     racine: { name: 'Rooted', short: 'Rooted', plus: () => `Your shots deal ${times(RACINE_DAMAGE_MUL)} the damage while you stand still`, minus: () => `Movement −${pct(1 - RACINE_SPEED_MUL)}` },
     diable: { name: 'Devil\'s bargain', short: 'Devil\'s bargain', plus: () => `A guaranteed Legendary card at the next pick`, minus: () => `−${DIABLE_HP} max HP, permanently` },

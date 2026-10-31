@@ -113,12 +113,12 @@ test('Ravitaillement : les caisses tombent deux fois plus souvent', () => {
   assert.equal(boxPeriod({ ravito: 1 }, 1), 7);
 });
 
-test('Vampire : sans combo, le joueur perd 1 PV par seconde au lieu de régénérer', () => {
+test('Vampire : plus de régénération, et sans combo le joueur perd 1 PV par seconde', () => {
   assert.equal(hpRate({}, 0, 5), 3);
   assert.equal(hpRate({}, 0, 2), 0);
   assert.equal(hpRate({ sansarmure: 1 }, 0, 5), 0);
   assert.equal(hpRate({ vampire: 1 }, 0, 5), -1);
-  assert.equal(hpRate({ vampire: 1 }, 4, 5), 3);
+  assert.equal(hpRate({ vampire: 1 }, 4, 5), 0);
 });
 
 test('Terre brûlée : roulade rechargée deux fois plus vite, au prix de 5 PV, jamais le dernier', () => {

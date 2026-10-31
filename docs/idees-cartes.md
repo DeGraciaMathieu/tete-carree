@@ -43,7 +43,7 @@ Coût d'implémentation : **S** une constante ou une ligne, **M** une branche da
 | ✅ **Ravitaillement** (`ravito`) | Caisses de ravitaillement deux fois plus fréquentes | Chaque caisse larguée fait entrer un zombie | S : `boxPeriod`, section « caisses » de `update` |
 | ✅ **Sans répit** (`repit`) | +1 cran de multiplicateur par vague terminée, jusqu'à +5 | Pause entre les vagues réduite de 50 % | M : `S.repit`, `waveBreak` |
 | ✅ **Fidélité** (`fidele`) | Dégâts du pistolet × 3 | Les caisses ne rechargent plus les autres armes | S : `shotDamageMul`, ramassage |
-| ✅ **Vampire** (`vampire`) | Chaque kill rend 1 PV, Soif de sang dès × 1 | Sans combo, −1 PV/s au lieu de régénérer | S : `soifHeal`, `hpRate` |
+| ✅ **Vampire** (`vampire`) | Chaque kill rend 1 PV, Soif de sang dès × 1 | Plus de régénération ; sans combo, −1 PV/s | S : `soifHeal`, `hpRate` |
 | ✅ **Terre brûlée** (`brulee`) | Roulade rechargée deux fois plus vite | Chaque roulade coûte 5 PV | S : `rollCooldown`, `rollHpCost` |
 | ✅ **Enraciné** (`racine`) | Tirs × 2 à l'arrêt | Déplacement −30 % | S : `shotDamageMul`, `speedMul` |
 | ✅ **Marché du diable** (`diable`) | Une Légendaire garantie au prochain choix | −25 PV max, définitivement | M : `rollCards(…, legend)` |
