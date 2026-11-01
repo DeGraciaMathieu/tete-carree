@@ -1,13 +1,13 @@
 import { describe, test } from 'vitest';
 import assert from 'node:assert/strict';
 import { ARENAS, MH, MW, T } from '../src/config.js';
+import { computeField, nextStep } from '../src/rules/pathfield.js';
 import { buildMap, doors, map } from '../src/state/arena.js';
 
 // case de départ du joueur (resetWorld)
 const START_X = 22, START_Y = 15 + 4 / T | 0;
 
-// Cases de sol atteignables à pied depuis le départ, de voisine en voisine. Le champ de distances
-// n'est pas utilisé ici : son bug d'arrondi connu laisse des tuiles sans chemin (tests/pathfield.test.js).
+// Cases de sol atteignables à pied depuis le départ, de voisine en voisine.
 function reachable() {
   const seen = new Uint8Array(MW * MH), todo = [START_Y * MW + START_X];
   seen[todo[0]] = 1;
@@ -37,5 +37,15 @@ describe.each(ARENAS)('arène %s', id => {
     buildMap(id);
     const seen = reachable();
     for (let i = 0; i < map.length; i++) if (map[i] === 0) assert.ok(seen[i], `case (${i % MW}, ${i / MW | 0})`);
+  });
+
+  test('un ennemi posté sur n\'importe quelle case de sol sait vers où marcher pour rejoindre le joueur', () => {
+    buildMap(id);
+    const dist = computeField(map, new Map(), START_X, START_Y);
+    for (let i = 0; i < map.length; i++) {
+      if (map[i] !== 0 || i === START_Y * MW + START_X) continue;
+      const x = i % MW, y = i / MW | 0;
+      assert.ok(nextStep(map, new Map(), dist, x * T + T / 2, y * T + T / 2) >= 0, `case (${x}, ${y})`);
+    }
   });
 });

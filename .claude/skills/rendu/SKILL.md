@@ -48,12 +48,13 @@ exclut ombres et effets translucides.
 ## Dessiner une nouvelle entité
 
 1. Écris `draw<Nom>(e)` dans `src/render/sprites.js`, sous un commentaire `/* … */` qui décrit le
-   personnage ; repère local centré sur `(e.x, e.y)`, `C` pour le flash, palette en dur (les couleurs
-   restent hors de `config.js`).
+   personnage ; repère local centré sur `(e.x, e.y)`, `C(fl, c)`, `R(fl, …)`, `E(fl, …)` du module pour le
+   flash, palette en dur (les couleurs restent hors de `config.js`). Pas de fermeture ni de tableau créés
+   à chaque appel : un personnage est dessiné deux fois par image (contour), une centaine en fin de partie.
 2. Branche-la dans `render()` (`src/render/scene.js`) : soit dans la liste triée (nouveau `t`, ou
-   aiguillage par `e.type` existant — **les deux** aiguillages, chutes et liste), soit dans une passe
+   aiguillage par `e.type` existant — **les deux** aiguillages, chutes et `drawEnemy`), soit dans une passe
    d'effets après la liste.
-3. Si elle doit être détourée, passe-la par `outlined(ent, () => draw…(ent))` et respecte le proxy.
+3. Si elle doit être détourée, passe-la par `outlined(ent, draw…)` (qui appelle `draw…(ent)`) et respecte le proxy.
 4. Particules ou taches : `addPart`/`stampBlood` avec `Math.random`/`rnd`, jamais `rng`.
 5. Vérifie à l'œil avec `npm run dev`, contours activés **et** désactivés (bouton de l'écran de pause).
 

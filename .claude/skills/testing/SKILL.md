@@ -13,24 +13,21 @@ npm test            # vitest run : tous les tests/*.test.js
 npm run test:watch  # vitest en mode surveillance
 ```
 
-Résultat attendu aujourd'hui : 14 fichiers, tous les tests verts **plus un `test.fails`**
-(`tests/pathfield.test.js`, bug d'arrondi Float32 documenté dans `docs/decisions.md`). Si ce test
-se met à « passer », Vitest le signale en échec : c'est que le champ de distances a changé — décision à
-prendre explicitement, pas un effet de bord à accepter.
+Résultat attendu aujourd'hui : 14 fichiers, tous les tests verts.
 
 Le hook Stop (`scripts/run-tests.sh`) lance `npm test` à chaque fin de tâche et bloque si la suite échoue.
 
 ## Performance
 
 ```sh
-npm run perf        # 20 s de partie, budget d'allocations JS
+npm run perf        # 20 s de partie en vague 15, budget d'allocations JS
 npm run perf -- 8   # durée en secondes
 ```
 
 `scripts/perf.mjs` lance Vite et Chrome sans interface (`CHROME=<chemin>` pour un autre Chromium),
-démarre une partie avec un joueur immobile rendu invulnérable, puis mesure les allocations avec le
+démarre une partie directement en vague 15 (`WAVE`) avec un joueur immobile rendu invulnérable, puis mesure les allocations avec le
 profil échantillonné de Chrome. Il affiche les Mo/s par fonction et échoue au-delà de `BUDGET_MB_S`
-(10 Mo/s ; environ 2 aujourd'hui). Il ne fait pas partie de `npm test` ni du hook Stop : il exige
+(10 Mo/s ; 8 à 9 aujourd'hui en vague 15, selon la composition tirée). Il ne fait pas partie de `npm test` ni du hook Stop : il exige
 Chrome et dure une vingtaine de secondes. Lance-le après un changement dans un chemin chaud et avant
 chaque publication.
 
@@ -83,8 +80,8 @@ Noms de tests en français, phrase complète qui se lit comme la règle.
 | `tests/modifiers.test.js` | `rules/modifiers.js` : multiplicateur tous les 5 kills, Frénésie à ×5, cadence (Sans armure, Frénésie), Combo tenace, Double roulade |
 | `tests/unlock.test.js` | `rules/unlock.js` : seuil de l'Uzi, déblocages multiples dans l'ordre, pas de double déblocage, munitions à l'arrivée |
 | `tests/map.test.js` | `rules/map.js` : tir au-dessus d'une crevasse mais pas d'un mur, ligne de vue bloquée par une barricade, marche bloquée par une crevasse, case occupée, contact avec le bord d'une crevasse |
-| `tests/pathfield.test.js` | `rules/pathfield.js` : suivi d'un couloir, barricade qui allonge le chemin, zone coupée qui converge vers le bord ; `test.fails` du bug connu |
-| `tests/arenas.test.js` | plans de `state/arena.js`, pour chaque arène : départ sur du sol, chaque porte reliée au départ à pied, aucune case de sol enfermée (parcours case à case, pas le champ de distances) |
+| `tests/pathfield.test.js` | `rules/pathfield.js` : suivi d'un couloir, barricade qui allonge le chemin, zone coupée qui converge vers le bord, chemin depuis chaque tuile d'une arène ouverte |
+| `tests/arenas.test.js` | plans de `state/arena.js`, pour chaque arène : départ sur du sol, chaque porte reliée au départ à pied, aucune case de sol enfermée (parcours case à case), `nextStep` du champ de distances sur chaque case de sol |
 | `tests/cards.test.js` | `rules/cards.js` : trois cartes différentes, même graine ⇒ mêmes cartes, carte au max exclue, plus rien à proposer, cartes bannies, carte en plus hors table, garanties gardées à la relance |
 | `tests/waves.test.js` | `rules/waves.js` : 13 zombies en vague 1, entrée de chaque type à sa vague, Prime de risque grossit les meutes, compteur de restants, apparition deux par deux après la vague 6 |
 | `tests/scoring.test.js` | `rules/scoring.js` : points par kill et multiplicateur, Chair à canon, Prime de risque, Soif de sang, caisse lâchée par un blindé, pièces lâchées et pièces de fin de vague |

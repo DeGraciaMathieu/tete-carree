@@ -1,5 +1,5 @@
-// Mesure des allocations JS : serveur Vite + Chrome sans interface, une partie jouée (joueur immobile et
-// invulnérable), profil d'allocations échantillonné. Échoue au-delà du budget : la cause habituelle des
+// Mesure des allocations JS : serveur Vite + Chrome sans interface, une partie lancée en vague WAVE (joueur
+// immobile et invulnérable), profil d'allocations échantillonné. Échoue au-delà du budget : la cause habituelle des
 // baisses de fps est le ramasse-miettes.
 // Usage : npm run perf [-- secondes]   (CHROME=<chemin> pour un autre navigateur Chromium)
 import { spawn } from 'node:child_process';
@@ -9,6 +9,7 @@ import { join } from 'node:path';
 
 const BUDGET_MB_S = 10;   // aujourd'hui ~2 Mo/s ; 140 Mo/s avant la correction du tas du champ de distances
 const SECONDS = +(process.argv[2] || 20);
+const WAVE = 15; // vague de la mesure : une horde de fin de partie, plus d'une centaine d'ennemis
 const VITE_PORT = 5191, DEBUG_PORT = 9333;
 const CHROME = process.env.CHROME || '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const TOP = 12;
@@ -45,10 +46,13 @@ try {
   await sleep(500);
   if (!(await inPlay())) throw new Error('la partie n\'a pas démarré');
   // Joueur immobile rendu invulnérable : la horde s'accumule autour de lui sans finir la partie.
+  // La vague WAVE démarre tout de suite, pendant la pause d'avant la vague 1.
   // Le serveur Vite sert le même module que le jeu, on agit donc sur le vrai état.
-  await send('Runtime.evaluate', { expression: `import('/src/state/world.js').then(m => { m.player.invuln = 1e9; })`, awaitPromise: true });
+  const setup = await send('Runtime.evaluate', { awaitPromise: true, expression: `Promise.all([import('/src/state/world.js'), import('/src/game/enemies.js')])
+    .then(([w, en]) => { w.player.invuln = 1e9; w.S.wave = ${WAVE - 1}; en.startWave(); })` });
+  if (setup.result.exceptionDetails) throw new Error(`préparation de la partie : ${setup.result.exceptionDetails.exception?.description}`);
 
-  console.log(`Partie lancée, mesure pendant ${SECONDS} s…`);
+  console.log(`Partie lancée en vague ${WAVE}, mesure pendant ${SECONDS} s…`);
   await send('HeapProfiler.enable');
   await send('HeapProfiler.startSampling', { samplingInterval: 4096, includeObjectsCollectedByMajorGC: true, includeObjectsCollectedByMinorGC: true });
   await sleep(SECONDS * 1000);

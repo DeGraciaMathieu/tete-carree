@@ -119,9 +119,14 @@ export function circleTouchesVoid(o, m) { return Grid.circleTouchesVoid(map, o, 
 export function walkLine(ax, ay, bx, by) { return Grid.walkLine(map, ax, ay, bx, by); }
 export function los(ax, ay, bx, by) { return Grid.los(map, blocks, ax, ay, bx, by); }
 
-export let dist = new Float32Array(MW * MH);
-export function computeField() {
+export let dist = new Float64Array(MW * MH);
+// Le champ ne dépend que de la carte, des constructions et de la tuile du joueur : sans `force`
+// (constructions changées, nouvelle carte), il n'est recalculé que si le joueur a changé de tuile.
+let fieldTile = -1;
+export function computeField(force) {
   const ptx = clamp(Math.floor(player.x / T), 0, MW - 1), pty = clamp(Math.floor(player.y / T), 0, MH - 1);
+  if (!force && pty * MW + ptx === fieldTile) return;
+  fieldTile = pty * MW + ptx;
   dist = Field.computeField(map, blocks, ptx, pty);
 }
 export function nextStep(e) { return Field.nextStep(map, blocks, dist, e.x, e.y); }

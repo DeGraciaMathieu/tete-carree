@@ -22,7 +22,7 @@ test('un zombie suit le couloir jusqu\'au joueur', () => {
   const dist = computeField(map, new Map(), 15, 15);
   assert.equal(dist[idx(5, 5)], 20);
   const [x, y] = center(5, 5);
-  assert.deepEqual(nextStep(map, new Map(), dist, x, y), center(6, 5));
+  assert.equal(nextStep(map, new Map(), dist, x, y), idx(6, 5));
 });
 
 test('une barricade dans le couloir se défonce, mais allonge le chemin', () => {
@@ -39,10 +39,7 @@ test('une zone coupée du joueur par une crevasse converge vers le bord le plus 
   assert.ok(dist[idx(10, 9)] < dist[idx(5, 5)], 'le bord de la crevasse attire la zone coupée');
 });
 
-// Bug connu, conservé tel quel (docs/decisions.md) : relax() compare une distance float64 à sa copie
-// Float32 ; quand l'arrondi descend, la tuile n'est jamais propagée. Ce test passera au rouge le jour
-// où le bug sera corrigé : il faudra alors le transformer en test normal.
-test.fails('bug connu : dans une arène ouverte, toutes les tuiles devraient avoir un chemin', () => {
+test('dans une arène ouverte, toutes les tuiles ont un chemin jusqu\'au joueur', () => {
   const dist = computeField(new Uint8Array(MW * MH), new Map(), 15, 5);
   assert.ok(dist.every(d => d < 1e8));
 });

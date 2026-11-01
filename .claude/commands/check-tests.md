@@ -20,7 +20,6 @@ alors qu'elle devrait l'être) ou **N/A** (rendu, entrées, orchestration non te
    pure ? Si oui, signale-le comme préalable au test.
 3. Constantes de `src/config.js` modifiées : un test annonce-t-il l'ancienne valeur (« 13 zombies »,
    « 1 000 points ») ?
-4. Le `test.fails` de `tests/pathfield.test.js` est-il toujours en échec attendu ?
 
 ## 3. Proposition
 
