@@ -255,6 +255,23 @@ guerre, Avarice, Cupidité, Mercenaire).
 - Le rendu lit le clignotement des pièces et le bonus de Trésor de guerre par des raccourcis de `state/world.js`
   (`coinBlink`, `hoardMul`), pour ne pas importer `rules/` depuis `render/`.
 
+## Pactes de la bourse
+
+Spécifications : `docs/prd/pacte-*.md` (Péage, Vœu de pauvreté, Bouclier d'or, Crédit, Assurance, Monnaie piégée,
+Casino).
+
+- Champ `noDemo` sur les cartes de `MODS` : jamais tirées en démo (`rollCards`, `ctx.demo`). Posé sur les sept
+  pactes : la démo n'a pas de pièces.
+- Vœu de pauvreté est un pacte majeur ; ses exclusions (cartes du butin, Avarice, Cupidité, Mercenaire, pactes de la
+  bourse) sont listées sur lui seul, la règle étant symétrique.
+- Ordre dans `hurtPlayer` : protections, Gilet, Crédit (dégâts majorés), Bouclier d'or (pièces d'abord), vie, Second
+  souffle, puis Assurance. Ordre en fin de vague : pièces de fin de vague, Contrat, cotisation, Casino.
+- Prix payé (`discounted`) : doublé sous Bouclier d'or, puis remise de Marchandage. Achat permis (`canAfford`) jusqu'au
+  plancher de Crédit.
+- Écarts avec les PRD : la jauge de roulade n'affiche pas le prix de Péage (elle ne montre de pastilles qu'à partir
+  de deux charges) ; seul le bouton ROULER du tactile se grise sans assez de pièces. Péage écarte aussi la Roulade de
+  réserve du Comptoir. Le rayon de Monnaie piégée est écrasé de 0,55 en hauteur comme l'éparpillement des pièces.
+
 ## Harnais d'équilibrage
 
 Spécification : `docs/prd/harnais-equilibrage.md`. Commande `npm run balance`, code dans `scripts/balance/`.
@@ -396,5 +413,7 @@ Decisions the code does not settle and that were not made. Never resolved by gue
   boutiques sur la même bourse à régler en jeu. Liste des cartes louables à vérifier carte par carte (Second souffle…).
 - Cartes du butin : Aimant enlève la prise de risque de Collecte ; Mercenaire, s'il sort à la première carte,
   retarde beaucoup les premières armes ; Trésor de guerre peut dissuader de tout achat. À observer en jeu.
+- Pactes de la bourse : Péage (roulades enchaînées protégées 65 % du temps), seuil fixe de l'Assurance en fin de
+  partie, rafales de pièces piégées d'un même tas, force de Vœu de pauvreté : à mesurer avec `npm run balance`.
 - Harnais d'équilibrage : le profil Débutant (visée 0,4 s et 15°, sans roulade) meurt dès les vagues 1 à 2 au premier
   essai ; trop faible pour être utile, ou fidèle à un vrai débutant ?

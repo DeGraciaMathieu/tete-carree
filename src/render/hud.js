@@ -4,7 +4,7 @@ import { sfx } from '../audio/sfx.js';
 import { LOW_HP, MODS, SABLIER_HOLD, W } from '../config.js';
 import { selectWeapon } from '../game/weapons.js';
 import { lang, tr } from '../i18n/index.js';
-import { S, ammo, comboTime, frenzy, hoardMul, mod, multiplier, player, queueCount, unlocked, world } from '../state/world.js';
+import { S, ammo, comboTime, frenzy, hoardMul, mod, multiplier, rollReady, player, queueCount, unlocked, world } from '../state/world.js';
 import { cardIcon } from './cardIcons.js';
 import { $, fmt } from '../util.js';
 
@@ -161,10 +161,13 @@ export function updateHud() {
   if (hudCache.low !== low) { hudCache.low = low; $('hpBar').classList.toggle('low', !!low); }
   setText('score', fmt(S.score));
   setText('money', String(S.money));
+  // bourse : rouge à découvert (Crédit), barrée sous Vœu de pauvreté
+  const purse = S.money < 0 ? 'debt' : mod('pauvrete') ? 'poor' : '';
+  if (hudCache.purse !== purse) { hudCache.purse = purse; const el = $('money').parentElement; el.classList.toggle('debt', purse === 'debt'); el.classList.toggle('poor', purse === 'poor'); }
   if (mod('silence') && hudCache.pauseScore !== S.score) { hudCache.pauseScore = S.score; $('pauseScore').textContent = tr.pauseScore(fmt(S.score)); }
   const pot = mod('toutourien') ? S.pot : -1, potKey = pot + '/' + S.coinPot; // Tout ou rien : points et pièces en jeu pendant la vague
   if (hudCache.pot !== potKey) { hudCache.pot = potKey; $('pot').hidden = pot < 0; $('pot').innerHTML = tr.pot(fmt(Math.max(0, pot)), S.coinPot); }
-  const rc = player.rollCharges <= 0 || !!player.roll;
+  const rc = !rollReady() || !!player.roll; // pas de charge, ou pas assez de pièces sous Péage
   if (hudCache.rc !== rc) { hudCache.rc = rc; $('rollBtn').classList.toggle('cd', rc); }
   const nx = W.findIndex((w, i) => !unlocked[i]);
   const nextHtml = nx >= 0 ? tr.next(tr.weapons[W[nx].id].name, fmt(W[nx].unlock)) : tr.nextNone;

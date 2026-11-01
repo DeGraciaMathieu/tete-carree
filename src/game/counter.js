@@ -9,7 +9,7 @@ import { pop } from '../render/effects.js';
 import { shopIcon } from '../render/shopIcons.js';
 import { restockCost, rollStall, weaponsFor } from '../rules/counter.js';
 import { refillOf } from '../rules/modifiers.js';
-import { discounted } from '../rules/shop.js';
+import { canAfford, discounted, shopOpens } from '../rules/shop.js';
 import { waveCounts } from '../rules/waves.js';
 import { S, ammo, mod, player, rng, rollMax, unlocked, world } from '../state/world.js';
 import { $, clamp } from '../util.js';
@@ -21,16 +21,16 @@ export let shopFocus = 0;
 // Harnais d'équilibrage : caisses de l'étale et caisses vendues, en lecture seule.
 export const stallOptions = () => ({ stall, sold });
 
-// Prix payé : Marchandage le réduit.
-const price = n => discounted(n, S.mods);
+// Prix payé (Marchandage, Bouclier d'or) et achat permis (Crédit : jusqu'au plancher).
+const price = n => discounted(n, S.mods), afford = n => canAfford(S.mods, S.money, n);
 const ctx = () => ({ mods: S.mods, buffs: S.buffs, wave: S.wave + 1, unlocked, ammo, special: S.special, banned: S.banned });
 const weaponIndex = id => W.findIndex(w => w.id === id);
 // Attelle : vie max rendue selon les pactes possédés.
 const attelleHp = () => (mod('verre') ? VERRE_HP : 0) + (mod('diable') ? DIABLE_HP : 0);
 
-// Ouvre le Comptoir, sauf en démo ou avec une bourse vide. Vrai s'il s'est ouvert ; sinon `after` est fait tout de suite.
+// Ouvre le Comptoir, sauf en démo, avec une bourse vide (sauf Crédit) ou sous Vœu de pauvreté. Vrai s'il s'est ouvert ; sinon `after` est fait tout de suite.
 export function openShop(after = null) {
-  if (world.demo || S.money <= 0) { if (after) after(); return false; }
+  if (world.demo || !shopOpens(S.mods, S.money)) { if (after) after(); return false; }
   afterShop = after;
   world.state = 'shop'; releaseFire();
   restocks = 0;
@@ -52,7 +52,7 @@ function deal() {
 }
 export function restockShop() {
   const cost = price(restockCost(restocks));
-  if (world.state !== 'shop' || S.money < cost) return;
+  if (world.state !== 'shop' || !afford(cost)) return;
   S.money -= cost; restocks++;
   sfx('toss');
   deal();
@@ -60,7 +60,7 @@ export function restockShop() {
 }
 export function buyItem(i) {
   const s = stall[i];
-  if (world.state !== 'shop' || !s || sold[i] || S.money < price(s.item.price)) return;
+  if (world.state !== 'shop' || !s || sold[i] || !afford(price(s.item.price))) return;
   S.money -= price(s.item.price); sold[i] = true;
   applyItem(s.item, s.target);
   sfx('coin');
@@ -100,7 +100,7 @@ const targetName = s => !s.target ? '' : s.item.target === 'rent' ? tr.cards[s.t
 const famLabel = item => item.pacts ? tr.counterPact(item.pacts.filter(id => mod(id)).map(id => tr.cards[id].name).join(' · ')) : tr.shopFam[item.fam];
 const coinPrice = n => `<i class="coinico" aria-hidden="true"></i>${n}`;
 function itemHtml(s, i) {
-  const t = tr.shop[s.item.id], arg = s.item.id === 'attelle' ? attelleHp() : targetName(s), poor = !sold[i] && S.money < price(s.item.price);
+  const t = tr.shop[s.item.id], arg = s.item.id === 'attelle' ? attelleHp() : targetName(s), poor = !sold[i] && !afford(price(s.item.price));
   const icon = s.item.target === 'rent' ? `<span class="rent">${cardIcon(s.target)}</span>` : shopIcon(s.item.id);
   return `<button class="item f-${s.item.fam}${sold[i] ? ' sold' : poor ? ' poor' : ''}" type="button" data-i="${i}"${sold[i] || poor ? ' aria-disabled="true"' : ''}>`
     + `<span class="ifam">${famLabel(s.item)}</span>`
@@ -111,11 +111,11 @@ function itemHtml(s, i) {
 }
 // Bourse, caisses, prix du réassort, et composition de la vague si l'Éclaireur a été acheté.
 function renderShop() {
-  $('shopPurse').textContent = S.money;
+  $('shopPurse').textContent = S.money; $('shopPurse').parentElement.classList.toggle('debt', S.money < 0);
   $('stall').innerHTML = stall.length ? stall.map(itemHtml).join('') : `<p class="pickhint">${tr.shopEmpty}</p>`;
   const cost = price(restockCost(restocks));
   $('restockPrice').innerHTML = coinPrice(cost);
-  $('restockBtn').disabled = S.money < cost;
+  $('restockBtn').disabled = !afford(cost);
   $('shopScout').hidden = !S.buffs.eclaireur;
   if (S.buffs.eclaireur) $('shopScout').textContent = tr.forecast(waveCounts(S.wave + 1, S.mods, S.buffs));
 }

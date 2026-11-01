@@ -12,7 +12,7 @@ import { banner, buildSlots, renderRuns, resetHud } from '../render/hud.js';
 import { isPact, rollCards } from '../rules/cards.js';
 import { takeAllCards, waveBreak } from '../rules/modifiers.js';
 import { rankRun } from '../rules/records.js';
-import { buybackable, canBuyExtra, discounted, rerollCost, undoPact, withoutPact } from '../rules/shop.js';
+import { buybackable, canAfford, canBuyExtra, discounted, rerollCost, undoPact, withoutPact } from '../rules/shop.js';
 import { S, ammo, comboTime, mod, player, resetWorld, rng, rollMax, unlocked, world } from '../state/world.js';
 import { $, clamp, fmt } from '../util.js';
 
@@ -89,7 +89,7 @@ export function openPick() {
   pickRerolls = 0; pickExtra = false; pickBanning = false; pactFocus = -1;
   $('pickWave').textContent = tr.pickWave(S.wave);
   $('pickTitle').textContent = all ? tr.pickTitleAll(pickChoices.length) : tr.pickTitle;
-  $('shop').hidden = false;
+  $('shop').hidden = !!mod('pauvrete'); // Vœu de pauvreté : plus de boutique
   layHand(true);
   $('pickScreen').hidden = false;
   pickFocus = 0; if (pad.on) focusCard(0);
@@ -125,31 +125,31 @@ function shopReady() {
   return true;
 }
 const coinPrice = n => `<i class="coinico" aria-hidden="true"></i>${n}`;
-// Prix payé : Marchandage le réduit.
-const price = n => discounted(n, S.mods);
+// Prix payé (Marchandage, Bouclier d'or) et achat permis (Crédit : jusqu'au plancher).
+const price = n => discounted(n, S.mods), afford = n => canAfford(S.mods, S.money, n);
 // Bourse, prix, boutons grisés, pactes rachetables et aide selon le mode.
 function renderShop() {
   const all = takeAllCards(S.mods), reroll = price(rerollCost(pickRerolls));
-  $('purseNum').textContent = S.money;
+  $('purseNum').textContent = S.money; $('purse').classList.toggle('debt', S.money < 0);
   $('rerollPrice').innerHTML = coinPrice(reroll);
-  $('rerollBtn').disabled = pickBanning || S.money < reroll;
+  $('rerollBtn').disabled = pickBanning || !afford(reroll);
   $('extraPrice').innerHTML = coinPrice(price(EXTRA_CARD_COST));
   $('extraBtn').hidden = all;
-  $('extraBtn').disabled = pickBanning || !canBuyExtra(S.mods, pickExtra) || S.money < price(EXTRA_CARD_COST);
+  $('extraBtn').disabled = pickBanning || !canBuyExtra(S.mods, pickExtra) || !afford(price(EXTRA_CARD_COST));
   $('banPrice').innerHTML = coinPrice(price(BAN_COST));
   $('banLabel').textContent = pickBanning ? tr.banCancel : tr.ban;
-  $('banBtn').disabled = !pickBanning && S.money < price(BAN_COST);
+  $('banBtn').disabled = !pickBanning && !afford(price(BAN_COST));
   $('banBtn').classList.toggle('on', pickBanning);
   $('cards').classList.toggle('banning', pickBanning);
   $('pickHint').textContent = pickBanning ? tr.banHint : all ? tr.pickHintAll : tr.pickHint;
-  const pacts = buybackable(S.mods), off = pickBanning || S.money < price(BUYBACK_COST) ? ' disabled' : '';
+  const pacts = mod('pauvrete') ? [] : buybackable(S.mods), off = pickBanning || !afford(price(BUYBACK_COST)) ? ' disabled' : '';
   $('buyback').innerHTML = pacts.length ? `<span class="label">${tr.buyback}</span>` + pacts.map(m =>
     `<button class="mchip r-p" data-id="${m.id}"${off}><b>${tr.cards[m.id].name}</b><span class="price">${coinPrice(price(BUYBACK_COST))}</span></button>`).join('') : '';
   if (pactFocus >= 0) focusPact(pactFocus);
 }
 export function rerollPick() {
   const cost = price(rerollCost(pickRerolls));
-  if (!shopReady() || pickBanning || S.money < cost) return;
+  if (!shopReady() || pickBanning || !afford(cost)) return;
   const cards = rollCards(S.mods, rng, pickLegend, pickCtx({ count: pickChoices.length }));
   if (!cards.length) return;
   S.money -= cost; pickRerolls++; pickChoices = cards;
@@ -161,7 +161,7 @@ export function rerollPick() {
 // Carte d'appoint : hors de la table, sans Légendaire promise ni pacte majeur garanti.
 const extraCard = () => rollCards(S.mods, rng, false, pickCtx({ free: true, count: 1, without: pickChoices.map(m => m.id) }))[0];
 export function buyExtraCard() {
-  if (!shopReady() || pickBanning || !canBuyExtra(S.mods, pickExtra) || S.money < price(EXTRA_CARD_COST)) return;
+  if (!shopReady() || pickBanning || !canBuyExtra(S.mods, pickExtra) || !afford(price(EXTRA_CARD_COST))) return;
   const m = extraCard();
   if (!m) return;
   S.money -= price(EXTRA_CARD_COST); pickExtra = true; pickChoices.push(m);
@@ -171,7 +171,7 @@ export function buyExtraCard() {
   if (pad.on && pactFocus < 0) focusCard(pickChoices.length - 1);
 }
 export function toggleBan() {
-  if (!shopReady() || (!pickBanning && S.money < price(BAN_COST))) return;
+  if (!shopReady() || (!pickBanning && !afford(price(BAN_COST)))) return;
   pickBanning = !pickBanning; sfx('click');
   renderShop();
 }
@@ -179,7 +179,7 @@ export function cancelBan() { if (pickBanning) toggleBan(); }
 // Carte bannie : remplacée par une carte d'appoint, jamais plus proposée. S'il n'y a plus rien à proposer, l'écran se ferme.
 function banCard(i) {
   const m = pickChoices[i];
-  if (!m || S.money < price(BAN_COST)) return;
+  if (!m || !afford(price(BAN_COST))) return;
   S.money -= price(BAN_COST); S.banned.push(m.id); pickBanning = false;
   const r = extraCard();
   if (r) pickChoices[i] = r; else pickChoices.splice(i, 1);
@@ -190,11 +190,12 @@ function banCard(i) {
 }
 // Rachat d'un pacte ordinaire : il disparaît avec son avantage et sa contrepartie, et ne ressortira plus.
 export function buybackPact(id) {
-  if (!shopReady() || pickBanning || S.money < price(BUYBACK_COST) || !buybackable(S.mods).some(m => m.id === id)) return;
+  if (!shopReady() || pickBanning || !afford(price(BUYBACK_COST)) || !buybackable(S.mods).some(m => m.id === id)) return;
   S.money -= price(BUYBACK_COST);
   S.mods = withoutPact(S.mods, id); S.banned.push(id);
   const undone = undoPact(id, { maxHp: player.maxHp, legendNext: S.legendNext, repit: S.repit });
   player.maxHp = undone.maxHp; S.legendNext = undone.legendNext; S.repit = undone.repit;
+  if (id === 'peage') player.rollCharges = rollMax(); // la charge de roulade revient
   sfx('unlock');
   renderShop();
 }
@@ -271,6 +272,7 @@ function applyCard(m) {
   const lost = m.id === 'diable' ? DIABLE_HP : m.id === 'verre' ? VERRE_HP : 0;
   if (lost) { player.maxHp -= lost; player.hp = Math.max(1, Math.min(player.hp, player.maxHp)); }
   if (m.id === 'unevie') player.maxHp = player.hp = 1; // le premier coup, quel qu'il soit, est mortel
+  if (m.id === 'pauvrete') { S.money = 0; S.coinPot = 0; world.coins.length = 0; } // plus aucune pièce, pour toute la partie
 }
 // Démo : une des cartes qu'on aurait proposées, prise au hasard, sans écran de choix.
 export function demoPick() {

@@ -10,6 +10,7 @@ import {
   VAMPIRE_HEAL, VERRE_DAMAGE_MUL, VERRE_HP, WALL_HP,
   COIN_CHANCE, COIN_LIFE, LIVRAISON_DELAY, SHOP_BAIT_ARMORED, SHOP_COIN_LIFE, SHOP_CONTRACT_COINS, SHOP_DEPART_BONUS, SHOP_DIG_CHANCE, SHOP_FUSE_T, SHOP_HEAD_MUL, SHOP_HEAVY_MUL, SHOP_MAG_MUL, SHOP_REPEL_MUL, SHOP_RUSTINE_HP, SHOP_SCOPE_MUL,
   AVARICE_COIN_LIFE, AVARICE_MUL, COLLECTE_TIME, CUPIDITE_BONUS, CUPIDITE_LOSS, MARCHANDAGE_DISCOUNT, MERCENAIRE_COINS, MERCENAIRE_POINTS_MUL, MIDAS_VALUE, PILLARD_CHANCE, POCHES_LIFE, SANGDOR_HEAL, TRESOR_COINS, TRESOR_MAX, TRESOR_STEP,
+  ASSURANCE_FEE, ASSURANCE_MIN, BOUCLIER_COIN_HP, BOUCLIER_PRICE_MUL, CREDIT_FLOOR, CREDIT_HURT_MUL, PAUVRETE_DAMAGE_MUL, PEAGE_COST, PIEGEE_COIN_LIFE, PIEGEE_DAMAGE, PIEGEE_SELF_DAMAGE,
 } from '../config.js';
 
 const pct = x => Math.round(x * 100) + ' %';
@@ -88,6 +89,7 @@ export default {
   shopHintPad: 'Croix ou stick pour choisir, A pour acheter · X (□) réassort · Y (△) pour repartir.',
   shopEmpty: 'Plus rien à vendre pour l\'instant.', sold: 'VENDU', free: 'Gratuit', oneWave: '1 vague',
   counterPact: p => `Contre-pacte · ${p}`, contractPaid: n => `Contrat rempli : +${n} pièces`,
+  insured: 'Vie sauvée', insuranceFee: n => `−${n} cotisation`, casinoWin: 'Pile ! ×2', casinoLoss: 'Face… ÷2',
   shopFam: { pact: 'Contre-pacte', heal: 'Soins', ammo: 'Munitions', arms: 'Armurerie', combo: 'Combo et score', loot: 'Butin', horde: 'Horde', rent: 'Location' },
   forecast: k => [[k.z, 'zombie'], [k.b, 'Gonflé'], [k.d, 'Diable'], [k.s, 'Cracheur'], [k.a, 'Blindé'], [k.p, 'meute']]
     .filter(e => e[0] > 0).map(e => `${e[0]} ${e[1]}${e[0] > 1 ? 's' : ''}`).join(' · '),
@@ -236,6 +238,12 @@ export default {
     avarice: { name: 'Avarice', short: 'Avarice', plus: () => `Les ennemis lâchent ${AVARICE_MUL === 2 ? 'deux' : num(AVARICE_MUL)} fois plus de pièces`, minus: () => `Les pièces ne restent que ${AVARICE_COIN_LIFE} s au sol` },
     cupidite: { name: 'Cupidité', short: 'Cupidité', plus: () => `+${CUPIDITE_BONUS} pièce sur chaque ennemi qui en lâche`, minus: () => `Chaque coup encaissé fait tomber ${CUPIDITE_LOSS} pièces de ta bourse autour de toi` },
     mercenaire: { name: 'Mercenaire', short: 'Mercenaire', plus: () => `Chaque kill rapporte ${MERCENAIRE_COINS} pièce de plus`, minus: () => `Les kills rapportent ${MERCENAIRE_POINTS_MUL === .5 ? 'deux fois moins' : pct(1 - MERCENAIRE_POINTS_MUL) + ' de moins'} de points : armes débloquées plus tard, record plus bas` },
+    peage: { name: 'Péage', short: 'Péage', plus: () => `Roulades sans limite : plus de charge ni de recharge`, minus: () => `Chaque roulade coûte ${PEAGE_COST} pièces ; sans elles, plus de roulade` },
+    bouclier: { name: 'Bouclier d\'or', short: 'Bouclier d\'or', plus: () => `Les coups se paient d'abord en pièces : une pièce pour ${BOUCLIER_COIN_HP} PV`, minus: () => `Boutique et Comptoir coûtent ${BOUCLIER_PRICE_MUL === 2 ? 'deux' : num(BOUCLIER_PRICE_MUL)} fois plus cher` },
+    credit: { name: 'Crédit', short: 'Crédit', plus: () => `Tu peux acheter à crédit, jusqu'à ${-CREDIT_FLOOR} pièces de dette`, minus: () => `À découvert, tu encaisses ${pct(CREDIT_HURT_MUL - 1)} de dégâts en plus` },
+    assurance: { name: 'Assurance', short: 'Assurance', plus: () => `Une fois par vague, un coup mortel te laisse à 1 PV et vide ta bourse, s'il te reste ${ASSURANCE_MIN} pièces`, minus: () => `À chaque fin de vague, la cotisation prend ${pct(ASSURANCE_FEE)} de ta bourse` },
+    piegee: { name: 'Monnaie piégée', short: 'Piégée', plus: () => `Une pièce que personne ne ramasse explose : ${PIEGEE_DAMAGE} dégâts à la horde autour`, minus: () => `L'explosion te blesse aussi de près (${PIEGEE_SELF_DAMAGE} PV), et les pièces ne restent que ${PIEGEE_COIN_LIFE} s au sol` },
+    casino: { name: 'Casino', short: 'Casino', plus: () => `À chaque fin de vague, une chance sur deux de doubler ta bourse`, minus: () => `Sinon, elle est divisée par deux` },
     sanssoin: { name: 'Plus de soins', short: 'Plus de soins', plus: () => `Chaque vague terminée te rend toute ta vie`, minus: () => `Plus aucune régénération ni caisse de soin` },
     unevie: { name: 'Une seule vie', short: 'Une seule vie', plus: () => `Points ×${UNEVIE_POINTS_MUL} sur chaque kill et sur le bonus de fin de vague`, minus: () => `Le premier coup encaissé te tue, et plus aucune caisse de soin` },
     sablier: { name: 'Sablier', short: 'Sablier', plus: () => `Points ×${SABLIER_POINTS_MUL} sur chaque kill`, minus: () => `Pendant une vague, tu perds ${SABLIER_DRAIN} PV par seconde jusqu'à la mort ; chaque kill arrête la perte ${num(SABLIER_HOLD)} s` },
@@ -247,6 +255,7 @@ export default {
     sanspause: { name: 'Pas de pause', short: 'Pas de pause', plus: () => `Toutes les deux vagues, tu gagnes les trois cartes proposées (jamais de pacte)`, minus: () => `Plus de pause entre les vagues, et aucune carte après une vague impaire` },
     specialiste: { name: 'Spécialiste', short: 'Spécialiste', plus: () => `L'arme que tu choisis devient infinie et fait ${SPECIALISTE_DAMAGE_MUL === 2 ? 'deux' : num(SPECIALISTE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `Tu ne pourras plus jamais changer d'arme` },
     silence: { name: 'Silence', short: 'Silence', plus: () => `Points ×${SILENCE_POINTS_MUL} sur chaque kill`, minus: () => `Plus de HUD : santé, score, combo, armes et cartes disparaissent (score et cartes restent en pause)` },
+    pauvrete: { name: 'Vœu de pauvreté', short: 'Pauvreté', plus: () => `Tes tirs et tes explosions font ${pct(PAUVRETE_DAMAGE_MUL - 1)} de dégâts en plus`, minus: () => `Plus aucune pièce, ni boutique ni Comptoir, jusqu'à la fin de la partie` },
     aveugle: { name: 'Aveugle', short: 'Aveugle', plus: () => `Tes tirs font ${AVEUGLE_DAMAGE_MUL === 2 ? 'deux' : num(AVEUGLE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `Tu ne vois plus rien au-delà de ${AVEUGLE_SIGHT} cases` },
   },
 };

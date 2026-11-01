@@ -16,14 +16,14 @@ export function majorDue(wave) { return wave >= MAJOR_FROM_WAVE && (wave - MAJOR
 // legend : Marché du diable a promis une Légendaire, tirée en premier. Le pacte n'est proposé que s'il en reste.
 // Pacte majeur garanti (majorDue) : tiré juste après, au hasard parmi ceux encore permis.
 // ctx : wave (vague qui vient de se terminer), demo, noPacts (ni pacte ni pacte majeur), weapons (armes débloquées :
-// Spécialiste n'est proposé qu'avec un vrai choix d'arme), banned (ids bannis ou rachetés, jamais proposés),
+// Spécialiste n'est proposé qu'avec un vrai choix d'arme ; une carte `noDemo` jamais en démo), banned (ids bannis ou rachetés, jamais proposés),
 // without (ids déjà sur la table), count (nombre de cartes, CARDS_PER_PICK par défaut), free (carte d'appoint de la
 // boutique : ni Légendaire promise ni pacte majeur garanti).
 export function rollCards(mods, rng, legend = false, ctx = {}) {
   const major = majorOk(mods, ctx.wave || 0, ctx.demo), count = ctx.count || CARDS_PER_PICK;
   const left = MODS.filter(m => modLevel(mods, m.id) < m.max && !excluded(m, mods) && (m.rar !== 'm' || major) && !(ctx.noPacts && isPact(m))
     && (m.id !== 'specialiste' || (ctx.weapons || 1) >= SPECIALISTE_MIN_WEAPONS)
-    && !(ctx.banned && ctx.banned.includes(m.id)) && !(ctx.without && ctx.without.includes(m.id)));
+    && !(ctx.banned && ctx.banned.includes(m.id)) && !(ctx.without && ctx.without.includes(m.id)) && !(ctx.demo && m.noDemo));
   const legends = left.filter(m => m.rar === 'l');
   const pool = legends.length ? left : left.filter(m => m.id !== 'diable'), out = [];
   if (legend && legends.length && !ctx.free) { const m = legends[rng() * legends.length | 0]; out.push(m); pool.splice(pool.indexOf(m), 1); }

@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { resolveEnemyHit, playerProtected, secondWind } from '../src/rules/damage.js';
+import { resolveEnemyHit, playerProtected, secondWind, coinShield, debtHurtMul, insured } from '../src/rules/damage.js';
 
 // Blindé qui regarde vers la droite : un tir venu de face voyage vers la gauche (dx = -1).
 const armored = { type: 'a', fx: 1, fy: 0, shield: 300 };
@@ -40,4 +40,34 @@ test('Second souffle relève le joueur à 40 % de sa vie max, une seule fois', (
   assert.equal(secondWind(-5, 125, { souffle: 1 }, true), null);
   assert.equal(secondWind(-5, 125, {}, false), null);
   assert.equal(secondWind(10, 125, { souffle: 1 }, false), null);
+});
+
+// Pactes de la bourse
+test('Bouclier d\'or : un coup de 10 PV coûte 5 pièces et aucun PV', () => {
+  assert.deepEqual(coinShield({ bouclier: 1 }, 10, 40), { coins: 5, dmg: 0 });
+});
+
+test('Bouclier d\'or : une bourse trop maigre est vidée, le reste passe sur la vie', () => {
+  assert.deepEqual(coinShield({ bouclier: 1 }, 15, 3), { coins: 3, dmg: 9 });
+});
+
+test('sans Bouclier d\'or, le coup va entièrement sur la vie', () => {
+  assert.deepEqual(coinShield({}, 10, 40), { coins: 0, dmg: 10 });
+});
+
+test('Crédit : à découvert, un coup fait 30 % de dégâts en plus', () => {
+  assert.equal(debtHurtMul({ credit: 1 }, -15), 1.3);
+  assert.equal(debtHurtMul({ credit: 1 }, 0), 1);
+});
+
+test('Assurance : un coup mortel laisse à 1 PV si la bourse a 30 pièces', () => {
+  assert.equal(insured({ assurance: 1 }, -4, 40, false), true);
+});
+
+test('Assurance : une seule fois par vague', () => {
+  assert.equal(insured({ assurance: 1 }, -4, 40, true), false);
+});
+
+test('Assurance : avec moins de 30 pièces, le coup mortel tue', () => {
+  assert.equal(insured({ assurance: 1 }, -4, 29, false), false);
 });

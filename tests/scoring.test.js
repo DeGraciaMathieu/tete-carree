@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { killPoints, soifHeal, rollDrop, waveBonus, potsKill, potAfterHit, rollCoins, waveCoins, coinLife, coinBlink, coinWorth, coinHeal, coinsLostOnHit } from '../src/rules/scoring.js';
+import { killPoints, soifHeal, rollDrop, waveBonus, potsKill, potAfterHit, rollCoins, waveCoins, coinLife, coinBlink, coinWorth, coinHeal, coinsLostOnHit, insuranceFee, casinoPurse } from '../src/rules/scoring.js';
 import { createRng } from '../src/rules/rng.js';
 
 const fixed = (...values) => () => values.shift();
@@ -198,4 +198,44 @@ test('Mercenaire : rien ne tombe au-dessus du vide', () => {
 
 test('Mercenaire : le bonus de fin de vague est inchangé', () => {
   assert.equal(waveBonus(6, { mercenaire: 1 }), waveBonus(6, {}));
+});
+
+// Pactes de la bourse
+test('Vœu de pauvreté : plus aucune pièce ne tombe', () => {
+  assert.equal(rollCoins('a', false, fixed(0), {}, { pauvrete: 1 }), 0);
+});
+
+test('Vœu de pauvreté : la fin de vague ne verse plus de pièces', () => {
+  assert.equal(waveCoins(6, { pauvrete: 1 }), 0);
+});
+
+test('Cupidité ne prend rien sur une bourse négative', () => {
+  assert.equal(coinsLostOnHit({ cupidite: 1 }, -20), 0);
+});
+
+test('Assurance : la cotisation prend 15 % de la bourse en fin de vague', () => {
+  assert.equal(insuranceFee({ assurance: 1 }, 60), 9);
+  assert.equal(insuranceFee({}, 60), 0);
+});
+
+test('Monnaie piégée : une pièce ne reste que 4 s au sol, sans clignoter', () => {
+  assert.equal(coinLife({ piegee: 1 }, {}), 4);
+  assert.equal(coinBlink({ piegee: 1 }), 0);
+});
+
+test('Casino : pile, la bourse double', () => {
+  assert.equal(casinoPurse({ casino: 1 }, 40, .2), 80);
+});
+
+test('Casino : face, elle est divisée par deux, arrondie en dessous', () => {
+  assert.equal(casinoPurse({ casino: 1 }, 7, .8), 3);
+});
+
+test('Casino : une bourse vide ou négative ne tire rien', () => {
+  assert.equal(casinoPurse({ casino: 1 }, 0, .2), 0);
+  assert.equal(casinoPurse({ casino: 1 }, -10, .2), -10);
+});
+
+test('sans Casino, la bourse ne change pas en fin de vague', () => {
+  assert.equal(casinoPurse({}, 40, .2), 40);
 });

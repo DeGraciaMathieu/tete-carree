@@ -40,7 +40,7 @@ export function spawnEnemy(type, door) {
 export function startWave() {
   S.wave++; const n = S.wave;
   S.queue = Waves.waveQueue(n, S.mods, rng, S.buffs);
-  S.waveActive = true; S.spawnT = WAVE_FIRST_SPAWN; S.waveHurt = false;
+  S.waveActive = true; S.spawnT = WAVE_FIRST_SPAWN; S.waveHurt = false; S.insuranceUsed = false; // Assurance : une par vague
   if (S.buffs.livraison === 1) { S.buffs.livraison = 2; S.boxT = LIVRAISON_DELAY; } // Comptoir : la prochaine caisse sera de munitions
   S.lastKill = S.time + WAVE_FIRST_SPAWN; // Sablier : la perte ne commence qu'après la première apparition
   world.shake = Math.min(16, world.shake + 6);
