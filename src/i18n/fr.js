@@ -9,6 +9,7 @@ import {
   SHOTS, SILENCE_POINTS_MUL, SPECIALISTE_DAMAGE_MUL, TOUTOURIEN_KILLS_PER_MULTIPLIER, TURRET_EVERY, UNEVIE_POINTS_MUL, VAMPIRE_DRAIN,
   VAMPIRE_HEAL, VERRE_DAMAGE_MUL, VERRE_HP, WALL_HP,
   COIN_CHANCE, COIN_LIFE, LIVRAISON_DELAY, SHOP_BAIT_ARMORED, SHOP_COIN_LIFE, SHOP_CONTRACT_COINS, SHOP_DEPART_BONUS, SHOP_DIG_CHANCE, SHOP_FUSE_T, SHOP_HEAD_MUL, SHOP_HEAVY_MUL, SHOP_MAG_MUL, SHOP_REPEL_MUL, SHOP_RUSTINE_HP, SHOP_SCOPE_MUL,
+  AVARICE_COIN_LIFE, AVARICE_MUL, COLLECTE_TIME, CUPIDITE_BONUS, CUPIDITE_LOSS, MARCHANDAGE_DISCOUNT, MERCENAIRE_COINS, MERCENAIRE_POINTS_MUL, MIDAS_VALUE, PILLARD_CHANCE, POCHES_LIFE, SANGDOR_HEAL, TRESOR_COINS, TRESOR_MAX, TRESOR_STEP,
 } from '../config.js';
 
 const pct = x => Math.round(x * 100) + ' %';
@@ -225,6 +226,16 @@ export default {
     racine: { name: 'Enraciné', short: 'Enraciné', plus: () => `Tes tirs font ${num(RACINE_DAMAGE_MUL)} fois plus de dégâts quand tu es immobile`, minus: () => `Déplacement −${pct(1 - RACINE_SPEED_MUL)}` },
     diable: { name: 'Marché du diable', short: 'Marché du diable', plus: () => `Une carte Légendaire garantie au prochain choix`, minus: () => `−${DIABLE_HP} PV max, définitivement` },
     verre: { name: 'Canon de verre', short: 'Canon de verre', plus: () => `Tes tirs font ${num(VERRE_DAMAGE_MUL)} fois plus de dégâts`, minus: () => `−${VERRE_HP} PV max` },
+    pillard: { name: 'Pillard', short: 'Pillard', desc: n => `+${pct(PILLARD_CHANCE * n)} de chance qu'un ennemi lâche des pièces (zombie : ${pct(COIN_CHANCE.z)} → ${pct(COIN_CHANCE.z + PILLARD_CHANCE * n)}).` },
+    poches: { name: 'Poches profondes', short: 'Poches', desc: n => `Les pièces restent ${COIN_LIFE + POCHES_LIFE * n} s au sol au lieu de ${COIN_LIFE}.` },
+    marchandage: { name: 'Marchandage', short: 'Marchandage', desc: n => `Relances, cartes en plus, bannissements, rachats et caisses du Comptoir coûtent ${pct(MARCHANDAGE_DISCOUNT * n)} de moins.` },
+    collecte: { name: 'Collecte', short: 'Collecte', desc: n => `Chaque pièce ramassée prolonge le combo en cours de ${num(Math.round(COLLECTE_TIME * n * 10) / 10)} s.` },
+    sangdor: { name: 'Sang d\'or', short: 'Sang d\'or', desc: () => `Chaque pièce ramassée rend ${SANGDOR_HEAL} point de vie.` },
+    midas: { name: 'Midas', short: 'Midas', desc: () => `Chaque pièce ramassée en vaut ${MIDAS_VALUE}.` },
+    tresor: { name: 'Trésor de guerre', short: 'Trésor', desc: () => `Tes tirs font +${pct(TRESOR_STEP)} de dégâts par tranche de ${TRESOR_COINS} pièces en bourse, jusqu'à +${pct(TRESOR_MAX)}.` },
+    avarice: { name: 'Avarice', short: 'Avarice', plus: () => `Les ennemis lâchent ${AVARICE_MUL === 2 ? 'deux' : num(AVARICE_MUL)} fois plus de pièces`, minus: () => `Les pièces ne restent que ${AVARICE_COIN_LIFE} s au sol` },
+    cupidite: { name: 'Cupidité', short: 'Cupidité', plus: () => `+${CUPIDITE_BONUS} pièce sur chaque ennemi qui en lâche`, minus: () => `Chaque coup encaissé fait tomber ${CUPIDITE_LOSS} pièces de ta bourse autour de toi` },
+    mercenaire: { name: 'Mercenaire', short: 'Mercenaire', plus: () => `Chaque kill rapporte ${MERCENAIRE_COINS} pièce de plus`, minus: () => `Les kills rapportent ${MERCENAIRE_POINTS_MUL === .5 ? 'deux fois moins' : pct(1 - MERCENAIRE_POINTS_MUL) + ' de moins'} de points : armes débloquées plus tard, record plus bas` },
     sanssoin: { name: 'Plus de soins', short: 'Plus de soins', plus: () => `Chaque vague terminée te rend toute ta vie`, minus: () => `Plus aucune régénération ni caisse de soin` },
     unevie: { name: 'Une seule vie', short: 'Une seule vie', plus: () => `Points ×${UNEVIE_POINTS_MUL} sur chaque kill et sur le bonus de fin de vague`, minus: () => `Le premier coup encaissé te tue, et plus aucune caisse de soin` },
     sablier: { name: 'Sablier', short: 'Sablier', plus: () => `Points ×${SABLIER_POINTS_MUL} sur chaque kill`, minus: () => `Pendant une vague, tu perds ${SABLIER_DRAIN} PV par seconde jusqu'à la mort ; chaque kill arrête la perte ${num(SABLIER_HOLD)} s` },

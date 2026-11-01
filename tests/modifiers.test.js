@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, comboKillsAfterHit, repitBonus, waveBreak,
-  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, pickAfter, takeAllCards, canSwitch, specialMul, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul, shopBonus, spreadMul,
+  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, pickAfter, takeAllCards, canSwitch, specialMul, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul, shopBonus, spreadMul, comboAfterCoin, hoardMul,
 } from '../src/rules/modifiers.js';
 
 test('le multiplicateur gagne un cran tous les 5 kills enchaînés', () => {
@@ -296,4 +296,33 @@ test('sans effet du Comptoir, les règles donnent les mêmes résultats qu\'avan
   assert.equal(hpRate({ vampire: 1 }, 0, 10, 10, true, {}), hpRate({ vampire: 1 }, 0, 10, 10, true));
   assert.equal(refillOf({}, 1, {}), refillOf({}, 1));
   assert.equal(shopBonus({}), 0);
+});
+
+test('Collecte : une pièce ramassée prolonge le combo de 0,3 s', () => {
+  assert.equal(comboAfterCoin({ collecte: 1 }, 4, 1, 2.6), 1.3);
+});
+
+test('Collecte : le combo ne dépasse jamais sa fenêtre', () => {
+  assert.equal(comboAfterCoin({ collecte: 2 }, 4, 2.5, 2.6), 2.6);
+});
+
+test('Collecte : une pièce ne relance pas un combo retombé', () => {
+  assert.equal(comboAfterCoin({ collecte: 1 }, 0, 0, 2.6), 0);
+});
+
+test('sans Collecte, ramasser une pièce ne touche pas au combo', () => {
+  assert.equal(comboAfterCoin({}, 4, 1, 2.6), 1);
+});
+
+test('Trésor de guerre : +2 % de dégâts par tranche de 10 pièces', () => {
+  assert.equal(hoardMul({ tresor: 1 }, 50), 1.1);
+  assert.equal(hoardMul({ tresor: 1 }, 59), 1.1);
+});
+
+test('Trésor de guerre : jamais plus de 40 %', () => {
+  assert.equal(hoardMul({ tresor: 1 }, 500), 1.4);
+});
+
+test('sans Trésor de guerre, la bourse ne change pas les dégâts', () => {
+  assert.equal(hoardMul({}, 500), 1);
 });

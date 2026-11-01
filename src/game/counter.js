@@ -9,6 +9,7 @@ import { pop } from '../render/effects.js';
 import { shopIcon } from '../render/shopIcons.js';
 import { restockCost, rollStall, weaponsFor } from '../rules/counter.js';
 import { refillOf } from '../rules/modifiers.js';
+import { discounted } from '../rules/shop.js';
 import { waveCounts } from '../rules/waves.js';
 import { S, ammo, mod, player, rng, rollMax, unlocked, world } from '../state/world.js';
 import { $, clamp } from '../util.js';
@@ -18,6 +19,8 @@ import { $, clamp } from '../util.js';
 let stall = [], sold = [], restocks = 0, afterShop = null;
 export let shopFocus = 0;
 
+// Prix payé : Marchandage le réduit.
+const price = n => discounted(n, S.mods);
 const ctx = () => ({ mods: S.mods, buffs: S.buffs, wave: S.wave + 1, unlocked, ammo, special: S.special, banned: S.banned });
 const weaponIndex = id => W.findIndex(w => w.id === id);
 // Attelle : vie max rendue selon les pactes possédés.
@@ -46,7 +49,7 @@ function deal() {
   renderShop();
 }
 export function restockShop() {
-  const cost = restockCost(restocks);
+  const cost = price(restockCost(restocks));
   if (world.state !== 'shop' || S.money < cost) return;
   S.money -= cost; restocks++;
   sfx('toss');
@@ -55,8 +58,8 @@ export function restockShop() {
 }
 export function buyItem(i) {
   const s = stall[i];
-  if (world.state !== 'shop' || !s || sold[i] || S.money < s.item.price) return;
-  S.money -= s.item.price; sold[i] = true;
+  if (world.state !== 'shop' || !s || sold[i] || S.money < price(s.item.price)) return;
+  S.money -= price(s.item.price); sold[i] = true;
   applyItem(s.item, s.target);
   sfx('coin');
   renderShop();
@@ -95,20 +98,20 @@ const targetName = s => !s.target ? '' : s.item.target === 'rent' ? tr.cards[s.t
 const famLabel = item => item.pacts ? tr.counterPact(item.pacts.filter(id => mod(id)).map(id => tr.cards[id].name).join(' · ')) : tr.shopFam[item.fam];
 const coinPrice = n => `<i class="coinico" aria-hidden="true"></i>${n}`;
 function itemHtml(s, i) {
-  const t = tr.shop[s.item.id], arg = s.item.id === 'attelle' ? attelleHp() : targetName(s), poor = !sold[i] && S.money < s.item.price;
+  const t = tr.shop[s.item.id], arg = s.item.id === 'attelle' ? attelleHp() : targetName(s), poor = !sold[i] && S.money < price(s.item.price);
   const icon = s.item.target === 'rent' ? `<span class="rent">${cardIcon(s.target)}</span>` : shopIcon(s.item.id);
   return `<button class="item f-${s.item.fam}${sold[i] ? ' sold' : poor ? ' poor' : ''}" type="button" data-i="${i}"${sold[i] || poor ? ' aria-disabled="true"' : ''}>`
     + `<span class="ifam">${famLabel(s.item)}</span>`
     + `<span class="crate" aria-hidden="true"><span class="top"></span><span class="face">${icon}</span></span>`
     + `<span class="iname">${t.name}</span><span class="idesc">${t.desc(arg)}</span>`
-    + `<span class="price">${s.item.price ? coinPrice(s.item.price) : tr.free}</span>`
+    + `<span class="price">${price(s.item.price) ? coinPrice(price(s.item.price)) : tr.free}</span>`
     + (sold[i] ? `<span class="stamp">${tr.sold}</span>` : '') + `<span class="mkey only-desk">${i + 1}</span></button>`;
 }
 // Bourse, caisses, prix du réassort, et composition de la vague si l'Éclaireur a été acheté.
 function renderShop() {
   $('shopPurse').textContent = S.money;
   $('stall').innerHTML = stall.length ? stall.map(itemHtml).join('') : `<p class="pickhint">${tr.shopEmpty}</p>`;
-  const cost = restockCost(restocks);
+  const cost = price(restockCost(restocks));
   $('restockPrice').innerHTML = coinPrice(cost);
   $('restockBtn').disabled = S.money < cost;
   $('shopScout').hidden = !S.buffs.eclaireur;

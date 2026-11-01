@@ -9,7 +9,7 @@ import {
   RACINE_SPEED_MUL, VERRE_DAMAGE_MUL, SABLIER_DRAIN, SABLIER_HOLD, ELITE_HP_MUL, ELITE_SPEED_MUL,
   ENTRAVE_SPEED_MUL, ENTRAVE_DAMAGE_MUL, MITRAILLE_CD_MUL, MITRAILLE_AMMO_COST, MITRAILLE_PISTOL_REFILL, W,
   TOUTOURIEN_KILLS_PER_MULTIPLIER, SANSPAUSE_BREAK, SPECIALISTE_DAMAGE_MUL, AVEUGLE_DAMAGE_MUL, LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL, LOURDE_SELF_PUSH, LOURDE_SPREAD,
-  SHOP_DEPART_BONUS, SHOP_FUSE_T, SHOP_HEAVY_MUL, SHOP_MAG_MUL, SHOP_SCOPE_MUL,
+  SHOP_DEPART_BONUS, SHOP_FUSE_T, SHOP_HEAVY_MUL, SHOP_MAG_MUL, SHOP_SCOPE_MUL, COLLECTE_TIME, TRESOR_COINS, TRESOR_MAX, TRESOR_STEP,
 } from '../config.js';
 
 export const modLevel = (mods, id) => (mods && mods[id]) || 0;
@@ -26,6 +26,13 @@ export function fireMul(mods, combo, bonus = 0) { return Math.pow(CADENCE_CD_MUL
 export function comboTime(mods, buffs) {
   return (COMBO_T + TENACE_BONUS * modLevel(mods, 'tenace') + (buff(buffs, 'meche') ? SHOP_FUSE_T : 0)) * (modLevel(mods, 'fievre') && !buff(buffs, 'sangfroid') ? FIEVRE_COMBO_MUL : 1);
 }
+// Collecte : temps de combo après une pièce ramassée, sans dépasser la fenêtre (max) ; ne relance pas un combo retombé.
+export function comboAfterCoin(mods, combo, comboT, max) {
+  const lvl = modLevel(mods, 'collecte');
+  return lvl && combo ? Math.min(max, comboT + COLLECTE_TIME * lvl) : comboT;
+}
+// Trésor de guerre : dégâts des tirs selon la bourse, par tranche de TRESOR_COINS pièces, jusqu'à TRESOR_MAX.
+export function hoardMul(mods, money) { return modLevel(mods, 'tresor') ? 1 + Math.min(TRESOR_MAX, TRESOR_STEP * Math.floor(money / TRESOR_COINS)) : 1; }
 // Départ lancé : crans de multiplicateur en plus pendant la vague, ajoutés au bonus de Sans répit.
 export function shopBonus(buffs) { return buff(buffs, 'depart') ? SHOP_DEPART_BONUS : 0; }
 // Temps de combo restant après un coup encaissé : Quitte ou double le remet à zéro.

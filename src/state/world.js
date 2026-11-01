@@ -2,6 +2,7 @@
 // et accès aux modificateurs et au combo de la session.
 import { ARENAS, BOX_FIRST, FIRST_BREAK, PLAYER_HP, PLAYER_RADIUS, STORAGE_ARENA, STORAGE_BEST, STORAGE_RUNS, T, W } from '../config.js';
 import * as Mods from '../rules/modifiers.js';
+import * as Scoring from '../rules/scoring.js';
 import { createRng } from '../rules/rng.js';
 import * as Waves from '../rules/waves.js';
 import { buildMap } from './arena.js';
@@ -18,6 +19,9 @@ export function fireMul() { return Mods.fireMul(S.mods, S.combo, bonus()); }
 export function comboTime() { return Mods.comboTime(S.mods, S.buffs); }
 export function rollMax() { return Mods.rollMax(S.mods, S.buffs); }
 export function rollCooldown() { return Mods.rollCooldown(S.mods); }
+// Cartes du butin, pour le rendu : clignotement des pièces (Avarice), bonus de dégâts de Trésor de guerre.
+export function coinBlink() { return Scoring.coinBlink(S.mods); }
+export function hoardMul() { return Mods.hoardMul(S.mods, S.money); }
 
 // État de partie réaffecté depuis plusieurs modules : un module ES ne peut pas réaffecter
 // une liaison importée, ces valeurs vivent donc comme propriétés d'un objet partagé.

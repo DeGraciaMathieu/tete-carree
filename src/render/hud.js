@@ -4,7 +4,7 @@ import { sfx } from '../audio/sfx.js';
 import { LOW_HP, MODS, SABLIER_HOLD, W } from '../config.js';
 import { selectWeapon } from '../game/weapons.js';
 import { lang, tr } from '../i18n/index.js';
-import { S, ammo, comboTime, frenzy, mod, multiplier, player, queueCount, unlocked, world } from '../state/world.js';
+import { S, ammo, comboTime, frenzy, hoardMul, mod, multiplier, player, queueCount, unlocked, world } from '../state/world.js';
 import { cardIcon } from './cardIcons.js';
 import { $, fmt } from '../util.js';
 
@@ -55,10 +55,11 @@ function shopChips() {
 }
 function renderMods() {
   const act = MODS.filter(m => mod(m.id));
-  const sig = act.map(m => m.id + mod(m.id)).join(',') + (S.souffleUsed ? 'u' : '') + S.buffsVer;
+  const hoard = Math.round((hoardMul() - 1) * 100); // Trésor de guerre : bonus en cours, affiché sur sa puce
+  const sig = act.map(m => m.id + mod(m.id)).join(',') + (S.souffleUsed ? 'u' : '') + S.buffsVer + '/' + hoard;
   if (sig === modsSig) return;
   modsSig = sig;
-  const html = act.map(m => `<span class="mchip r-${m.rar}">${tr.cards[m.id].short}${m.max > 1 ? ` <b>${mod(m.id)}</b>` : ''}${m.id === 'souffle' && S.souffleUsed ? ` <i>${tr.used}</i>` : ''}${S.buffs.rent === m.id ? ` <i>${tr.oneWave}</i>` : ''}</span>`).join('')
+  const html = act.map(m => `<span class="mchip r-${m.rar}">${tr.cards[m.id].short}${m.max > 1 ? ` <b>${mod(m.id)}</b>` : ''}${m.id === 'souffle' && S.souffleUsed ? ` <i>${tr.used}</i>` : ''}${S.buffs.rent === m.id ? ` <i>${tr.oneWave}</i>` : ''}${m.id === 'tresor' ? ` <b>+${hoard} %</b>` : ''}</span>`).join('')
     + shopChips();
   $('mods').innerHTML = html;
   $('pauseMods').innerHTML = html || `<span class="none">${tr.noCards}</span>`;

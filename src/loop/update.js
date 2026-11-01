@@ -17,11 +17,11 @@ import { VH, VW, zoom } from '../render/canvas.js';
 import { addPart, casing, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood } from '../render/floor.js';
 import { banner } from '../render/hud.js';
-import { blastRadius, boxKind, boxPeriod, fragShards, hpRate, pickAfter, refillOf, repitBonus, speedMul, waveBreak, waveEndHp } from '../rules/modifiers.js';
-import { potsKill, waveBonus, waveCoins } from '../rules/scoring.js';
+import { blastRadius, boxKind, boxPeriod, comboAfterCoin, fragShards, hpRate, pickAfter, refillOf, repitBonus, speedMul, waveBreak, waveEndHp } from '../rules/modifiers.js';
+import { coinHeal, coinWorth, potsKill, waveBonus, waveCoins } from '../rules/scoring.js';
 import * as Waves from '../rules/waves.js';
 import { computeField, dist, isVoid, los, moveCircle, nextStep, openT, passable, shotTile, unstick, walkLine } from '../state/arena.js';
-import { S, ammo, blocks, cam, frenzy, jitter, mod, player, rng, rollCooldown, rollMax, unlocked, world } from '../state/world.js';
+import { S, ammo, blocks, cam, comboTime, frenzy, jitter, mod, player, rng, rollCooldown, rollMax, unlocked, world } from '../state/world.js';
 import { clamp, rnd } from '../util.js';
 
 export function update(dt) {
@@ -350,8 +350,11 @@ function updateCoins(dt) {
       const ax = player.x - c.x, ay = player.y - c.y, d = Math.hypot(ax, ay);
       if (d < reach && d > 1) { const sp = Math.min(d, AIMANT_SPEED * dt); c.x += ax / d * sp; c.y += ay / d * sp; }
       if (d < PICKUP_RADIUS) {
-        if (potsKill(S.mods, S.waveActive)) S.coinPot++; else S.money++; // Tout ou rien : en jeu jusqu'à la fin de la vague
-        sfx('coin', 45); pop(c.x, c.y - 24, '+1', '#e8b23a'); continue;
+        const worth = coinWorth(S.mods, c.lost);
+        if (potsKill(S.mods, S.waveActive)) S.coinPot += worth; else S.money += worth; // Tout ou rien : en jeu jusqu'à la fin de la vague
+        S.comboT = comboAfterCoin(S.mods, S.combo, S.comboT, comboTime()); // Collecte
+        player.hp = Math.min(player.maxHp, player.hp + coinHeal(S.mods)); // Sang d'or
+        sfx('coin', 45); pop(c.x, c.y - 24, worth > 1 ? '+2' : '+1', '#e8b23a'); continue;
       }
     }
     if (c.life <= 0) continue;

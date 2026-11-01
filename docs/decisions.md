@@ -240,6 +240,21 @@ Spécification : `docs/prd/comptoir.md`.
   sur 2 colonnes sous 640 px (le seuil existant), pas 760.
 - L'étale et le réassort tirent avec `rng()` : pour une même graine, la partie diverge dès la première visite.
 
+## Cartes du butin
+
+Spécifications : `docs/prd/carte-*.md` (Pillard, Poches profondes, Marchandage, Collecte, Sang d'or, Midas, Trésor de
+guerre, Avarice, Cupidité, Mercenaire).
+
+- Ajoutées à la fin des cartes ordinaires de `MODS`, avant les pactes majeurs : pour une même graine, les cartes
+  proposées changent.
+- Les doublons avec le Comptoir se cumulent : Pillard avec Fouille, Poches profondes avec Pièces collantes.
+- Exclusions symétriques posées sur des cartes ordinaires (première fois) : Sang d'or avec Sans armure, Vampire, Plus
+  de soins et Une seule vie ; Poches profondes avec Avarice.
+- Pièces perdues sous Cupidité (`lost`) : elles valent 1 même sous Midas (sinon perdre 5 pièces en rapporterait 10),
+  mais comptent pour Collecte et Sang d'or. Seuls les vrais coups en font tomber, pas l'acide ni le Sablier.
+- Le rendu lit le clignotement des pièces et le bonus de Trésor de guerre par des raccourcis de `state/world.js`
+  (`coinBlink`, `hoardMul`), pour ne pas importer `rules/` depuis `render/`.
+
 ## Langues : français et anglais
 
 - Tous les textes affichés au joueur vivent dans `src/i18n/fr.js` et `src/i18n/en.js`, mêmes clés
@@ -353,3 +368,5 @@ Decisions the code does not settle and that were not made. Never resolved by gue
   Bannissement sans limite par écran : à garder ?
 - Comptoir : sous Pas de pause (pause de 1,5 s), il revient à chaque vague : le rythme tient-il ? Prix des deux
   boutiques sur la même bourse à régler en jeu. Liste des cartes louables à vérifier carte par carte (Second souffle…).
+- Cartes du butin : Aimant enlève la prise de risque de Collecte ; Mercenaire, s'il sort à la première carte,
+  retarde beaucoup les premières armes ; Trésor de guerre peut dissuader de tout achat. À observer en jeu.

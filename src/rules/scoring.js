@@ -1,5 +1,5 @@
 // Ce que rapporte un ennemi abattu : points, soin de Soif de sang, caisse et pièces au sol.
-import { COIN_CHANCE, COIN_VALUE, COIN_WAVE_BONUS, SHOP_DIG_CHANCE, KILL_POINTS, WAVE_BONUS, UNEVIE_POINTS_MUL, SABLIER_POINTS_MUL, ELITE_POINTS_MUL, SILENCE_POINTS_MUL, DROP_CHANCE, DROP_HP_CHANCE, SOIF_MULTIPLIER, PRIME_POINTS_MUL, CHAIR_POINTS_MUL, VAMPIRE_HEAL } from '../config.js';
+import { AVARICE_BLINK, AVARICE_COIN_LIFE, AVARICE_MUL, COIN_BLINK, COIN_CHANCE, COIN_LIFE, COIN_VALUE, COIN_WAVE_BONUS, CUPIDITE_BONUS, CUPIDITE_LOSS, MERCENAIRE_COINS, MERCENAIRE_POINTS_MUL, MIDAS_VALUE, PILLARD_CHANCE, POCHES_LIFE, SANGDOR_HEAL, SHOP_COIN_LIFE, SHOP_DIG_CHANCE, KILL_POINTS, WAVE_BONUS, UNEVIE_POINTS_MUL, SABLIER_POINTS_MUL, ELITE_POINTS_MUL, SILENCE_POINTS_MUL, DROP_CHANCE, DROP_HP_CHANCE, SOIF_MULTIPLIER, PRIME_POINTS_MUL, CHAIR_POINTS_MUL, VAMPIRE_HEAL } from '../config.js';
 import { boxKind, modLevel, quittePoints } from './modifiers.js';
 
 // Types d'ennemis : 'z' zombie, 'b' gonflé, 'r' coureur, 's' cracheur, 'a' blindé, 'd' diable.
@@ -9,9 +9,11 @@ const byType = (table, type) => type in table ? table[type] : table.d;
 const majorPoints = mods => (modLevel(mods, 'unevie') ? UNEVIE_POINTS_MUL : 1) * (modLevel(mods, 'sablier') ? SABLIER_POINTS_MUL : 1)
   * (modLevel(mods, 'elite') ? ELITE_POINTS_MUL : 1) * (modLevel(mods, 'silence') ? SILENCE_POINTS_MUL : 1);
 
+// Mercenaire : les kills rapportent moins de points.
 export function killPoints(type, mods, multiplier) {
   const base = type === 'b' ? KILL_POINTS.b * Math.pow(CHAIR_POINTS_MUL, modLevel(mods, 'chair')) : byType(KILL_POINTS, type);
-  return Math.round(base * multiplier * Math.pow(PRIME_POINTS_MUL, modLevel(mods, 'prime')) * quittePoints(mods) * majorPoints(mods));
+  return Math.round(base * multiplier * Math.pow(PRIME_POINTS_MUL, modLevel(mods, 'prime')) * quittePoints(mods) * majorPoints(mods)
+    * (modLevel(mods, 'mercenaire') ? MERCENAIRE_POINTS_MUL : 1));
 }
 
 // Bonus de fin de vague : WAVE_BONUS × numéro de vague, ×3 sous Une seule vie.
@@ -35,11 +37,29 @@ export function rollDrop(type, onVoid, rng, mods) {
 }
 
 // Pièces lâchées par l'ennemi (0 si rien). Comme pour les caisses, rien ne tombe au-dessus d'une crevasse.
-// Fouille (Comptoir) : les zombies en lâchent plus souvent.
-export function rollCoins(type, onVoid, rng, buffs) {
-  const chance = type === 'z' && buffs && buffs.fouille ? SHOP_DIG_CHANCE : byType(COIN_CHANCE, type);
-  return rng() < chance && !onVoid ? byType(COIN_VALUE, type) : 0;
+// Fouille (Comptoir) : les zombies en lâchent plus souvent. Pillard : plus de chances pour tous ; Avarice : deux fois
+// plus de pièces ; Cupidité : une de plus quand il en lâche ; Mercenaire : une de plus à chaque kill.
+export function rollCoins(type, onVoid, rng, buffs, mods) {
+  const base = type === 'z' && buffs && buffs.fouille ? SHOP_DIG_CHANCE : byType(COIN_CHANCE, type);
+  const hit = rng() < Math.min(1, base + PILLARD_CHANCE * modLevel(mods, 'pillard'));
+  if (onVoid) return 0;
+  const drop = hit ? byType(COIN_VALUE, type) * (modLevel(mods, 'avarice') ? AVARICE_MUL : 1) + (modLevel(mods, 'cupidite') ? CUPIDITE_BONUS : 0) : 0;
+  return drop + (modLevel(mods, 'mercenaire') ? MERCENAIRE_COINS : 0);
 }
+
+// Durée d'une pièce au sol (s) : Pièces collantes (Comptoir) ou Avarice changent la base, Poches profondes l'allonge.
+export function coinLife(mods, buffs) {
+  const base = buffs && buffs.collantes ? SHOP_COIN_LIFE : modLevel(mods, 'avarice') ? AVARICE_COIN_LIFE : COIN_LIFE;
+  return base + POCHES_LIFE * modLevel(mods, 'poches');
+}
+// Dernières secondes au sol où la pièce clignote : raccourcies sous Avarice.
+export function coinBlink(mods) { return modLevel(mods, 'avarice') ? AVARICE_BLINK : COIN_BLINK; }
+// Valeur d'une pièce ramassée : Midas la double, sauf une pièce perdue sous Cupidité (lost).
+export function coinWorth(mods, lost) { return !lost && modLevel(mods, 'midas') ? MIDAS_VALUE : 1; }
+// PV rendus par une pièce ramassée : Sang d'or.
+export function coinHeal(mods) { return modLevel(mods, 'sangdor') ? SANGDOR_HEAL : 0; }
+// Pièces qui tombent de la bourse sur un coup encaissé : Cupidité, jamais plus que la bourse.
+export function coinsLostOnHit(mods, money) { return modLevel(mods, 'cupidite') ? Math.min(money, CUPIDITE_LOSS) : 0; }
 
 // Pièces versées en fin de vague : COIN_WAVE_BONUS × numéro de vague.
 export function waveCoins(wave) { return COIN_WAVE_BONUS * wave; }

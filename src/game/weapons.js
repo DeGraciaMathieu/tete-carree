@@ -7,7 +7,7 @@ import { casing, dust, gibs, muzzleFx, sparks } from '../render/effects.js';
 import { GUNS } from '../render/sprites.js';
 import { clearShot, doorSet, frontTile, map, moveCircle, shotTile } from '../state/arena.js';
 import { S, ammo, blocks, cam, fireMul, jitter, mod, player, rng, unlocked, world } from '../state/world.js';
-import { ammoCost, canSwitch, extraSpread, selfPush, shotDamageMul, shotKnockMul, specialMul, spreadMul, weaponCdMul } from '../rules/modifiers.js';
+import { ammoCost, canSwitch, extraSpread, hoardMul, selfPush, shotDamageMul, shotKnockMul, specialMul, spreadMul, weaponCdMul } from '../rules/modifiers.js';
 import { clamp } from '../util.js';
 
 // pierce : nombre d'ennemis que le tir peut toucher (Infinity pour le railgun) ; bounce : rebonds restants
@@ -33,7 +33,7 @@ function shoot(ang, range, dmg, pierce, knock, look, bounce = 0, from = null, pa
   if (hits.length >= pierce) { hits.length = pierce; endT = Math.max(0, hits[pierce - 1][0]); hitB = null; wallHit = false; }
   const wid = W[player.weapon].id, still = !player.moving, kmul = pact ? shotKnockMul(S.mods) : 1;
   for (let k = 0; k < hits.length; k++) {
-    const e = hits[k][1], mul = pact ? shotDamageMul(S.mods, wid, Math.hypot(e.x - player.x, e.y - player.y), still, S.buffs) : 1;
+    const e = hits[k][1], mul = pact ? shotDamageMul(S.mods, wid, Math.hypot(e.x - player.x, e.y - player.y), still, S.buffs) * hoardMul(S.mods, S.money) : 1;
     if (hurtEnemy(e, dmg * mul, dx, dy, knock * kmul, pierce === Infinity ? 'ap' : 'bullet') === 'blocked') {
       endT = Math.max(0, hits[k][0] - 8); hitB = null; wallHit = false; break;
     }

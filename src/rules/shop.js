@@ -1,5 +1,5 @@
 // Boutique de l'écran des cartes : prix de la relance, achats permis, rachat d'un pacte.
-import { DIABLE_HP, MODS, REROLL_COST, REROLL_STEP, VERRE_HP } from '../config.js';
+import { DIABLE_HP, MARCHANDAGE_DISCOUNT, MODS, REROLL_COST, REROLL_STEP, VERRE_HP } from '../config.js';
 import { modLevel, takeAllCards } from './modifiers.js';
 
 // Relance : REROLL_COST, puis REROLL_STEP de plus à chaque relance du même écran.
@@ -26,4 +26,10 @@ export function undoPact(id, { maxHp, legendNext, repit }) {
     legendNext: id === 'diable' ? false : legendNext,
     repit: id === 'repit' ? 0 : repit,
   };
+}
+
+// Marchandage : prix en pièces après remise, arrondi au supérieur, jamais sous 1 ; un article gratuit reste gratuit.
+export function discounted(price, mods) {
+  const lvl = modLevel(mods, 'marchandage');
+  return price && lvl ? Math.max(1, Math.ceil(price * (1 - MARCHANDAGE_DISCOUNT * lvl) - 1e-9)) : price;
 }
