@@ -73,6 +73,13 @@ Textes, dans `src/i18n/fr.js` et `src/i18n/en.js`, sous `cards[id]` (lus par `tr
 | `specialiste` (pacte majeur) | `choosePick` enchaîne sur `openWeaponPick` / `chooseWeapon` (`S.special`, munitions infinies) ; `canSwitch` dans `selectWeapon` et `cycleWeapon` ; `shotDamageMul`, `specialMul` (explosions du joueur dans `explosion`, PV des barricades dans `placeBlock`) ; caisses de munitions en points ; cases `.sealed` ; proposé à partir de `SPECIALISTE_MIN_WEAPONS` armes (`ctx.weapons` de `rollCards`) |
 | `silence` (pacte majeur) | `killPoints` (`SILENCE_POINTS_MUL`) ; classe `#hud.silence` posée par `renderMods` (CSS : cases d'armes gardées au tactile) ; `#pauseScore` dans `updateHud` |
 | `aveugle` (pacte majeur) | `shotDamageMul` ; voile `drawBlindness` dans `render()` (`render/scene.js`, portée `AVEUGLE_SIGHT`, dégradé créé une fois) |
+| `pillard`, `avarice`, `cupidite`, `mercenaire` (pièces lâchées) | `rollCoins(type, onVoid, rng, buffs, mods)` (`rules/scoring.js`), appelé par `killEnemy` |
+| `poches`, `avarice` (durée au sol) | `coinLife` dans `dropCoins` (`game/combat.js`) ; `coinBlink` (raccourci de `state/world.js`) dans `drawCoins` |
+| `marchandage` | `discounted(price, mods)` (`rules/shop.js`) : tous les prix de `game/flow.js` et `game/counter.js` passent par `price()` |
+| `collecte`, `sangdor`, `midas` | `updateCoins` (`loop/update.js`) : `comboAfterCoin`, `coinHeal`, `coinWorth` (pièce `lost` à 1) |
+| `tresor` | `hoardMul(mods, money)` dans `shoot` (`game/weapons.js`, tirs du joueur) ; bonus en cours sur sa puce (`renderMods`) |
+| `cupidite` (perte) | `coinsLostOnHit` dans `hurtPlayer` (vrais coups) : pièces de la bourse éparpillées par `dropCoins(…, true)` |
+| `mercenaire` (points) | `killPoints` (`MERCENAIRE_POINTS_MUL`) |
 
 ## Pactes majeurs
 

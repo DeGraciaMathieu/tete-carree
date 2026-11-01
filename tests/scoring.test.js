@@ -1,6 +1,6 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { killPoints, soifHeal, rollDrop, waveBonus, potsKill, potAfterHit, rollCoins, waveCoins } from '../src/rules/scoring.js';
+import { killPoints, soifHeal, rollDrop, waveBonus, potsKill, potAfterHit, rollCoins, waveCoins, coinLife, coinBlink, coinWorth, coinHeal, coinsLostOnHit } from '../src/rules/scoring.js';
 import { createRng } from '../src/rules/rng.js';
 
 const fixed = (...values) => () => values.shift();
@@ -106,4 +106,96 @@ test('Fouille : un zombie lâche une pièce environ une fois sur deux', () => {
   let coins = 0;
   for (let k = 0; k < 10000; k++) coins += rollCoins('z', false, rng, { fouille: 1 });
   assert.ok(coins > 4700 && coins < 5300, coins);
+});
+
+// Cartes du butin
+const coinsOver = (type, mods, buffs, n = 10000, seed = 11) => {
+  const rng = createRng(seed);
+  let total = 0;
+  for (let k = 0; k < n; k++) total += rollCoins(type, false, rng, buffs, mods);
+  return total;
+};
+
+test('Pillard : un zombie lâche une pièce environ 4 fois sur 10', () => {
+  const coins = coinsOver('z', { pillard: 1 });
+  assert.ok(coins > 3700 && coins < 4300, coins);
+});
+
+test('Pillard : la chance ne dépasse jamais 100 %', () => {
+  assert.equal(coinsOver('a', { pillard: 3 }, {}, 100), 500); // un Blindé lâche déjà toujours ses 5 pièces
+});
+
+test('Pillard et Fouille se cumulent sur les zombies', () => {
+  const coins = coinsOver('z', { pillard: 1 }, { fouille: 1 });
+  assert.ok(coins > 5700 && coins < 6300, coins);
+});
+
+test('sans carte du butin, le tirage des pièces est inchangé pour une même graine', () => {
+  assert.equal(coinsOver('z', {}, {}), coinsOver('z', undefined, undefined));
+});
+
+test('une pièce reste 6 s au sol, 9 s avec Poches profondes', () => {
+  assert.equal(coinLife({}, {}), 6);
+  assert.equal(coinLife({ poches: 1 }, {}), 9);
+});
+
+test('Poches profondes et Pièces collantes se cumulent', () => {
+  assert.equal(coinLife({ poches: 2 }, { collantes: 1 }), 16);
+});
+
+test('Sang d\'or : chaque pièce ramassée rend 1 PV', () => {
+  assert.equal(coinHeal({ sangdor: 1 }), 1);
+  assert.equal(coinHeal({}), 0);
+});
+
+test('Midas : une pièce ramassée en vaut deux', () => {
+  assert.equal(coinWorth({ midas: 1 }, false), 2);
+  assert.equal(coinWorth({}, false), 1);
+});
+
+test('Midas : une pièce perdue sous Cupidité ne vaut qu\'une', () => {
+  assert.equal(coinWorth({ midas: 1, cupidite: 1 }, true), 1);
+});
+
+test('Avarice : un Blindé lâche 10 pièces', () => {
+  assert.equal(rollCoins('a', false, fixed(0), {}, { avarice: 1 }), 10);
+});
+
+test('Avarice : une pièce ne reste que 3 s au sol et clignote la dernière seconde', () => {
+  assert.equal(coinLife({ avarice: 1 }, {}), 3);
+  assert.equal(coinBlink({ avarice: 1 }), 1);
+});
+
+test('Avarice : la chance de lâcher des pièces ne change pas', () => {
+  assert.equal(rollCoins('z', false, fixed(.5), {}, { avarice: 1 }), 0);
+});
+
+test('Cupidité : un ennemi qui lâche des pièces en lâche une de plus', () => {
+  assert.equal(rollCoins('z', false, fixed(0), {}, { cupidite: 1 }), 2);
+  assert.equal(rollCoins('z', false, fixed(.9), {}, { cupidite: 1 }), 0);
+});
+
+test('Cupidité : un coup fait perdre 5 pièces, ou toutes s\'il en reste moins', () => {
+  assert.equal(coinsLostOnHit({ cupidite: 1 }, 12), 5);
+  assert.equal(coinsLostOnHit({ cupidite: 1 }, 3), 3);
+});
+
+test('sans Cupidité, un coup ne fait perdre aucune pièce', () => {
+  assert.equal(coinsLostOnHit({}, 12), 0);
+});
+
+test('Mercenaire : un zombie rapporte 25 points au lieu de 50', () => {
+  assert.equal(killPoints('z', { mercenaire: 1 }, 1), 25);
+});
+
+test('Mercenaire : chaque ennemi abattu lâche au moins une pièce', () => {
+  assert.equal(rollCoins('z', false, fixed(.9), {}, { mercenaire: 1 }), 1);
+});
+
+test('Mercenaire : rien ne tombe au-dessus du vide', () => {
+  assert.equal(rollCoins('a', true, fixed(0), {}, { mercenaire: 1 }), 0);
+});
+
+test('Mercenaire : le bonus de fin de vague est inchangé', () => {
+  assert.equal(waveBonus(6, { mercenaire: 1 }), waveBonus(6, {}));
 });

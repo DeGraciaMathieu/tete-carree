@@ -33,7 +33,7 @@ test('après le Marché du diable, le choix suivant propose toujours une Légend
 });
 
 test('le Marché du diable n\'est plus proposé quand toutes les Légendaires sont prises', () => {
-  const mods = { frenesie: 1, tourelle: 1, souffle: 1 };
+  const mods = { frenesie: 1, tourelle: 1, souffle: 1, midas: 1, tresor: 1 };
   for (let seed = 0; seed < 200; seed++) assert.ok(!ids(rollCards(mods, createRng(seed))).includes('diable'), seed);
 });
 
@@ -135,4 +135,19 @@ test('une carte d\'appoint de la boutique n\'impose ni Légendaire ni pacte maje
 
 test('sans carte bannie ni carte sur la table, le tirage est inchangé pour une même graine', () => {
   for (let seed = 0; seed < 50; seed++) assert.deepEqual(ids(rollCards({}, createRng(seed), false, { banned: [], without: [] })), ids(rollCards({}, createRng(seed))));
+});
+
+const never = (owned, id) => {
+  for (let seed = 0; seed < 300; seed++) assert.ok(!ids(rollCards(owned, createRng(seed))).includes(id), `${id} / ${seed}`);
+};
+
+test('Poches profondes et Avarice ne sont jamais proposées ensemble', () => {
+  never({ avarice: 1 }, 'poches');
+  never({ poches: 1 }, 'avarice');
+});
+
+test('Sang d\'or n\'est jamais proposée avec Vampire, Sans armure, Plus de soins ni Une seule vie', () => {
+  for (const id of ['vampire', 'sansarmure', 'sanssoin', 'unevie']) never({ [id]: 1 }, 'sangdor');
+  never({ sangdor: 1 }, 'vampire');
+  never({ sangdor: 1 }, 'sansarmure');
 });

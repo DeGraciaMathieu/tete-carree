@@ -47,6 +47,17 @@ const PATHS = {
   specialiste: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/>',
   silence: '<path d="M3 5h18v12H8l-5 4z"/><path d="M3 3l18 18"/>',
   aveugle: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 21L21 3"/>',
+  // cartes du butin
+  pillard: '<path d="M4 20l7-7M9 8l7 7M13 4l7 7-3 3-7-7z"/><circle cx="6" cy="17" r="2"/>',
+  poches: '<path d="M5 4h14v8a7 7 0 0 1-14 0z"/><path d="M9 9h6"/><circle cx="12" cy="13" r="2"/>',
+  marchandage: '<path d="M3 12l9-9h8v8l-9 9z"/><circle cx="16" cy="8" r="1.5"/><path d="M8 13l3 3"/>',
+  collecte: '<circle cx="8" cy="15" r="4"/><path d="M14 4l-2 7h5l-3 9"/>',
+  sangdor: '<path d="M12 3q7 8 7 12a7 7 0 0 1-14 0q0-4 7-12z"/><circle cx="12" cy="15" r="2.5"/>',
+  midas: '<path d="M4 18l2-10 4 5 2-7 2 7 4-5 2 10z"/><path d="M4 21h16"/>',
+  tresor: '<path d="M3 10q0-5 9-5t9 5z"/><path d="M3 10h18v10H3z"/><path d="M12 9v5"/>',
+  avarice: '<circle cx="9" cy="9" r="5"/><circle cx="15" cy="15" r="5"/>',
+  cupidite: '<circle cx="12" cy="12" r="4"/><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M5 19l3-3"/>',
+  mercenaire: '<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/><path d="M9 12h6M12 9v6"/>',
 };
 export function cardIcon(id) {
   return `<svg viewBox="0 0 24 24" aria-hidden="true">${PATHS[id] || ''}</svg>`;

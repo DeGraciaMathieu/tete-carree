@@ -66,6 +66,17 @@ export const MODS = [
   { id: 'racine', rar: 'p', max: 1 },
   { id: 'diable', rar: 'p', max: 1 },
   { id: 'verre', rar: 'p', max: 1 },
+  // Cartes du butin (docs/prd/carte-*.md) : effets sur les pièces
+  { id: 'pillard', rar: 'c', max: 3 },
+  { id: 'poches', rar: 'c', max: 2, excl: ['avarice'] },
+  { id: 'marchandage', rar: 'r', max: 2 },
+  { id: 'collecte', rar: 'r', max: 2 },
+  { id: 'sangdor', rar: 'r', max: 1, excl: ['sansarmure', 'vampire', 'sanssoin', 'unevie'] },
+  { id: 'midas', rar: 'l', max: 1 },
+  { id: 'tresor', rar: 'l', max: 1 },
+  { id: 'avarice', rar: 'p', max: 1 },
+  { id: 'cupidite', rar: 'p', max: 1 },
+  { id: 'mercenaire', rar: 'p', max: 1 },
   // Pactes majeurs : un seul par partie, `excl` liste les cartes qu'ils rendent inutiles (docs/prd/pactes-majeurs.md).
   { id: 'sanssoin', rar: 'm', max: 1, excl: ['vampire', 'soif', 'sansarmure'] },
   { id: 'unevie', rar: 'm', max: 1, excl: ['constitution', 'souffle', 'vampire', 'soif', 'verre', 'diable', 'brulee', 'sansarmure'] },
@@ -272,6 +283,17 @@ export const COIN_SCATTER = 14;             // éparpillement autour du corps (p
 export const COIN_WAVE_BONUS = 1;           // pièces par numéro de vague, en fin de vague
 export const REROLL_COST = 10, REROLL_STEP = 5; // relance : prix de départ, hausse à chaque relance du même écran
 export const EXTRA_CARD_COST = 25, BAN_COST = 15, BUYBACK_COST = 60;
+// Cartes du butin
+export const PILLARD_CHANCE = .1;                 // Pillard : chance en plus de lâcher des pièces, par niveau
+export const POCHES_LIFE = 3;                     // Poches profondes : secondes au sol en plus, par niveau
+export const MARCHANDAGE_DISCOUNT = .15;          // Marchandage : remise sur tous les prix, par niveau
+export const COLLECTE_TIME = .3;                  // Collecte : secondes de combo par pièce ramassée, par niveau
+export const SANGDOR_HEAL = 1;                    // Sang d'or : PV rendus par pièce ramassée
+export const MIDAS_VALUE = 2;                     // Midas : valeur d'une pièce ramassée
+export const TRESOR_STEP = .02, TRESOR_COINS = 10, TRESOR_MAX = .4; // Trésor de guerre : dégâts par tranche de pièces, plafond
+export const AVARICE_MUL = 2, AVARICE_COIN_LIFE = 3, AVARICE_BLINK = 1; // Avarice : pièces lâchées, durée au sol et clignotement (s)
+export const CUPIDITE_BONUS = 1, CUPIDITE_LOSS = 5; // Cupidité : pièce en plus par ennemi qui en lâche, pièces perdues par coup
+export const MERCENAIRE_COINS = 1, MERCENAIRE_POINTS_MUL = .5; // Mercenaire : pièce en plus par kill, points des kills
 
 /* ---------- Comptoir : étale de caisses entre les vagues ---------- */
 // Articles : rareté (poids de RAR), prix en pièces, famille, pactes dont l'un est requis (contre-pactes).

@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { BUYBACK_COST, REROLL_COST, REROLL_STEP } from '../src/config.js';
-import { buybackable, canBuyExtra, rerollCost, undoPact, withoutPact } from '../src/rules/shop.js';
+import { buybackable, canBuyExtra, discounted, rerollCost, undoPact, withoutPact } from '../src/rules/shop.js';
 
 test('la relance coûte 10, puis 5 de plus à chaque relance du même écran', () => {
   assert.equal(REROLL_COST, 10);
@@ -53,4 +53,23 @@ test('racheter Sans répit fait perdre les crans gagnés', () => {
 
 test('racheter un pacte sans effet immédiat ne change ni la vie max ni la Légendaire promise', () => {
   assert.deepEqual(undoPact('prime', before), before);
+});
+
+test('Marchandage : la relance coûte 9 au lieu de 10, le rachat 51 au lieu de 60', () => {
+  assert.equal(discounted(10, { marchandage: 1 }), 9);
+  assert.equal(discounted(60, { marchandage: 1 }), 51);
+});
+
+test('Marchandage niveau 2 : 30 % de moins', () => {
+  assert.equal(discounted(10, { marchandage: 2 }), 7);
+  assert.equal(discounted(60, { marchandage: 2 }), 42);
+});
+
+test('Marchandage : un article gratuit reste gratuit, aucun prix ne tombe sous 1', () => {
+  assert.equal(discounted(0, { marchandage: 2 }), 0);
+  assert.equal(discounted(1, { marchandage: 2 }), 1);
+});
+
+test('sans Marchandage, les prix sont inchangés', () => {
+  assert.equal(discounted(25, {}), 25);
 });

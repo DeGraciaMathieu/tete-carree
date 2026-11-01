@@ -9,6 +9,7 @@ import {
   SHOTS, SILENCE_POINTS_MUL, SPECIALISTE_DAMAGE_MUL, TOUTOURIEN_KILLS_PER_MULTIPLIER, TURRET_EVERY, UNEVIE_POINTS_MUL, VAMPIRE_DRAIN,
   VAMPIRE_HEAL, VERRE_DAMAGE_MUL, VERRE_HP, WALL_HP,
   COIN_CHANCE, COIN_LIFE, LIVRAISON_DELAY, SHOP_BAIT_ARMORED, SHOP_COIN_LIFE, SHOP_CONTRACT_COINS, SHOP_DEPART_BONUS, SHOP_DIG_CHANCE, SHOP_FUSE_T, SHOP_HEAD_MUL, SHOP_HEAVY_MUL, SHOP_MAG_MUL, SHOP_REPEL_MUL, SHOP_RUSTINE_HP, SHOP_SCOPE_MUL,
+  AVARICE_COIN_LIFE, AVARICE_MUL, COLLECTE_TIME, CUPIDITE_BONUS, CUPIDITE_LOSS, MARCHANDAGE_DISCOUNT, MERCENAIRE_COINS, MERCENAIRE_POINTS_MUL, MIDAS_VALUE, PILLARD_CHANCE, POCHES_LIFE, SANGDOR_HEAL, TRESOR_COINS, TRESOR_MAX, TRESOR_STEP,
 } from '../config.js';
 
 const pct = x => Math.round(x * 100) + '%';
@@ -226,6 +227,16 @@ export default {
     racine: { name: 'Rooted', short: 'Rooted', plus: () => `Your shots deal ${times(RACINE_DAMAGE_MUL)} the damage while you stand still`, minus: () => `Movement −${pct(1 - RACINE_SPEED_MUL)}` },
     diable: { name: 'Devil\'s bargain', short: 'Devil\'s bargain', plus: () => `A guaranteed Legendary card at the next pick`, minus: () => `−${DIABLE_HP} max HP, permanently` },
     verre: { name: 'Glass cannon', short: 'Glass cannon', plus: () => `Your shots deal ${num(VERRE_DAMAGE_MUL)} times the damage`, minus: () => `−${VERRE_HP} max HP` },
+    pillard: { name: 'Looter', short: 'Looter', desc: n => `+${pct(PILLARD_CHANCE * n)} chance for an enemy to drop coins (zombie: ${pct(COIN_CHANCE.z)} → ${pct(COIN_CHANCE.z + PILLARD_CHANCE * n)}).` },
+    poches: { name: 'Deep pockets', short: 'Pockets', desc: n => `Coins stay on the ground for ${COIN_LIFE + POCHES_LIFE * n} s instead of ${COIN_LIFE}.` },
+    marchandage: { name: 'Haggling', short: 'Haggling', desc: n => `Rerolls, extra cards, bans, buybacks and Counter crates cost ${pct(MARCHANDAGE_DISCOUNT * n)} less.` },
+    collecte: { name: 'Collector', short: 'Collector', desc: n => `Every coin picked up extends the current combo by ${num(Math.round(COLLECTE_TIME * n * 10) / 10)} s.` },
+    sangdor: { name: 'Golden blood', short: 'Golden blood', desc: () => `Every coin picked up restores ${SANGDOR_HEAL} health.` },
+    midas: { name: 'Midas', short: 'Midas', desc: () => `Every coin picked up is worth ${MIDAS_VALUE}.` },
+    tresor: { name: 'War chest', short: 'War chest', desc: () => `Your shots deal +${pct(TRESOR_STEP)} damage per ${TRESOR_COINS} coins in your purse, up to +${pct(TRESOR_MAX)}.` },
+    avarice: { name: 'Greed', short: 'Greed', plus: () => `Enemies drop ${times(AVARICE_MUL)} as many coins`, minus: () => `Coins only stay on the ground for ${AVARICE_COIN_LIFE} s` },
+    cupidite: { name: 'Avidity', short: 'Avidity', plus: () => `+${CUPIDITE_BONUS} coin from every enemy that drops some`, minus: () => `Every hit you take drops ${CUPIDITE_LOSS} coins from your purse around you` },
+    mercenaire: { name: 'Mercenary', short: 'Mercenary', plus: () => `Every kill drops ${MERCENAIRE_COINS} more coin`, minus: () => `Kills are worth ${MERCENAIRE_POINTS_MUL === .5 ? 'half' : pct(MERCENAIRE_POINTS_MUL)} the points: weapons unlock later, lower record` },
     sanssoin: { name: 'No healing', short: 'No healing', plus: () => `Every wave cleared restores all your health`, minus: () => `No more regeneration or health crates` },
     unevie: { name: 'One life', short: 'One life', plus: () => `Points ×${UNEVIE_POINTS_MUL} on every kill and on the end-of-wave bonus`, minus: () => `The first hit you take kills you, and no more health crates` },
     sablier: { name: 'Hourglass', short: 'Hourglass', plus: () => `Points ×${SABLIER_POINTS_MUL} on every kill`, minus: () => `During a wave, you lose ${SABLIER_DRAIN} HP per second until death; every kill stops the loss for ${num(SABLIER_HOLD)} s` },
