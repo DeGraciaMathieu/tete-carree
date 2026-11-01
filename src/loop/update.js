@@ -1,7 +1,7 @@
 // Pas de simulation : fait avancer la partie de `dt` secondes.
 import { sfx } from '../audio/sfx.js';
 import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, ACID_TICK_RESET, AIMANT_RANGE, AIMANT_SPEED, AMMO_NO_WEAPON_BONUS, AMMO_REFILL_WEAPONS, ARMOR_SHOVE, BARBELES_DAMAGE, BLOATER_FUSE, BLOATER_FUSE_SPEED, BLOATER_TRIGGER_REACH, BLOCK_ATTACK_CD, BOX_HP_CHANCE, BOX_MIN_DIST, DEVIL_FIRE_CD, DEVIL_FIRE_RAND, DEVIL_RANGE, DEVIL_SPREAD, ENEMY_ATTACK_CD, ENEMY_BLOCK_DAMAGE, ENEMY_MELEE_DAMAGE, FIELD_PERIOD, FIREBALL_BLOCK_DAMAGE, FIREBALL_DAMAGE, FIREBALL_HIT_REACH, FIREBALL_LIFE, FIREBALL_SPEED, FRENZY_SPEED_MUL, GRENADE_DAMAGE, GRENADE_RADIUS, MAX_ENEMIES, MAX_PICKUPS, MEDKIT_HP, MELEE_REACH, MH, MW, PICKUP_RADIUS, PICK_DELAY, PLAYER_SPEED, RAVITO_ZOMBIES, ROCKET_DAMAGE, ROCKET_HIT_REACH, ROCKET_RADIUS, SPITTER_BACKOFF, SPITTER_HOLD, SPITTER_HOLD_SPEED, SPITTER_MIN_RANGE, SPITTER_SIGHT, SPITTER_TOO_CLOSE, SPITTER_WINDUP, T, W } from '../config.js';
-import { explosion, hurtEnemy, hurtPlayer, killEnemy, toxicBurst } from '../game/combat.js';
+import { coinBlast, explosion, hurtEnemy, hurtPlayer, killEnemy, toxicBurst } from '../game/combat.js';
 import { spawnEnemy, spit, startWave, updateGlobs } from '../game/enemies.js';
 import { DEMO_BREAK, ctl, demoControl } from '../game/demo.js';
 import { endShopEffects, openShop } from '../game/counter.js';
@@ -18,7 +18,7 @@ import { addPart, casing, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood } from '../render/floor.js';
 import { banner } from '../render/hud.js';
 import { blastRadius, boxKind, boxPeriod, comboAfterCoin, fragShards, hpRate, pickAfter, refillOf, repitBonus, speedMul, waveBreak, waveEndHp } from '../rules/modifiers.js';
-import { coinHeal, coinWorth, potsKill, waveBonus, waveCoins } from '../rules/scoring.js';
+import { casinoPurse, coinHeal, coinWorth, insuranceFee, potsKill, waveBonus, waveCoins } from '../rules/scoring.js';
 import * as Waves from '../rules/waves.js';
 import { computeField, dist, isVoid, los, moveCircle, nextStep, openT, passable, shotTile, unstick, walkLine } from '../state/arena.js';
 import { S, ammo, blocks, cam, comboTime, frenzy, jitter, mod, player, rng, rollCooldown, rollMax, unlocked, world } from '../state/world.js';
@@ -97,8 +97,8 @@ export function update(dt) {
         S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = pickAfter(S.mods, S.wave) || !world.demo ? PICK_DELAY : 0; S.repit = repitBonus(S.mods, S.repit);
         const bonus = waveBonus(S.wave, S.mods) + S.pot; S.pot = 0; addScore(bonus); // Tout ou rien : la cagnotte est versée
         banner(tr.waveCleared, tr.waveBonus, 'end', bonus);
-        if (!world.demo) { const coins = waveCoins(S.wave) + S.coinPot; S.coinPot = 0; S.money += coins; pop(player.x, player.y - 62, tr.coinsGained(coins), '#e8b23a'); }
-        if (!world.demo) endShopEffects();
+        if (!world.demo) { const coins = waveCoins(S.wave, S.mods) + S.coinPot; S.coinPot = 0; S.money += coins; if (coins) pop(player.x, player.y - 62, tr.coinsGained(coins), '#e8b23a'); }
+        if (!world.demo) { endShopEffects(); purseAtWaveEnd(); }
         const hp = waveEndHp(S.mods, player.hp, player.maxHp);
         if (hp > player.hp && !player.dead) { player.hp = hp; pop(player.x, player.y - 46, tr.lifeRestored, '#62c46e'); }
       }
@@ -337,6 +337,17 @@ export function update(dt) {
   player.recoil = Math.max(0, player.recoil + player.recoilV * dt);
 }
 
+// Fin de vague, après les pièces et le Contrat : cotisation de l'Assurance, puis pile ou face du Casino.
+function purseAtWaveEnd() {
+  const fee = insuranceFee(S.mods, S.money);
+  if (fee) { S.money -= fee; pop(player.x, player.y - 78, tr.insuranceFee(fee), '#ff8f84'); }
+  if (mod('casino') && S.money > 0) {
+    const before = S.money; S.money = casinoPurse(S.mods, S.money, rng());
+    const won = S.money > before;
+    pop(player.x, player.y - 94, won ? tr.casinoWin : tr.casinoLoss, won ? '#e8b23a' : '#ff8f84'); sfx(won ? 'jackpot' : 'bust');
+  }
+}
+
 const COIN_GRAVITY = 320; // saut cosmétique d'une pièce qui tombe (px/s²)
 // Pièces au sol : petit saut à la chute, attraction d'Aimant, ramassage, disparition au bout de COIN_LIFE.
 // Retrait par compactage en place : aucun tableau alloué à chaque image.
@@ -358,7 +369,7 @@ function updateCoins(dt) {
         sfx('coin', 45); pop(c.x, c.y - 24, worth > 1 ? '+2' : '+1', '#e8b23a'); continue;
       }
     }
-    if (c.life <= 0) continue;
+    if (c.life <= 0) { if (mod('piegee')) coinBlast(c.x, c.y); continue; } // Monnaie piégée : la pièce perdue explose
     coins[kept++] = c;
   }
   coins.length = kept;

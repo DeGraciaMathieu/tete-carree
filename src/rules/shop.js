@@ -1,5 +1,5 @@
 // Boutique de l'écran des cartes : prix de la relance, achats permis, rachat d'un pacte.
-import { DIABLE_HP, MARCHANDAGE_DISCOUNT, MODS, REROLL_COST, REROLL_STEP, VERRE_HP } from '../config.js';
+import { BOUCLIER_PRICE_MUL, CREDIT_FLOOR, DIABLE_HP, MARCHANDAGE_DISCOUNT, MODS, REROLL_COST, REROLL_STEP, VERRE_HP } from '../config.js';
 import { modLevel, takeAllCards } from './modifiers.js';
 
 // Relance : REROLL_COST, puis REROLL_STEP de plus à chaque relance du même écran.
@@ -28,8 +28,13 @@ export function undoPact(id, { maxHp, legendNext, repit }) {
   };
 }
 
-// Marchandage : prix en pièces après remise, arrondi au supérieur, jamais sous 1 ; un article gratuit reste gratuit.
+// Prix payé en pièces : doublé sous Bouclier d'or, puis remise de Marchandage ; arrondi au supérieur, jamais sous 1 ;
+// un article gratuit reste gratuit.
 export function discounted(price, mods) {
-  const lvl = modLevel(mods, 'marchandage');
-  return price && lvl ? Math.max(1, Math.ceil(price * (1 - MARCHANDAGE_DISCOUNT * lvl) - 1e-9)) : price;
+  const lvl = modLevel(mods, 'marchandage'), mul = modLevel(mods, 'bouclier') ? BOUCLIER_PRICE_MUL : 1;
+  return price && (lvl || mul > 1) ? Math.max(1, Math.ceil(price * mul * (1 - MARCHANDAGE_DISCOUNT * lvl) - 1e-9)) : price;
 }
+// Crédit : un achat est permis tant que la bourse ne descend pas sous CREDIT_FLOOR (0 sans le pacte).
+export function canAfford(mods, money, price) { return money - price >= (modLevel(mods, 'credit') ? CREDIT_FLOOR : 0); }
+// Le Comptoir s'ouvre s'il reste de quoi payer : bourse positive, ou crédit disponible ; jamais sous Vœu de pauvreté.
+export function shopOpens(mods, money) { return !modLevel(mods, 'pauvrete') && money > (modLevel(mods, 'credit') ? CREDIT_FLOOR : 0); }

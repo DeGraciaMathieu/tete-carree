@@ -7,7 +7,7 @@ import { pad, rumble } from '../input/gamepad.js';
 import { keys } from '../input/keyboard.js';
 import { stick } from '../input/touch.js';
 import { addPart, dust, pop } from '../render/effects.js';
-import { refillOf, rollAmmo, rollHpCost, shoveKnock } from '../rules/modifiers.js';
+import { canRoll, refillOf, rollAmmo, rollHpCost, rollPrice, shoveKnock } from '../rules/modifiers.js';
 import { circleTouchesVoid, moveCircle, unstick } from '../state/arena.js';
 import { S, ammo, mod, player, rollCooldown, rollMax, world } from '../state/world.js';
 import { rnd } from '../util.js';
@@ -34,13 +34,15 @@ function rollClears(dx, dy) {
 // dirX, dirY : direction imposée (pilote de la démo) ; sinon celle de la marche
 export function tryRoll(dirX = 0, dirY = 0) {
   if (!world.demo && world.state === 'play' && !player.dead && !rollMax()) { sfx('click'); return; } // Sans échappatoire
-  if ((world.state !== 'play' && !world.demo) || player.dead || player.roll || player.rollCharges <= 0) return;
+  if ((world.state !== 'play' && !world.demo) || player.dead || player.roll) return;
+  if (!canRoll(S.mods, player.rollCharges, S.money)) { if (mod('peage')) sfx('click'); return; } // Péage : pas assez de pièces
   let [mx, my] = dirX || dirY ? [dirX, dirY] : moveInput(), l = Math.hypot(mx, my);
   if (l < .2) { mx = player.fx; my = player.fy; l = Math.hypot(mx, my) || 1; }
   const dx = mx / l, dy = my / l;
   const sgn = Math.abs(dx) > .2 ? Math.sign(dx) : (player.fx >= 0 ? 1 : -1);
   player.roll = { t: 0, dx, dy, sgn, dist: 0, trail: [], trailT: 0, fireT: 0, shoved: new Set(), landed: false, started: false, fly: rollClears(dx, dy) };
-  player.rollCharges--;
+  const price = rollPrice(S.mods); // Péage : la roulade se paie au lieu d'une charge
+  if (price) { S.money -= price; pop(player.x, player.y - 62, `−${price}`, '#e8b23a'); } else player.rollCharges--;
   player.moving = false;
   player.hp -= rollHpCost(S.mods, player.hp);
 }

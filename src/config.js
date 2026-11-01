@@ -77,6 +77,13 @@ export const MODS = [
   { id: 'avarice', rar: 'p', max: 1 },
   { id: 'cupidite', rar: 'p', max: 1 },
   { id: 'mercenaire', rar: 'p', max: 1 },
+  // Pactes de la bourse (docs/prd/pacte-*.md) : noDemo, jamais proposés dans la démo de l'accueil (pas de pièces)
+  { id: 'peage', rar: 'p', max: 1, excl: ['entrave', 'brulee', 'double'], noDemo: true },
+  { id: 'bouclier', rar: 'p', max: 1, excl: ['cupidite'], noDemo: true },
+  { id: 'credit', rar: 'p', max: 1, excl: ['tresor'], noDemo: true },
+  { id: 'assurance', rar: 'p', max: 1, excl: ['unevie'], noDemo: true },
+  { id: 'piegee', rar: 'p', max: 1, excl: ['avarice', 'poches'], noDemo: true },
+  { id: 'casino', rar: 'p', max: 1, noDemo: true },
   // Pactes majeurs : un seul par partie, `excl` liste les cartes qu'ils rendent inutiles (docs/prd/pactes-majeurs.md).
   { id: 'sanssoin', rar: 'm', max: 1, excl: ['vampire', 'soif', 'sansarmure'] },
   { id: 'unevie', rar: 'm', max: 1, excl: ['constitution', 'souffle', 'vampire', 'soif', 'verre', 'diable', 'brulee', 'sansarmure'] },
@@ -89,6 +96,7 @@ export const MODS = [
   { id: 'sanspause', rar: 'm', max: 1, excl: ['repit'] },
   { id: 'specialiste', rar: 'm', max: 1, excl: ['fidele', 'rollammo'] },
   { id: 'silence', rar: 'm', max: 1 },
+  { id: 'pauvrete', rar: 'm', max: 1, noDemo: true, excl: ['pillard', 'poches', 'marchandage', 'collecte', 'sangdor', 'midas', 'tresor', 'avarice', 'cupidite', 'mercenaire', 'peage', 'bouclier', 'credit', 'assurance', 'piegee', 'casino'] },
   { id: 'aveugle', rar: 'm', max: 1 },
 ];
 
@@ -294,6 +302,14 @@ export const TRESOR_STEP = .02, TRESOR_COINS = 10, TRESOR_MAX = .4; // Trésor d
 export const AVARICE_MUL = 2, AVARICE_COIN_LIFE = 3, AVARICE_BLINK = 1; // Avarice : pièces lâchées, durée au sol et clignotement (s)
 export const CUPIDITE_BONUS = 1, CUPIDITE_LOSS = 5; // Cupidité : pièce en plus par ennemi qui en lâche, pièces perdues par coup
 export const MERCENAIRE_COINS = 1, MERCENAIRE_POINTS_MUL = .5; // Mercenaire : pièce en plus par kill, points des kills
+// Pactes de la bourse
+export const PEAGE_COST = 10;                     // Péage : pièces par roulade
+export const PAUVRETE_DAMAGE_MUL = 1.4;           // Vœu de pauvreté : dégâts des tirs et explosions du joueur
+export const BOUCLIER_COIN_HP = 2, BOUCLIER_PRICE_MUL = 2; // Bouclier d'or : PV encaissés par pièce, prix multipliés
+export const CREDIT_FLOOR = -100, CREDIT_HURT_MUL = 1.3;  // Crédit : plancher de la bourse, dégâts reçus à découvert
+export const ASSURANCE_MIN = 30, ASSURANCE_INVULN = 1, ASSURANCE_FEE = .15; // Assurance : bourse requise, protection (s), cotisation
+export const PIEGEE_DAMAGE = 30, PIEGEE_RADIUS = 50, PIEGEE_SELF_DAMAGE = 10, PIEGEE_SELF_RANGE = 40, PIEGEE_COIN_LIFE = 4; // Monnaie piégée
+export const CASINO_CHANCE = .5, CASINO_WIN = 2, CASINO_LOSS = .5; // Casino : chance de gagner, bourse gagnée ou perdue
 
 /* ---------- Comptoir : étale de caisses entre les vagues ---------- */
 // Articles : rareté (poids de RAR), prix en pièces, famille, pactes dont l'un est requis (contre-pactes).

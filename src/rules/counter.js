@@ -36,7 +36,8 @@ export function itemAllowed(item, ctx) {
   const mods = ctx.mods, special = ctx.special >= 0;
   if (item.pacts && !item.pacts.some(id => modLevel(mods, id))) return false;
   if (ctx.buffs[item.id] || (item.target === 'rent' && ctx.buffs.rent)) return false;
-  if (item.id === 'roulade' && modLevel(mods, 'entrave')) return false;
+  if (item.id === 'roulade' && (modLevel(mods, 'entrave') || modLevel(mods, 'peage'))) return false;
+  if (item.id === 'collantes' && modLevel(mods, 'piegee')) return false; // Monnaie piégée : durée au sol fixe
   if (item.fam === 'ammo' && special) return false; // l'arme gardée est infinie
   if (item.id === 'plein' && !weaponsFor('ammo', ctx).length) return false;
   if (item.id === 'appat' && ctx.wave < firstWave('a')) return false;

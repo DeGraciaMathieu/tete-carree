@@ -10,6 +10,7 @@ import {
   VAMPIRE_HEAL, VERRE_DAMAGE_MUL, VERRE_HP, WALL_HP,
   COIN_CHANCE, COIN_LIFE, LIVRAISON_DELAY, SHOP_BAIT_ARMORED, SHOP_COIN_LIFE, SHOP_CONTRACT_COINS, SHOP_DEPART_BONUS, SHOP_DIG_CHANCE, SHOP_FUSE_T, SHOP_HEAD_MUL, SHOP_HEAVY_MUL, SHOP_MAG_MUL, SHOP_REPEL_MUL, SHOP_RUSTINE_HP, SHOP_SCOPE_MUL,
   AVARICE_COIN_LIFE, AVARICE_MUL, COLLECTE_TIME, CUPIDITE_BONUS, CUPIDITE_LOSS, MARCHANDAGE_DISCOUNT, MERCENAIRE_COINS, MERCENAIRE_POINTS_MUL, MIDAS_VALUE, PILLARD_CHANCE, POCHES_LIFE, SANGDOR_HEAL, TRESOR_COINS, TRESOR_MAX, TRESOR_STEP,
+  ASSURANCE_FEE, ASSURANCE_MIN, BOUCLIER_COIN_HP, BOUCLIER_PRICE_MUL, CREDIT_FLOOR, CREDIT_HURT_MUL, PAUVRETE_DAMAGE_MUL, PEAGE_COST, PIEGEE_COIN_LIFE, PIEGEE_DAMAGE, PIEGEE_SELF_DAMAGE,
 } from '../config.js';
 
 const pct = x => Math.round(x * 100) + '%';
@@ -89,6 +90,7 @@ export default {
   shopHintPad: 'D-pad or stick to choose, A to buy · X (□) restock · Y (△) to move on.',
   shopEmpty: 'Nothing left to sell for now.', sold: 'SOLD', free: 'Free', oneWave: '1 wave',
   counterPact: p => `Counter-pact · ${p}`, contractPaid: n => `Contract fulfilled: +${n} coins`,
+  insured: 'Life saved', insuranceFee: n => `−${n} premium`, casinoWin: 'Heads! ×2', casinoLoss: 'Tails… ÷2',
   shopFam: { pact: 'Counter-pact', heal: 'Care', ammo: 'Ammo', arms: 'Armory', combo: 'Combo & score', loot: 'Loot', horde: 'Horde', rent: 'Rental' },
   forecast: k => [[k.z, 'zombie', 'zombies'], [k.b, 'bloater', 'bloaters'], [k.d, 'devil', 'devils'], [k.s, 'spitter', 'spitters'], [k.a, 'armored', 'armored'], [k.p, 'pack', 'packs']]
     .filter(e => e[0] > 0).map(e => `${e[0]} ${e[0] > 1 ? e[2] : e[1]}`).join(' · '),
@@ -237,6 +239,12 @@ export default {
     avarice: { name: 'Greed', short: 'Greed', plus: () => `Enemies drop ${times(AVARICE_MUL)} as many coins`, minus: () => `Coins only stay on the ground for ${AVARICE_COIN_LIFE} s` },
     cupidite: { name: 'Avidity', short: 'Avidity', plus: () => `+${CUPIDITE_BONUS} coin from every enemy that drops some`, minus: () => `Every hit you take drops ${CUPIDITE_LOSS} coins from your purse around you` },
     mercenaire: { name: 'Mercenary', short: 'Mercenary', plus: () => `Every kill drops ${MERCENAIRE_COINS} more coin`, minus: () => `Kills are worth ${MERCENAIRE_POINTS_MUL === .5 ? 'half' : pct(MERCENAIRE_POINTS_MUL)} the points: weapons unlock later, lower record` },
+    peage: { name: 'Toll', short: 'Toll', plus: () => `Unlimited rolls: no more charges or cooldown`, minus: () => `Every roll costs ${PEAGE_COST} coins; without them, no roll` },
+    bouclier: { name: 'Golden shield', short: 'Golden shield', plus: () => `Hits are paid in coins first: one coin for ${BOUCLIER_COIN_HP} HP`, minus: () => `The shop and the Counter cost ${times(BOUCLIER_PRICE_MUL)} as much` },
+    credit: { name: 'Credit', short: 'Credit', plus: () => `You can buy on credit, down to ${-CREDIT_FLOOR} coins of debt`, minus: () => `While in debt, you take ${pct(CREDIT_HURT_MUL - 1)} more damage` },
+    assurance: { name: 'Insurance', short: 'Insurance', plus: () => `Once per wave, a lethal hit leaves you at 1 HP and empties your purse, if you still have ${ASSURANCE_MIN} coins`, minus: () => `At the end of every wave, the premium takes ${pct(ASSURANCE_FEE)} of your purse` },
+    piegee: { name: 'Booby-trapped coins', short: 'Trapped', plus: () => `A coin nobody picks up explodes: ${PIEGEE_DAMAGE} damage to the horde around it`, minus: () => `The blast hurts you too up close (${PIEGEE_SELF_DAMAGE} HP), and coins only stay ${PIEGEE_COIN_LIFE} s on the ground` },
+    casino: { name: 'Casino', short: 'Casino', plus: () => `At the end of every wave, a one-in-two chance to double your purse`, minus: () => `Otherwise, it is halved` },
     sanssoin: { name: 'No healing', short: 'No healing', plus: () => `Every wave cleared restores all your health`, minus: () => `No more regeneration or health crates` },
     unevie: { name: 'One life', short: 'One life', plus: () => `Points ×${UNEVIE_POINTS_MUL} on every kill and on the end-of-wave bonus`, minus: () => `The first hit you take kills you, and no more health crates` },
     sablier: { name: 'Hourglass', short: 'Hourglass', plus: () => `Points ×${SABLIER_POINTS_MUL} on every kill`, minus: () => `During a wave, you lose ${SABLIER_DRAIN} HP per second until death; every kill stops the loss for ${num(SABLIER_HOLD)} s` },
@@ -248,6 +256,7 @@ export default {
     sanspause: { name: 'No break', short: 'No break', plus: () => `Every two waves, you win all three cards offered (never a pact)`, minus: () => `No more break between waves, and no card after an odd wave` },
     specialiste: { name: 'Specialist', short: 'Specialist', plus: () => `The weapon you choose becomes infinite and deals ${times(SPECIALISTE_DAMAGE_MUL)} the damage`, minus: () => `You can never switch weapons again` },
     silence: { name: 'Silence', short: 'Silence', plus: () => `Points ×${SILENCE_POINTS_MUL} on every kill`, minus: () => `No more HUD: health, score, combo, weapons and cards disappear (score and cards remain on pause)` },
+    pauvrete: { name: 'Vow of poverty', short: 'Poverty', plus: () => `Your shots and explosions deal ${pct(PAUVRETE_DAMAGE_MUL - 1)} more damage`, minus: () => `No more coins, shop or Counter until the end of the run` },
     aveugle: { name: 'Blind', short: 'Blind', plus: () => `Your shots deal ${times(AVEUGLE_DAMAGE_MUL)} the damage`, minus: () => `You can't see anything beyond ${AVEUGLE_SIGHT} tiles` },
   },
 };

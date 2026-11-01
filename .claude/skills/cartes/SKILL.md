@@ -19,7 +19,8 @@ large, elles se couchent.
 | --- | --- |
 | `id` | clé dans `S.mods` (`{ id: niveau }`) ; lue par `mod('<id>')` (`state/world.js`) ou `modLevel(mods, '<id>')` (règles) |
 | `rar` | `c` Commune, `r` Rare, `l` Légendaire, `p` Pacte, `m` Pacte majeur ; poids de tirage `RAR[rar].w` |
-| `excl` | pacte majeur : ids des cartes qu'il rend inutiles ; exclusion symétrique dans `rollCards` |
+| `excl` | ids des cartes rendues inutiles ; exclusion symétrique dans `rollCards` |
+| `noDemo` | jamais tirée dans la démo de l'accueil (pactes de la bourse) |
 | `max` | niveau maximal ; une carte au max n'est plus proposée |
 
 Textes, dans `src/i18n/fr.js` et `src/i18n/en.js`, sous `cards[id]` (lus par `tr.cards[m.id]`) :
@@ -80,6 +81,13 @@ Textes, dans `src/i18n/fr.js` et `src/i18n/en.js`, sous `cards[id]` (lus par `tr
 | `tresor` | `hoardMul(mods, money)` dans `shoot` (`game/weapons.js`, tirs du joueur) ; bonus en cours sur sa puce (`renderMods`) |
 | `cupidite` (perte) | `coinsLostOnHit` dans `hurtPlayer` (vrais coups) : pièces de la bourse éparpillées par `dropCoins(…, true)` |
 | `mercenaire` (points) | `killPoints` (`MERCENAIRE_POINTS_MUL`) |
+| `peage` | `rollPrice` / `canRoll` (`rules/modifiers.js`) dans `tryRoll` ; charge rendue au rachat (`buybackPact`) ; bouton ROULER par `rollReady` |
+| `pauvrete` (pacte majeur) | `applyCard` vide bourse et pièces ; `rollCoins`, `waveCoins` à 0 ; `shopOpens` faux ; boutique masquée dans `openPick` ; `shotDamageMul`, `ownBlastMul` |
+| `bouclier` | `coinShield` (`rules/damage.js`) dans `hurtPlayer` ; prix doublés dans `discounted` |
+| `credit` | `canAfford` et `shopOpens` (`rules/shop.js`) pour tous les achats ; `debtHurtMul` dans `hurtPlayer` ; bourse rouge (`.debt`) |
+| `assurance` | `insured` dans `hurtPlayer` après Second souffle (`S.insuranceUsed`, remis par `startWave`) ; `insuranceFee` en fin de vague |
+| `piegee` | `coinLife`, `coinBlink` ; `coinBlast` (`game/combat.js`) quand une pièce expire dans `updateCoins` ; rouge dans `drawCoins` |
+| `casino` | `casinoPurse` en fin de vague (`purseAtWaveEnd`, `loop/update.js`) |
 
 ## Pactes majeurs
 

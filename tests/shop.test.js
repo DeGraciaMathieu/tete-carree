@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { BUYBACK_COST, REROLL_COST, REROLL_STEP } from '../src/config.js';
-import { buybackable, canBuyExtra, discounted, rerollCost, undoPact, withoutPact } from '../src/rules/shop.js';
+import { buybackable, canAfford, canBuyExtra, discounted, rerollCost, shopOpens, undoPact, withoutPact } from '../src/rules/shop.js';
 
 test('la relance coûte 10, puis 5 de plus à chaque relance du même écran', () => {
   assert.equal(REROLL_COST, 10);
@@ -72,4 +72,28 @@ test('Marchandage : un article gratuit reste gratuit, aucun prix ne tombe sous 1
 
 test('sans Marchandage, les prix sont inchangés', () => {
   assert.equal(discounted(25, {}), 25);
+});
+
+test('Bouclier d\'or : tout coûte deux fois plus cher, Marchandage s\'applique après', () => {
+  assert.equal(discounted(10, { bouclier: 1 }), 20);
+  assert.equal(discounted(60, { bouclier: 1, marchandage: 1 }), 102);
+});
+
+test('Crédit : un achat est permis jusqu\'à −100', () => {
+  assert.equal(canAfford({ credit: 1 }, 10, 25), true);
+  assert.equal(canAfford({ credit: 1 }, -95, 10), false);
+});
+
+test('Crédit : le Comptoir s\'ouvre avec une bourse vide', () => {
+  assert.equal(shopOpens({ credit: 1 }, 0), true);
+  assert.equal(shopOpens({}, 0), false);
+});
+
+test('sans Crédit, un achat ne fait jamais passer la bourse sous zéro', () => {
+  assert.equal(canAfford({}, 10, 25), false);
+  assert.equal(canAfford({}, 25, 25), true);
+});
+
+test('sous Vœu de pauvreté, le Comptoir ne s\'ouvre jamais', () => {
+  assert.equal(shopOpens({ pauvrete: 1 }, 50), false);
 });

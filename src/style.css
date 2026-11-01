@@ -54,6 +54,8 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .money{font-size:12px;color:var(--coin);margin-top:3px;font-variant-numeric:tabular-nums}
 .money .coinico{margin-right:5px}
 .money #money{font-size:13px}
+.money.debt,.purse.debt b{color:var(--blood)} /* Crédit : à découvert */
+.money.poor{text-decoration:line-through;opacity:.45} /* Vœu de pauvreté */
 #pot{font-size:11px;color:var(--r-m);margin-top:2px}
 #pot b{font-weight:400;color:var(--text)}
 #next{font-size:11px;color:var(--muted);margin-top:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}

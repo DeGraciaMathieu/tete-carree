@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, comboKillsAfterHit, repitBonus, waveBreak,
-  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, pickAfter, takeAllCards, canSwitch, specialMul, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul, shopBonus, spreadMul, comboAfterCoin, hoardMul,
+  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, pickAfter, takeAllCards, canSwitch, specialMul, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul, shopBonus, spreadMul, comboAfterCoin, hoardMul, canRoll, rollPrice, ownBlastMul,
 } from '../src/rules/modifiers.js';
 
 test('le multiplicateur gagne un cran tous les 5 kills enchaînés', () => {
@@ -325,4 +325,27 @@ test('Trésor de guerre : jamais plus de 40 %', () => {
 
 test('sans Trésor de guerre, la bourse ne change pas les dégâts', () => {
   assert.equal(hoardMul({}, 500), 1);
+});
+
+test('Péage : une roulade coûte 10 pièces', () => {
+  assert.equal(rollPrice({ peage: 1 }), 10);
+  assert.equal(rollPrice({}), 0);
+});
+
+test('Péage : sans 10 pièces, pas de roulade, même avec une charge', () => {
+  assert.equal(canRoll({ peage: 1 }, 1, 9), false);
+});
+
+test('Péage : sans charge, la roulade part quand même si la bourse suffit', () => {
+  assert.equal(canRoll({ peage: 1 }, 0, 10), true);
+});
+
+test('sans Péage, la roulade dépend des charges comme avant', () => {
+  assert.equal(canRoll({}, 0, 99), false);
+  assert.equal(canRoll({}, 1, 0), true);
+});
+
+test('Vœu de pauvreté : les tirs et les explosions font 40 % de dégâts en plus', () => {
+  assert.equal(shotDamageMul({ pauvrete: 1 }, 'uzi', 100, false), 1.4);
+  assert.equal(ownBlastMul({ pauvrete: 1 }), 1.4);
 });

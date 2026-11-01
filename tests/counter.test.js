@@ -90,3 +90,11 @@ test('l\'Éclaireur annonce les mêmes comptes que la vague tirée', () => {
     assert.deepEqual([count('z'), count('b'), count('d'), count('s'), count('a'), q.filter(e => e[0] === 'p').length], [k.z, k.b, k.d, k.s, k.a, k.p], `${n}/${seed}`);
   }
 });
+
+test('sous Monnaie piégée, Pièces collantes n\'est pas proposée', () => {
+  assert.equal(itemAllowed(item('collantes'), ctx({ mods: { piegee: 1 } })), false);
+});
+
+test('sous Péage, la Roulade de réserve n\'est pas proposée', () => {
+  assert.equal(itemAllowed(item('roulade'), ctx({ mods: { peage: 1 } })), false);
+});

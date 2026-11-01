@@ -10,6 +10,7 @@ import {
   ENTRAVE_SPEED_MUL, ENTRAVE_DAMAGE_MUL, MITRAILLE_CD_MUL, MITRAILLE_AMMO_COST, MITRAILLE_PISTOL_REFILL, W,
   TOUTOURIEN_KILLS_PER_MULTIPLIER, SANSPAUSE_BREAK, SPECIALISTE_DAMAGE_MUL, AVEUGLE_DAMAGE_MUL, LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL, LOURDE_SELF_PUSH, LOURDE_SPREAD,
   SHOP_DEPART_BONUS, SHOP_FUSE_T, SHOP_HEAVY_MUL, SHOP_MAG_MUL, SHOP_SCOPE_MUL, COLLECTE_TIME, TRESOR_COINS, TRESOR_MAX, TRESOR_STEP,
+  PAUVRETE_DAMAGE_MUL, PEAGE_COST,
 } from '../config.js';
 
 export const modLevel = (mods, id) => (mods && mods[id]) || 0;
@@ -63,6 +64,9 @@ export function hpRate(mods, combo, sinceHurt, sinceKill = Infinity, inWave = fa
 export function boxKind(mods, r, hpChance) { return r < hpChance && !modLevel(mods, 'sanssoin') && !modLevel(mods, 'unevie') ? 'hp' : 'ammo'; }
 // Vie après une vague terminée : Plus de soins la rend en entier.
 export function waveEndHp(mods, hp, maxHp) { return modLevel(mods, 'sanssoin') ? maxHp : hp; }
+// Péage : une roulade coûte des pièces, sans charge ni recharge ; sans assez de pièces, pas de roulade.
+export function rollPrice(mods) { return modLevel(mods, 'peage') ? PEAGE_COST : 0; }
+export function canRoll(mods, charges, money) { return modLevel(mods, 'peage') ? money >= PEAGE_COST : charges > 0; }
 // Sans échappatoire : aucune charge de roulade. Roulade de réserve (Comptoir) : une charge de plus.
 export function rollMax(mods, buffs) { return modLevel(mods, 'entrave') ? 0 : 1 + modLevel(mods, 'double') + (buff(buffs, 'roulade') ? 1 : 0); }
 // Terre brûlée : recharge de la roulade, et PV qu'elle coûte sans jamais prendre le dernier.
@@ -93,7 +97,7 @@ export function spreadMul(buffs, weapon) { return buff(buffs, 'lunette') === wea
 export function speedMul(mods) { return (modLevel(mods, 'racine') ? RACINE_SPEED_MUL : 1) * (modLevel(mods, 'entrave') ? ENTRAVE_SPEED_MUL : 1); }
 // Dégâts des tirs du joueur selon ses pactes : arme tirée, distance à la cible (px), joueur immobile ; Balles lourdes (Comptoir).
 export function shotDamageMul(mods, weapon, d, still, buffs) {
-  let m = buff(buffs, 'lourdes') === weapon ? SHOP_HEAVY_MUL : 1;
+  let m = (buff(buffs, 'lourdes') === weapon ? SHOP_HEAVY_MUL : 1) * (modLevel(mods, 'pauvrete') ? PAUVRETE_DAMAGE_MUL : 1); // Vœu de pauvreté
   if (weapon === 'pistol' && modLevel(mods, 'fidele')) m *= FIDELE_PISTOL_MUL;
   if (modLevel(mods, 'verre')) m *= VERRE_DAMAGE_MUL;
   if (modLevel(mods, 'entrave')) m *= ENTRAVE_DAMAGE_MUL;
@@ -108,6 +112,8 @@ export function shotDamageMul(mods, weapon, d, still, buffs) {
 // comptent double (le joueur ne pose plus que celles de son arme).
 export function canSwitch(special, i) { return special < 0 || i === special; }
 export function specialMul(mods) { return modLevel(mods, 'specialiste') ? SPECIALISTE_DAMAGE_MUL : 1; }
+// Explosions du joueur (barils, grenades, roquettes) : Spécialiste, Vœu de pauvreté.
+export function ownBlastMul(mods) { return specialMul(mods) * (modLevel(mods, 'pauvrete') ? PAUVRETE_DAMAGE_MUL : 1); }
 // Poudre noire : rayon des explosions du joueur (barils, grenades, roquettes) et dégâts qu'elles lui font.
 export function ownBlastRadius(mods, R) { return R * (modLevel(mods, 'poudre') ? POUDRE_RADIUS_MUL : 1); }
 export function ownBlastSelfMul(mods) { return modLevel(mods, 'poudre') ? POUDRE_SELF_MUL : 1; }

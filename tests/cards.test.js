@@ -151,3 +151,35 @@ test('Sang d\'or n\'est jamais proposée avec Vampire, Sans armure, Plus de soin
   never({ sangdor: 1 }, 'vampire');
   never({ sangdor: 1 }, 'sansarmure');
 });
+
+test('Péage n\'est jamais proposé avec Sans échappatoire, Terre brûlée ni Double roulade', () => {
+  for (const id of ['entrave', 'brulee', 'double']) never({ [id]: 1 }, 'peage');
+  never({ peage: 1 }, 'double');
+});
+
+test('Bouclier d\'or et Cupidité ne sont jamais proposés ensemble', () => {
+  never({ bouclier: 1 }, 'cupidite');
+  never({ cupidite: 1 }, 'bouclier');
+});
+
+test('Crédit et Trésor de guerre, Assurance et Une seule vie ne sont jamais proposés ensemble', () => {
+  never({ tresor: 1 }, 'credit');
+  never({ unevie: 1 }, 'assurance');
+});
+
+test('Monnaie piégée n\'est jamais proposée avec Avarice ni Poches profondes', () => {
+  never({ avarice: 1 }, 'piegee');
+  never({ poches: 1 }, 'piegee');
+});
+
+test('Vœu de pauvreté n\'est jamais proposé avec une carte du butin ni un pacte de la bourse', () => {
+  for (const id of ['midas', 'pillard', 'casino', 'peage', 'mercenaire']) never({ [id]: 1 }, 'pauvrete');
+});
+
+test('la démo ne tire jamais un pacte de la bourse', () => {
+  const noDemo = MODS.filter(m => m.noDemo).map(m => m.id);
+  for (let seed = 0; seed < 300; seed++) {
+    const drawn = ids(rollCards({}, createRng(seed), false, { wave: 9, demo: true }));
+    assert.ok(!drawn.some(id => noDemo.includes(id)), seed);
+  }
+});

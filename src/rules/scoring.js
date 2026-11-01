@@ -1,5 +1,5 @@
 // Ce que rapporte un ennemi abattu : points, soin de Soif de sang, caisse et pièces au sol.
-import { AVARICE_BLINK, AVARICE_COIN_LIFE, AVARICE_MUL, COIN_BLINK, COIN_CHANCE, COIN_LIFE, COIN_VALUE, COIN_WAVE_BONUS, CUPIDITE_BONUS, CUPIDITE_LOSS, MERCENAIRE_COINS, MERCENAIRE_POINTS_MUL, MIDAS_VALUE, PILLARD_CHANCE, POCHES_LIFE, SANGDOR_HEAL, SHOP_COIN_LIFE, SHOP_DIG_CHANCE, KILL_POINTS, WAVE_BONUS, UNEVIE_POINTS_MUL, SABLIER_POINTS_MUL, ELITE_POINTS_MUL, SILENCE_POINTS_MUL, DROP_CHANCE, DROP_HP_CHANCE, SOIF_MULTIPLIER, PRIME_POINTS_MUL, CHAIR_POINTS_MUL, VAMPIRE_HEAL } from '../config.js';
+import { ASSURANCE_FEE, CASINO_CHANCE, CASINO_LOSS, CASINO_WIN, PIEGEE_COIN_LIFE, AVARICE_BLINK, AVARICE_COIN_LIFE, AVARICE_MUL, COIN_BLINK, COIN_CHANCE, COIN_LIFE, COIN_VALUE, COIN_WAVE_BONUS, CUPIDITE_BONUS, CUPIDITE_LOSS, MERCENAIRE_COINS, MERCENAIRE_POINTS_MUL, MIDAS_VALUE, PILLARD_CHANCE, POCHES_LIFE, SANGDOR_HEAL, SHOP_COIN_LIFE, SHOP_DIG_CHANCE, KILL_POINTS, WAVE_BONUS, UNEVIE_POINTS_MUL, SABLIER_POINTS_MUL, ELITE_POINTS_MUL, SILENCE_POINTS_MUL, DROP_CHANCE, DROP_HP_CHANCE, SOIF_MULTIPLIER, PRIME_POINTS_MUL, CHAIR_POINTS_MUL, VAMPIRE_HEAL } from '../config.js';
 import { boxKind, modLevel, quittePoints } from './modifiers.js';
 
 // Types d'ennemis : 'z' zombie, 'b' gonflé, 'r' coureur, 's' cracheur, 'a' blindé, 'd' diable.
@@ -42,24 +42,31 @@ export function rollDrop(type, onVoid, rng, mods) {
 export function rollCoins(type, onVoid, rng, buffs, mods) {
   const base = type === 'z' && buffs && buffs.fouille ? SHOP_DIG_CHANCE : byType(COIN_CHANCE, type);
   const hit = rng() < Math.min(1, base + PILLARD_CHANCE * modLevel(mods, 'pillard'));
-  if (onVoid) return 0;
+  if (onVoid || modLevel(mods, 'pauvrete')) return 0; // Vœu de pauvreté : plus aucune pièce
   const drop = hit ? byType(COIN_VALUE, type) * (modLevel(mods, 'avarice') ? AVARICE_MUL : 1) + (modLevel(mods, 'cupidite') ? CUPIDITE_BONUS : 0) : 0;
   return drop + (modLevel(mods, 'mercenaire') ? MERCENAIRE_COINS : 0);
 }
 
-// Durée d'une pièce au sol (s) : Pièces collantes (Comptoir) ou Avarice changent la base, Poches profondes l'allonge.
+// Durée d'une pièce au sol (s) : Monnaie piégée, Pièces collantes (Comptoir) ou Avarice changent la base, Poches profondes l'allonge.
 export function coinLife(mods, buffs) {
-  const base = buffs && buffs.collantes ? SHOP_COIN_LIFE : modLevel(mods, 'avarice') ? AVARICE_COIN_LIFE : COIN_LIFE;
+  const base = modLevel(mods, 'piegee') ? PIEGEE_COIN_LIFE : buffs && buffs.collantes ? SHOP_COIN_LIFE : modLevel(mods, 'avarice') ? AVARICE_COIN_LIFE : COIN_LIFE;
   return base + POCHES_LIFE * modLevel(mods, 'poches');
 }
-// Dernières secondes au sol où la pièce clignote : raccourcies sous Avarice.
-export function coinBlink(mods) { return modLevel(mods, 'avarice') ? AVARICE_BLINK : COIN_BLINK; }
+// Dernières secondes au sol où la pièce clignote : raccourcies sous Avarice ; aucune sous Monnaie piégée, où elle rougit.
+export function coinBlink(mods) { return modLevel(mods, 'piegee') ? 0 : modLevel(mods, 'avarice') ? AVARICE_BLINK : COIN_BLINK; }
 // Valeur d'une pièce ramassée : Midas la double, sauf une pièce perdue sous Cupidité (lost).
 export function coinWorth(mods, lost) { return !lost && modLevel(mods, 'midas') ? MIDAS_VALUE : 1; }
 // PV rendus par une pièce ramassée : Sang d'or.
 export function coinHeal(mods) { return modLevel(mods, 'sangdor') ? SANGDOR_HEAL : 0; }
 // Pièces qui tombent de la bourse sur un coup encaissé : Cupidité, jamais plus que la bourse.
-export function coinsLostOnHit(mods, money) { return modLevel(mods, 'cupidite') ? Math.min(money, CUPIDITE_LOSS) : 0; }
+export function coinsLostOnHit(mods, money) { return modLevel(mods, 'cupidite') ? Math.min(Math.max(0, money), CUPIDITE_LOSS) : 0; }
+// Assurance : cotisation prise sur la bourse en fin de vague.
+export function insuranceFee(mods, money) { return modLevel(mods, 'assurance') && money > 0 ? Math.floor(money * ASSURANCE_FEE) : 0; }
+// Casino : bourse après le pile ou face de fin de vague (r entre 0 et 1) ; une bourse vide ou négative ne tire rien.
+export function casinoPurse(mods, money, r) {
+  if (!modLevel(mods, 'casino') || money <= 0) return money;
+  return r < CASINO_CHANCE ? money * CASINO_WIN : Math.floor(money * CASINO_LOSS);
+}
 
-// Pièces versées en fin de vague : COIN_WAVE_BONUS × numéro de vague.
-export function waveCoins(wave) { return COIN_WAVE_BONUS * wave; }
+// Pièces versées en fin de vague : COIN_WAVE_BONUS × numéro de vague ; aucune sous Vœu de pauvreté.
+export function waveCoins(wave, mods) { return modLevel(mods, 'pauvrete') ? 0 : COIN_WAVE_BONUS * wave; }

@@ -47,6 +47,14 @@ const PATHS = {
   specialiste: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 1v5M12 18v5M1 12h5M18 12h5"/>',
   silence: '<path d="M3 5h18v12H8l-5 4z"/><path d="M3 3l18 18"/>',
   aveugle: '<path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/><path d="M3 21L21 3"/>',
+  // pactes de la bourse
+  peage: '<path d="M3 20h18"/><path d="M6 20V9h4v11M14 20V9h4v11"/><path d="M4 9h16l-2-5H6z"/><circle cx="12" cy="14" r="1.5"/>',
+  pauvrete: '<path d="M5 4h14v8a7 7 0 0 1-14 0z"/><path d="M9 9h6"/><path d="M3 3l18 18"/>',
+  bouclier: '<circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><path d="M12 4v4M12 16v4M4 12h4M16 12h4"/>',
+  credit: '<path d="M3 6h18v12H3z"/><path d="M3 10h18"/><path d="M7 15h4"/>',
+  assurance: '<path d="M12 3l8 3v6c0 5-4 8-8 9-4-1-8-4-8-9V6z"/><path d="M9 12l2 2 4-4"/>',
+  piegee: '<circle cx="11" cy="14" r="6"/><path d="M15 9l3-3M17 4l2 2M19 3v2"/>',
+  casino: '<path d="M4 4h16v16H4z"/><circle cx="8.5" cy="8.5" r="1"/><circle cx="15.5" cy="15.5" r="1"/><circle cx="12" cy="12" r="1"/>',
   // cartes du butin
   pillard: '<path d="M4 20l7-7M9 8l7 7M13 4l7 7-3 3-7-7z"/><circle cx="6" cy="17" r="2"/>',
   poches: '<path d="M5 4h14v8a7 7 0 0 1-14 0z"/><path d="M9 9h6"/><circle cx="12" cy="13" r="2"/>',

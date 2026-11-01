@@ -1,6 +1,6 @@
 // Dégâts infligés et subis, mort des ennemis, explosions et ondes de choc.
 import { sfx } from '../audio/sfx.js';
-import { BARREL_CHAIN_DELAY, BLAST_BLOCK_DAMAGE, BLAST_BLOCK_REACH, BLAST_FALLOFF, BLAST_KNOCK, BLAST_SELF_DAMAGE, BLAST_SELF_FALLOFF, BLAST_SELF_RANGE, BLOATER_DAMAGE, BLOATER_RADIUS, CHAIR_RADIUS_MUL, COIN_MAX, COIN_SCATTER, SECOND_WIND_SHOCK_DAMAGE, SECOND_WIND_SHOCK_KNOCK, SECOND_WIND_SHOCK_RADIUS, SHOP_HEAD_MUL, T } from '../config.js';
+import { BARREL_CHAIN_DELAY, BLAST_BLOCK_DAMAGE, BLAST_BLOCK_REACH, BLAST_FALLOFF, BLAST_KNOCK, BLAST_SELF_DAMAGE, BLAST_SELF_FALLOFF, BLAST_SELF_RANGE, ASSURANCE_INVULN, PIEGEE_DAMAGE, PIEGEE_RADIUS, PIEGEE_SELF_DAMAGE, PIEGEE_SELF_RANGE, BLOATER_DAMAGE, BLOATER_RADIUS, CHAIR_RADIUS_MUL, COIN_MAX, COIN_SCATTER, SECOND_WIND_SHOCK_DAMAGE, SECOND_WIND_SHOCK_KNOCK, SECOND_WIND_SHOCK_RADIUS, SHOP_HEAD_MUL, T } from '../config.js';
 import { addScore } from './score.js';
 import { damageBlock } from './weapons.js';
 import { tr } from '../i18n/index.js';
@@ -8,8 +8,8 @@ import { rumble } from '../input/gamepad.js';
 import { addPart, blood, dust, gibs, pop, sparks } from '../render/effects.js';
 import { fctx, stampBlood, stampScorch } from '../render/floor.js';
 import { banner } from '../render/hud.js';
-import { playerProtected, resolveEnemyHit, secondWind } from '../rules/damage.js';
-import { comboAfterHit, comboKillsAfterHit, ownBlastRadius, ownBlastSelfMul, specialMul } from '../rules/modifiers.js';
+import { coinShield, debtHurtMul, insured, playerProtected, resolveEnemyHit, secondWind } from '../rules/damage.js';
+import { comboAfterHit, comboKillsAfterHit, ownBlastMul, ownBlastRadius, ownBlastSelfMul } from '../rules/modifiers.js';
 import { coinLife, coinsLostOnHit, killPoints, potAfterHit, potsKill, rollCoins, rollDrop, soifHeal } from '../rules/scoring.js';
 import { isVoid, openT } from '../state/arena.js';
 import { S, blocks, comboTime, jitter, mod, multiplier, player, rng, world } from '../state/world.js';
@@ -83,6 +83,9 @@ export function hurtPlayer(dmg, soft, by = '') {
   // Cupidité : un vrai coup fait tomber des pièces de la bourse autour du joueur, à reprendre
   const lost = soft ? 0 : coinsLostOnHit(S.mods, S.money);
   if (lost) { S.money -= lost; dropCoins(player.x, player.y, lost, true); pop(player.x, player.y - 62, `−${lost}`, '#ff8f84'); }
+  dmg *= debtHurtMul(S.mods, S.money); // Crédit : à découvert, les coups font plus mal
+  const shield = coinShield(S.mods, dmg, S.money); // Bouclier d'or : le coup se paie d'abord en pièces
+  if (shield.coins) { S.money -= shield.coins; dmg = shield.dmg; pop(player.x, player.y - 62, `−${shield.coins}`, '#e8b23a'); }
   player.hp -= dmg; player.hurtT = .35; player.flash = .08; player.lastHurt = S.time;
   if (!soft) { world.shake = Math.min(16, world.shake + 4); S.combo = comboKillsAfterHit(S.mods, S.combo, S.comboT); S.comboT = comboAfterHit(S.mods, S.comboT); }
   S.coinPot = potAfterHit(S.mods, S.coinPot); // Tout ou rien : les pièces en jeu sont perdues comme les points
@@ -97,11 +100,27 @@ export function hurtPlayer(dmg, soft, by = '') {
     banner(tr.cards.souffle.name, tr.getUp); sfx('unlock');
     return;
   }
+  // Assurance : après Second souffle, une fois par vague, la bourse paie la vie
+  if (insured(S.mods, player.hp, S.money, S.insuranceUsed)) {
+    S.insuranceUsed = true; S.money = 0; player.hp = 1; player.invuln = ASSURANCE_INVULN;
+    banner(tr.cards.assurance.name, tr.insured); sfx('unlock');
+    return;
+  }
   if (player.hp <= 0) {
     player.hp = 0; player.dead = true; S.overT = 1.6;
     blood(player.x, player.y, 26, 0, 0, 160); gibs(player.x, player.y, 10, ['#2f5d8a', '#e2b48a', '#7a1512']);
     stampBlood(player.x, player.y, 16, .8); sfx('splat');
   }
+}
+// Monnaie piégée : une pièce que personne n'a ramassée explose ; ni constructions ni barils touchés.
+export function coinBlast(x, y) {
+  for (const e of world.enemies) {
+    if (e.dead) continue;
+    const dx = e.x - x, dy = e.y - y, d = Math.hypot(dx, dy / .55) || 1;
+    if (d < PIEGEE_RADIUS + e.r) hurtEnemy(e, PIEGEE_DAMAGE, dx / d, dy / d, 40, 'blast');
+  }
+  if (Math.hypot(player.x - x, (player.y - y) / .55) < PIEGEE_SELF_RANGE) hurtPlayer(PIEGEE_SELF_DAMAGE, false, 'piegee');
+  sparks(x, y, 6, '#ff8a3a'); sfx('pop', 60);
 }
 export function shockwave(x, y, R, dmg) {
   for (const e of world.enemies) {
@@ -115,7 +134,7 @@ export function shockwave(x, y, R, dmg) {
 // own : explosion provoquée par le joueur (baril, grenade, roquette), soumise à Poudre noire
 export function explosion(x, y, R, dmg, own = false) {
   if (own) R = ownBlastRadius(S.mods, R);
-  const em = own ? specialMul(S.mods) : 1; // Spécialiste : ses explosions blessent deux fois plus la horde
+  const em = own ? ownBlastMul(S.mods) : 1; // Spécialiste, Vœu de pauvreté : ses explosions blessent plus la horde
   { const pd = Math.hypot(player.x - x, player.y - y); if (pd < 420) rumble(.75 * (1 - pd / 420), .45 * (1 - pd / 420), 220); }
   for (const e of world.enemies) {
     if (e.dead) continue;

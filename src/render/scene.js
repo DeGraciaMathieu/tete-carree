@@ -197,7 +197,7 @@ function drawPickup(p) {
 // blink : dernières secondes où la pièce clignote (raccourcies sous Avarice), lues une fois par image.
 const coinVisible = (c, x0, x1, y0, y1, blink) => c.x >= x0 && c.x <= x1 && c.y >= y0 && c.y <= y1 && !(c.life < blink && (c.life * 8 | 0) & 1);
 function drawCoins(x0, x1, y0, y1) {
-  const coins = world.coins, blink = coinBlink();
+  const coins = world.coins, blink = coinBlink(), trap = mod('piegee');
   // ombres de toutes les pièces en un seul remplissage
   ctx.fillStyle = 'rgba(20,22,24,.55)'; ctx.beginPath();
   for (let i = 0; i < coins.length; i++) {
@@ -211,7 +211,8 @@ function drawCoins(x0, x1, y0, y1) {
     const c = coins[i];
     if (!coinVisible(c, x0, x1, y0, y1, blink)) continue;
     const a = Math.cos(S.time * 4.2 + c.ph), rx = Math.max(.9, Math.abs(a) * 4.6), y = c.y - 4.6 - c.z;
-    ctx.fillStyle = Math.abs(a) < .35 ? '#9a6f12' : '#e8b23a'; // de profil, on voit la tranche
+    const armed = trap && c.life < 1 && (c.life * 8 | 0) & 1; // Monnaie piégée : rouge par éclats la dernière seconde
+    ctx.fillStyle = armed ? '#d0352c' : Math.abs(a) < .35 ? '#9a6f12' : '#e8b23a'; // de profil, on voit la tranche
     ctx.beginPath(); ctx.ellipse(c.x, y, rx, 4.6, 0, 0, 7); ctx.fill(); ctx.stroke();
     if (rx > 2.2) { ctx.fillStyle = '#fff1b8'; ctx.fillRect(c.x - rx * .45, y - 2.9, 1.6, 3); }
     // étoile : 0,3 s toutes les 1,6 s, déphasée d'une pièce à l'autre
