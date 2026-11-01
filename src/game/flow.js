@@ -278,6 +278,8 @@ export function demoPick() {
   S.legendNext = false;
   if (cards.length) applyCard(cards[rng() * cards.length | 0]);
 }
+// Harnais d'équilibrage : cartes sur la table, en lecture seule.
+export const pickOptions = () => pickChoices;
 export let pickFocus = 0;
 export function focusCard(i) {
   const cards = $('cards').querySelectorAll('.mcard'); if (!cards.length) return;

@@ -11,7 +11,8 @@
     "package": "vite build && rm -f tete-carree-itch.zip && cd dist && zip -r ../tete-carree-itch.zip .",
     "test": "vitest run",
     "test:watch": "vitest",
-    "perf": "node scripts/perf.mjs"
+    "perf": "node scripts/perf.mjs",
+    "balance": "node scripts/balance.mjs"
   },
   "devDependencies": {
     "vite": "^8.3.5",

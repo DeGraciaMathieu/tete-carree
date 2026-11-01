@@ -63,6 +63,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/input/buttons.js` | boutons des écrans (Jouer, Reprendre, FPS, contours, langue…) ; `applyLang` réécrit l'accueil et les réglages dans la langue courante ; menu de l'accueil : `openPanel`, `panelOpen`, `moveMenu` (flèches et croix de la manette) | game/flow, i18n |
 | `src/loop/update.js` | `update(dt)` : acide, joueur, champ de distances, ennemis, séparation, projectiles, ramassage (caisses, pièces `updateCoins`), blocs, particules, caméra | tout |
 | `src/loop/frame.js` | `frame` (rAF) | update, render |
+| `scripts/balance.mjs`, `scripts/balance/` | harnais d'équilibrage (hors jeu) : lancement Chrome, pilote `world.pilot` et écrans de choix (`pilot.js`), profils, décisions pures (`decide.js`), rapport HTML (`report.js`) | src/ (servi par Vite) |
 
 ## Où va le nouveau code
 

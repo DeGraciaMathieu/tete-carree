@@ -72,12 +72,13 @@ function dropCoins(x, y, n, lost = false) {
   }
 }
 
-export function hurtPlayer(dmg, soft) {
+// by : source du coup (type d'ennemi, 'acid', 'blast' pour une explosion du joueur, 'sablier'), gardée pour les mesures.
+export function hurtPlayer(dmg, soft, by = '') {
   if (player.dead || (world.state !== 'play' && !world.demo)) return;
   if (playerProtected(player)) return;
   // Gilet (Comptoir) : le premier vrai coup de la vague ne fait rien
   if (!soft && S.buffs.gilet === 1) { S.buffs.gilet = 2; player.invuln = .3; pop(player.x, player.y - 46, tr.shop.gilet.name, '#dfe8ef'); sfx('shieldbreak'); return; }
-  S.waveHurt = true; // Contrat (Comptoir)
+  S.waveHurt = true; S.lastHurtBy = by; // Contrat (Comptoir) ; source du dernier coup
   // Cupidité : un vrai coup fait tomber des pièces de la bourse autour du joueur, à reprendre
   const lost = soft ? 0 : coinsLostOnHit(S.mods, S.money);
   if (lost) { S.money -= lost; dropCoins(player.x, player.y, lost, true); pop(player.x, player.y - 62, `−${lost}`, '#ff8f84'); }
@@ -121,7 +122,7 @@ export function explosion(x, y, R, dmg, own = false) {
     if (d < R + e.r) { const f = 1 - Math.max(0, d - e.r) / R * BLAST_FALLOFF; hurtEnemy(e, dmg * f * em, dx / d, dy / d, BLAST_KNOCK * f, 'blast'); }
   }
   const pd = Math.hypot(player.x - x, player.y - y);
-  if (pd < R * BLAST_SELF_RANGE) hurtPlayer(dmg * BLAST_SELF_DAMAGE * (1 - pd / R * BLAST_SELF_FALLOFF) * (own ? ownBlastSelfMul(S.mods) : 1));
+  if (pd < R * BLAST_SELF_RANGE) hurtPlayer(dmg * BLAST_SELF_DAMAGE * (1 - pd / R * BLAST_SELF_FALLOFF) * (own ? ownBlastSelfMul(S.mods) : 1), false, own ? 'blast' : 'b');
   for (const b of blocks.values()) {
     const bx = b.tx * T + T / 2, by = b.ty * T + T / 2, d = Math.hypot(bx - x, by - y);
     if (d < R + BLAST_BLOCK_REACH && d > 1) {

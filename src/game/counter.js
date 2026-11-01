@@ -18,6 +18,8 @@ import { $, clamp } from '../util.js';
 // afterShop : à faire en repartant (bannière de la carte prise, qui sinon s'afficherait par-dessus le Comptoir).
 let stall = [], sold = [], restocks = 0, afterShop = null;
 export let shopFocus = 0;
+// Harnais d'équilibrage : caisses de l'étale et caisses vendues, en lecture seule.
+export const stallOptions = () => ({ stall, sold });
 
 // Prix payé : Marchandage le réduit.
 const price = n => discounted(n, S.mods);

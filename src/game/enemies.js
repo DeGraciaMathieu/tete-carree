@@ -74,5 +74,5 @@ function splashAcid(x, y) {
   if (isVoid(x, y) || tileAt(Math.floor(x / T), Math.floor(y / T))) return;
   world.puddles.push({ x, y, t: PUDDLE_LIFE, max: PUDDLE_LIFE, r: PUDDLE_RADIUS });
   fctx.fillStyle = 'rgba(110,140,40,.16)'; fctx.beginPath(); fctx.ellipse(x, y, 22, 13, 0, 0, 7); fctx.fill();
-  if (Math.hypot(player.x - x, (player.y - y) * 1.4) < ACID_SPLASH_RADIUS) hurtPlayer(ACID_SPLASH_DAMAGE);
+  if (Math.hypot(player.x - x, (player.y - y) * 1.4) < ACID_SPLASH_RADIUS) hurtPlayer(ACID_SPLASH_DAMAGE, false, 's');
 }

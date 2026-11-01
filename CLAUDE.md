@@ -16,6 +16,7 @@ cartes de modificateurs entre les vagues. Publié sur itch.io comme jeu HTML jou
 | `npm run build` | `dist/` avec `index.html` à la racine, chemins relatifs |
 | `npm run package` | build + zip du **contenu** de `dist/` dans `tete-carree-itch.zip` (commande `zip` du système) |
 | `npm run perf` | 20 s de partie dans Chrome sans interface ; échoue si les allocations JS dépassent le budget (10 Mo/s) |
+| `npm run balance` | parties jouées par cinq profils de pilote dans Chrome sans interface ; rapport HTML et mesures dans `reports/` (options `--profils`, `--parties`, `--vagues`, `--arene`, `--onglets`) |
 
 Pas de linter ni de formateur : n'en ajoute pas sans qu'on le demande.
 Ouvrir `index.html` par double-clic ne marche pas (ESM non servi en `file://`).
@@ -102,6 +103,8 @@ et les questions ouvertes : lis-le avant tout changement structurel.
 - Pour vérifier le build publié : `npm run build` puis `./node_modules/.bin/vite preview`.
 - Après un changement dans un chemin chaud, et avant chaque publication sur itch.io, lance
   `npm run perf` : en cas d'échec, il nomme les fonctions qui allouent le plus.
+- Pour un changement d'équilibrage (valeurs de `config.js`, cartes, vagues), lance `npm run balance` avant et après :
+  le rapport (`reports/`) compare les profils de pilote ; il compare des réglages, il ne juge pas une vague seule.
 - Pour une modification visible du joueur (rendu, écran, HUD, caméra, décor, thème) ou qui offre
   plusieurs options, fais d'office une page HTML d'exemples (artifact, hors du dépôt) : style du jeu
   (case de `T` px, vue 3/4, contour sombre, polices et couleurs de `src/style.css`) et vraies données

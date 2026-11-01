@@ -255,6 +255,25 @@ guerre, Avarice, Cupidité, Mercenaire).
 - Le rendu lit le clignotement des pièces et le bonus de Trésor de guerre par des raccourcis de `state/world.js`
   (`coinBlink`, `hoardMul`), pour ne pas importer `rules/` depuis `render/`.
 
+## Harnais d'équilibrage
+
+Spécification : `docs/prd/harnais-equilibrage.md`. Commande `npm run balance`, code dans `scripts/balance/`.
+
+- Vraie partie (`world.demo` faux) pilotée par `world.pilot`, plutôt que la démo : la démo coupe les pièces, le
+  Comptoir, la vraie pause et choisit ses cartes seule. Quand `world.pilot` est nul, le jeu ne change pas.
+- La page du jeu est chargée telle quelle ; un script injecté avant le jeu fige `requestAnimationFrame` (aucun
+  rendu) et rend `setTimeout` immédiat (distribution des cartes, sorties d'écran). Le harnais appelle `update(1/60)`
+  en boucle : le pas reste celui du jeu, pour ne pas fausser physique et collisions.
+- `Math.random` est remplacé par un tirage à graine avant chaque partie : même graine, même partie, tant que le code
+  ne change pas. Le pilote a son propre tirage, dérivé de la graine.
+- `hurtPlayer(dmg, soft, by)` garde la source du dernier coup dans `S.lastHurtBy` (cause de la mort du rapport).
+- Le pilote s'écarte des flaques d'acide (sauf le profil Débutant) : la démo ne le fait pas, et l'acide dominait
+  les causes de mort de tous les profils au premier essai.
+- Ce que le pilote ne sait pas faire : poser barricades et barils, lancer grenades et roquettes, bannir ou racheter
+  un pacte autrement que par les règles simples de son profil. Ces armes ne sont pas mesurées.
+- Mesuré au premier essai : environ 16 fois le temps réel par onglet, une partie jusqu'à la vague 8 en une vingtaine
+  de secondes.
+
 ## Langues : français et anglais
 
 - Tous les textes affichés au joueur vivent dans `src/i18n/fr.js` et `src/i18n/en.js`, mêmes clés
@@ -370,3 +389,5 @@ Decisions the code does not settle and that were not made. Never resolved by gue
   boutiques sur la même bourse à régler en jeu. Liste des cartes louables à vérifier carte par carte (Second souffle…).
 - Cartes du butin : Aimant enlève la prise de risque de Collecte ; Mercenaire, s'il sort à la première carte,
   retarde beaucoup les premières armes ; Trésor de guerre peut dissuader de tout achat. À observer en jeu.
+- Harnais d'équilibrage : le profil Débutant (visée 0,4 s et 15°, sans roulade) meurt dès les vagues 1 à 2 au premier
+  essai ; trop faible pour être utile, ou fidèle à un vrai débutant ?
