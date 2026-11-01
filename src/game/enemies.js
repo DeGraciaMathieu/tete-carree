@@ -27,12 +27,18 @@ export function spawnEnemy(type, door) {
   const n = S.wave;
   const s = ENEMY_STATS[type] || ENEMY_STATS.d;
   const hpMul = enemyHpMul(S.mods);
-  const e = { type, r: s.r, hp: (s.hp + n * s.hpWave) * hpMul, sp: (s.sp + Math.min(s.spCap, n * s.spWave) + rng() * s.spRand) * enemySpeedMul(S.mods) };
-  if (type === 'a') e.shield = (s.shield + n * s.shieldWave) * hpMul;
-  else if (type === 's') { e.spitCd = s.spitCd + rng() * s.spitCdRand; e.wind = 0; }
-  else if (s === ENEMY_STATS.d) e.fire = s.fire + rng() * s.fireRand;
-  Object.assign(e, { x: dx * T + T / 2 + jitter(6), y: dy * T + T / 2 + jitter(6), vx: 0, vy: 0, fx: 0, fy: 1, flash: 0, atk: ENEMY_FIRST_ATTACK, walk: Math.random() * 6, moving: true, bump: -1, dead: false });
-  e.shieldMax = e.shield || 0;
+  // Même forme d'objet pour tous les types (propriétés dans le même ordre, toutes présentes dès l'apparition) :
+  // V8 lit alors e.x, e.y… sans créer un nombre à chaque accès dans les boucles sur la horde.
+  // Tirages dans l'ordre d'origine : vitesse, puis recharge (cracheur) ou tir (diable), puis position.
+  const sp = (s.sp + Math.min(s.spCap, n * s.spWave) + rng() * s.spRand) * enemySpeedMul(S.mods);
+  const shield = type === 'a' ? (s.shield + n * s.shieldWave) * hpMul : 0;
+  const spitCd = type === 's' ? s.spitCd + rng() * s.spitCdRand : 0;
+  const fire = type !== 'a' && type !== 's' && s === ENEMY_STATS.d ? s.fire + rng() * s.fireRand : 0;
+  const x = dx * T + T / 2 + jitter(6), y = dy * T + T / 2 + jitter(6);
+  const e = {
+    type, r: s.r, hp: (s.hp + n * s.hpWave) * hpMul, sp, shield, shieldMax: shield, shieldFlash: 0, spitCd, wind: 0, see: false, fire,
+    fuse: undefined, knockT: 0, x, y, vx: 0, vy: 0, fx: 0, fy: 1, flash: 0, atk: ENEMY_FIRST_ATTACK, walk: Math.random() * 6, moving: true, bump: -1, dead: false,
+  };
   e.x = clamp(e.x, e.r + 1, MW * T - e.r - 1); e.y = clamp(e.y, e.r + 1, MH * T - e.r - 1);
   world.enemies.push(e);
 }

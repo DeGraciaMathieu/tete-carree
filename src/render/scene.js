@@ -177,6 +177,9 @@ export function drawBlock(b) {
   }
   ctx.restore();
 }
+function drawEnemy(e) {
+  if (e.type === 'b') drawBloater(e); else if (e.type === 'r') drawRunner(e); else if (e.type === 's') drawSpitter(e); else if (e.type === 'a') drawArmored(e); else drawChar(e, e.type);
+}
 function drawPickup(p) {
   const bb = Math.sin(S.time * 4 + p.ph) * 2;
   ctx.save(); ctx.translate(Math.round(p.x), Math.round(p.y));
@@ -239,6 +242,18 @@ function drawBlindness() {
   ctx.fillStyle = blindGrad; ctx.fillRect(-BLIND_COVER, -BLIND_COVER, BLIND_COVER * 2, BLIND_COVER * 2);
   ctx.restore();
 }
+// Liste d'affichage triée par profondeur (k) : entrées réutilisées d'une image à l'autre et tri par insertion
+// à l'ajout, stable comme Array.prototype.sort, donc même ordre de dessin, sans allocation ni comparateur.
+const drawList = [];
+let drawN = 0;
+function addDraw(k, t, o, tx, ty, v) {
+  let d = drawList[drawN];
+  if (!d) d = drawList[drawN] = { k: 0, t: 0, o: null, tx: 0, ty: 0, v: 0 };
+  d.k = k; d.t = t; d.o = o; d.tx = tx; d.ty = ty; d.v = v;
+  let j = drawN++;
+  while (j > 0 && drawList[j - 1].k > k) { drawList[j] = drawList[j - 1]; j--; }
+  drawList[j] = d;
+}
 export function render() {
   ctx.setTransform(1, 0, 0, 1, 0, 0);
   ctx.fillStyle = '#1a1c1d'; ctx.fillRect(0, 0, cv.width, cv.height);
@@ -274,25 +289,25 @@ export function render() {
     ctx.restore();
   }
   drawCoins(cam.x - hw - 20, cam.x + hw + 20, cam.y - hh - 20, cam.y + hh + 40);
-  const list = [];
+  drawN = 0;
   for (let ty = ty0; ty <= ty1; ty++) for (let tx = tx0; tx <= tx1; tx++) {
-    const v = map[ty * MW + tx]; if (v === 1 || v === 2) list.push({ k: (ty + 1) * T, t: 0, tx, ty, v });
+    const v = map[ty * MW + tx]; if (v === 1 || v === 2) addDraw((ty + 1) * T, 0, null, tx, ty, v);
   }
-  for (const b of blocks.values()) list.push({ k: b.ty * T + T * .75, t: 1, o: b });
-  for (const p of world.pickups) list.push({ k: p.y, t: 2, o: p });
-  for (const e of world.enemies) list.push({ k: e.y, t: 3, o: e });
-  if (!player.dead) list.push({ k: player.y, t: 4, o: player });
-  for (const g of world.grenades) list.push({ k: g.y, t: 5, o: g });
-  for (const r of world.rockets) list.push({ k: r.y, t: 6, o: r });
-  list.sort((a, b) => a.k - b.k);
+  for (const b of blocks.values()) addDraw(b.ty * T + T * .75, 1, b, 0, 0, 0);
+  for (let i = 0; i < world.pickups.length; i++) addDraw(world.pickups[i].y, 2, world.pickups[i], 0, 0, 0);
+  for (let i = 0; i < world.enemies.length; i++) addDraw(world.enemies[i].y, 3, world.enemies[i], 0, 0, 0);
+  if (!player.dead) addDraw(player.y, 4, player, 0, 0, 0);
+  for (let i = 0; i < world.grenades.length; i++) addDraw(world.grenades[i].y, 5, world.grenades[i], 0, 0, 0);
+  for (let i = 0; i < world.rockets.length; i++) addDraw(world.rockets[i].y, 6, world.rockets[i], 0, 0, 0);
   const vx0 = cam.x - hw - 50, vx1 = cam.x + hw + 50, vy0 = cam.y - hh - 20, vy1 = cam.y + hh + 70;
-  for (const d of list) {
+  for (let i = 0; i < drawN; i++) {
+    const d = drawList[i];
     if (d.t >= 2 && d.t <= 4 && (d.o.x < vx0 || d.o.x > vx1 || d.o.y < vy0 || d.o.y > vy1)) continue;
     switch (d.t) {
       case 0: drawTile(d.tx, d.ty, d.v); break;
       case 1: drawBlock(d.o); break;
-      case 2: outlined(d.o, () => drawPickup(d.o)); break;
-      case 3: { const e = d.o; outlined(e, () => { if (e.type === 'b') drawBloater(e); else if (e.type === 'r') drawRunner(e); else if (e.type === 's') drawSpitter(e); else if (e.type === 'a') drawArmored(e); else drawChar(e, e.type); }); break; }
+      case 2: outlined(d.o, drawPickup); break;
+      case 3: outlined(d.o, drawEnemy); break;
       case 4: outlined(player, drawPlayerState); break;
       case 5: {
         const g = d.o;

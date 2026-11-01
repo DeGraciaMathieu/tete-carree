@@ -123,13 +123,29 @@ Ouvrir `index.html` par double-clic ne fonctionne plus (ESM natif non servi en `
 - Les baisses de fps ponctuelles venaient du ramasse-miettes, pas du rendu : le tas de priorité du
   champ de distances (`rules/pathfield.js`) allouait ~140 Mo/s (échanges par déstructuration, tableau
   renvoyé par `pop()`). Passé en tableaux typés sans allocation : ~2 Mo/s. Champs vérifiés identiques
-  au bit près (empreinte de 480 calculs sur 12 arènes), le bug d'arrondi Float32 est donc conservé.
-- `npm run perf` (`scripts/perf.mjs`) garde ce gain : 20 s de partie dans Chrome sans interface, joueur
-  immobile et invulnérable, profil d'allocations échantillonné, échec au-delà de 10 Mo/s. Hors de
+  au bit près (empreinte de 480 calculs sur 12 arènes), le bug d'arrondi Float32 était donc conservé.
+- Chutes de fps à partir de la vague 10, qui empirent ensuite : le champ de distances coûtait ~14 ms par calcul, toutes les
+  `FIELD_PERIOD` s, à cause du bug d'arrondi Float32 (≈ 25 insertions dans le tas par tuile). Avec une centaine
+  d'ennemis à dessiner, l'image qui le portait dépassait 16,7 ms. Corrigé en stockant le champ en `Float64Array`
+  (≈ 10 fois plus rapide), ce qui tranche l'ancienne question ouverte : la horde trouve désormais un chemin
+  depuis chaque tuile, Bunker compris. Le champ n'est plus recalculé au minuteur si le joueur reste sur la même
+  tuile (résultat identique, il ne dépend que de la carte, des constructions et de cette tuile).
+- `npm run perf` (`scripts/perf.mjs`) garde ce gain : 20 s de partie dans Chrome sans interface, lancée en
+  vague 15 (horde de fin de partie), joueur immobile et invulnérable, profil d'allocations échantillonné, échec au-delà de 10 Mo/s. Hors de
   `npm test` et du hook Stop parce qu'il exige Chrome et dure ~20 s ; un seuil d'allocations sous
   Node serait trop instable pour bloquer.
-- Le rendu alloue ~0,2 Mo/s (liste de tri, fermetures de `outlined`, couleurs de particules) : laissé
-  tel quel, le gain serait invisible.
+- Passé en vague 15, la mesure a révélé ~27 Mo/s (contre ~1,3 en vague 1), proportionnels à la horde. Ramené
+  à 8–9 Mo/s, le chiffre varie d'une partie à l'autre selon la composition tirée :
+  - ennemis tous de la même forme d'objet (`spawnEnemy` : toutes les propriétés, dans le même ordre, dès
+    l'apparition) : avec une forme par type, les accès `e.x`, `e.y`… devenaient mégamorphes et V8 créait
+    un nombre à chaque lecture (séparation : ~7 000 paires par image) ;
+  - mise à jour d'un ennemi et séparation sorties d'`update` (`updateEnemy`, `separate`) : la longue fonction
+    n'était pas optimisée et allouait un nombre à chaque calcul ;
+  - `nextStep` renvoie l'index de la tuile au lieu d'un tableau `[x, y]` ; boucles indexées au lieu de `for…of` ;
+  - dessin des ennemis sans fermeture recréée à chaque appel (`C`, `R`, `E`, bras, bouclier : fonctions du
+    module), `outlined(ent, draw)` appelle `draw(ent)` ; proxy du contour sans `...a` ;
+  - liste d'affichage de `render` : entrées réutilisées, tri par insertion (stable, même ordre de dessin).
+  Reste surtout les nombres passés aux méthodes du canvas, inévitables sans changer la façon de dessiner.
 
 ## Écran titre : partie de démo
 
@@ -322,7 +338,7 @@ Spécification : `docs/prd/harnais-equilibrage.md`. Commande `npm run balance`, 
 | Multiplicateur, Frénésie, cadence, durée du combo, charges de roulade | `rules/modifiers.js` | `tests/modifiers.test.js` | lit `S.mods` et `S.combo` passés en paramètre |
 | Déblocage des armes au score | `rules/unlock.js` | `tests/unlock.test.js` | |
 | Tuiles, crevasses, ligne de vue, marche en ligne droite | `rules/map.js` | `tests/map.test.js` | lit `map` et `blocks` par référence, sans copie (chemin chaud) |
-| Champ de distances de la horde, pas suivant | `rules/pathfield.js` | `tests/pathfield.test.js` | renvoie un nouveau `Float32Array` (≈ 5 fois/s) ; bug connu, voir plus bas |
+| Champ de distances de la horde, pas suivant | `rules/pathfield.js` | `tests/pathfield.test.js` | renvoie un nouveau `Float64Array` (≈ 5 fois/s au plus) |
 | Tirage des trois cartes | `rules/cards.js` | `tests/cards.test.js` | `rng` injecté |
 | Composition des vagues, restants, cadence d'apparition | `rules/waves.js` | `tests/waves.test.js` | `rng` injecté |
 | Points d'un kill, Soif de sang, caisse lâchée | `rules/scoring.js` | `tests/scoring.test.js` | `rollDrop` reçoit `onVoid` pour garder l'ordre exact des tirages |
@@ -355,15 +371,6 @@ Seed: tirée de `Math.random` à chaque nouvelle partie (`resetWorld`). Les test
 Behaviour that looks wrong but was preserved, because the refactor must not change the
 game. Each entry: what it is, where, and why it was not fixed.
 
-- **Champ de distances : tuiles jamais propagées (arrondi Float32).** `relax()` dans
-  `src/rules/pathfield.js` compare la distance extraite du tas (float64) à sa copie stockée dans un
-  `Float32Array` (`if (d > D[i]) continue`). Quand l'arrondi Float32 descend sous la valeur exacte
-  — fréquent dès qu'un chemin passe par des diagonales (coût 1,414) — la tuile est sautée et ses
-  voisines ne sont pas propagées. Mesuré sur la version d'origine : 292 tuiles sur 1 320 sans
-  chemin dans une arène vide, de 5 à 23 % des tuiles de sol dans l'arène réelle selon la position
-  du joueur. Un ennemi sur une telle tuile n'obtient pas de `nextStep`. Comportement identique
-  au prototype (vérifié tuile à tuile sur 140 positions du joueur). Documenté par un
-  `test.fails` dans `tests/pathfield.test.js`.
 - **Double balise `<meta name="viewport">`** dans `index.html` : la première n'a pas
   `user-scalable=no`, la seconde l'a. Le navigateur retient en général la première.
 - **`KeyQ` change d'arme (précédente)** mais n'est pas mentionnée dans les contrôles de l'écran titre.
@@ -380,10 +387,6 @@ game. Each entry: what it is, where, and why it was not fixed.
 
 Decisions the code does not settle and that were not made. Never resolved by guessing.
 
-- Corriger ou non le bug d'arrondi du champ de distances : le corriger change le déplacement de la horde.
-  Il pèse davantage dans le Bunker : joueur au départ, 66 % du sol sans chemin (Entrepôt 11 %, Colonnade 11 %,
-  Le Pont 7 %, La Fosse 1 %) ; les ennemis de ces tuiles marchent droit sur le joueur et butent sur les murs
-  de la casemate. Corriger le bug, retoucher le Bunker, ou le garder tel quel ?
 - Records par arène, ou communs comme aujourd'hui ?
 - `npm run package` s'appuie sur la commande `zip` du système : faut-il un script multiplateforme
   (Windows sans WSL) ? Cela demanderait une dépendance de dev.

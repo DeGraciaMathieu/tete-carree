@@ -57,8 +57,10 @@ function relax(map, blocks, heap, D, viaVoid) {
 }
 
 // Distance de chaque tuile au joueur, posté sur la tuile (ptx, pty). Renvoie un nouveau tableau.
+// Float64 comme les distances du tas : avec un stockage Float32, l'arrondi faisait sauter des tuiles
+// (jamais propagées) et réinsérer les autres des dizaines de fois.
 export function computeField(map, blocks, ptx, pty) {
-  const dist = new Float32Array(MW * MH);
+  const dist = new Float64Array(MW * MH);
   const s = pty * MW + ptx;
   // 1. vrais chemins jusqu'au joueur : la horde contourne le vide
   let heap = createHeap();
@@ -67,7 +69,7 @@ export function computeField(map, blocks, ptx, pty) {
   let cut = false;
   for (let i = 0; i < dist.length; i++) if (map[i] === 0 && dist[i] > 1e8) { cut = true; break; }
   if (!cut) return dist;
-  const distV = new Float32Array(MW * MH);
+  const distV = new Float64Array(MW * MH);
   heap = createHeap();
   distV.fill(UNREACHABLE); distV[s] = 0; heap.push(s, 0); relax(map, blocks, heap, distV, true);
   heap = createHeap();
@@ -76,18 +78,18 @@ export function computeField(map, blocks, ptx, pty) {
   return dist;
 }
 
-// Centre de la tuile voisine qui rapproche le plus du joueur, ou null si aucune.
+// Tuile voisine qui rapproche le plus du joueur (index ty * MW + tx), ou -1 si aucune. Un index plutôt
+// qu'un couple de coordonnées : appelé pour chaque ennemi à chaque image, sans allocation.
 export function nextStep(map, blocks, dist, x, y) {
   const tx = Math.floor(x / T), ty = Math.floor(y / T);
-  if (!passable(map, tx, ty)) return null;
+  if (!passable(map, tx, ty)) return -1;
   let bestD = dist[ty * MW + tx], bi = -1;
-  for (const [dx, dy] of NB) {
-    const nx = tx + dx, ny = ty + dy;
+  for (let k = 0; k < NB.length; k++) {
+    const dx = NB[k][0], dy = NB[k][1], nx = tx + dx, ny = ty + dy;
     if (!passable(map, nx, ny)) continue;
     if (dx && dy && (!openT(map, blocks, tx + dx, ty) || !openT(map, blocks, tx, ty + dy))) continue;
     const v = dist[ny * MW + nx];
     if (v < bestD) { bestD = v; bi = ny * MW + nx; }
   }
-  if (bi < 0) return null;
-  return [(bi % MW) * T + T / 2, (bi / MW | 0) * T + T / 2];
+  return bi;
 }

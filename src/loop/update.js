@@ -30,7 +30,7 @@ export function update(dt) {
 
   // flaques d'acide
   player.inAcid = false;
-  for (const p of world.puddles) { p.t -= dt; if (!player.dead && Math.hypot(player.x - p.x, (player.y - p.y) * 1.6) < p.r) player.inAcid = true; }
+  for (let i = 0; i < world.puddles.length; i++) { const p = world.puddles[i]; p.t -= dt; if (!player.dead && Math.hypot(player.x - p.x, (player.y - p.y) * 1.6) < p.r) player.inAcid = true; }
   world.puddles = world.puddles.filter(p => p.t > 0);
   if (player.inAcid && !player.roll && playing) {
     player.acidT = (player.acidT || 0) - dt;
@@ -127,102 +127,17 @@ export function update(dt) {
 
   // champ de distances
   S.fieldT -= dt;
-  if (world.fieldDirty || S.fieldT <= 0) { computeField(); world.fieldDirty = false; S.fieldT = FIELD_PERIOD; }
+  if (world.fieldDirty || S.fieldT <= 0) { computeField(world.fieldDirty); world.fieldDirty = false; S.fieldT = FIELD_PERIOD; }
 
   // ennemis
-  for (const e of world.enemies) {
-    if (e.dead) continue;
-    e.flash -= dt; e.atk -= dt; e.bump = -1;
-    if (!passable(Math.floor(e.x / T), Math.floor(e.y / T))) unstick(e);
-    const dxp = player.x - e.x, dyp = player.y - e.y, dp = Math.hypot(dxp, dyp) || 1;
-    let tx = player.x, ty = player.y;
-    if (dp > T * 1.3 || player.dead || !walkLine(e.x, e.y, player.x, player.y)) {
-      const n = nextStep(e); if (n) { tx = n[0]; ty = n[1]; }
-    }
-    if (player.dead) { tx = e.x + Math.cos(e.walk) * 20; ty = e.y + Math.sin(e.walk * .7) * 20; }
-    // cracheur : garde ses distances quand il voit le joueur, recule s'il est trop près
-    let hold = false;
-    if (e.type === 's' && !player.dead) {
-      e.see = dp < SPITTER_SIGHT && los(e.x, e.y, player.x, player.y);
-      if (e.see && dp < SPITTER_TOO_CLOSE) {
-        const bx = e.x - dxp / dp * SPITTER_BACKOFF, by = e.y - dyp / dp * SPITTER_BACKOFF;
-        if (walkLine(e.x, e.y, bx, by)) { tx = bx; ty = by; } else hold = true;
-      } else if (e.see && dp < SPITTER_HOLD) hold = true;
-      if (e.wind > 0) hold = true;
-      if (hold) { const sw = Math.sin(S.time * 1.3 + e.x * .1); tx = e.x - dyp / dp * 20 * sw; ty = e.y + dxp / dp * 20 * sw; }
-    }
-    let vx = tx - e.x, vy = ty - e.y; const l = Math.hypot(vx, vy) || 1;
-    const k = Math.min(1, dt * 6);
-    const sp = e.fuse !== undefined ? e.sp * BLOATER_FUSE_SPEED : hold ? (e.wind > 0 ? 0 : e.sp * SPITTER_HOLD_SPEED) : e.sp;
-    e.vx += (vx / l * sp - e.vx) * k; e.vy += (vy / l * sp - e.vy) * k;
-    const fxT = hold ? dxp / dp : vx / l, fyT = hold ? dyp / dp : vy / l;
-    const turn = Math.min(1, dt * (e.type === 'a' ? 2.4 : 8));
-    e.fx += (fxT - e.fx) * turn; e.fy += (fyT - e.fy) * turn;
-    const flung = e.knockT > 0; e.knockT = (e.knockT || 0) - dt;
-    moveCircle(e, e.vx * dt, 0, flung); moveCircle(e, 0, e.vy * dt, flung);
-    if (flung && isVoid(e.x, e.y)) { killEnemy(e, 0, 0, true); continue; }
-    e.walk += dt * (e.type === 'd' ? 11 : e.type === 'b' ? 6 : e.type === 'r' ? 17 : e.type === 's' ? 7 : e.type === 'a' ? 7 : 8);
-    e.shieldFlash -= dt;
-    if (e.type === 'r' && Math.random() < dt * 6) dust(e.x - e.fx * 6, e.y - e.fy * 6, 1);
-    if (e.type === 's' && playing && !player.dead) {
-      e.spitCd -= dt;
-      if (e.wind > 0) { e.wind -= dt; if (e.wind <= 0) spit(e); }
-      else if (e.spitCd <= 0 && e.see && dp > SPITTER_MIN_RANGE) { e.wind = SPITTER_WINDUP; sfx('gurgle', 150); }
-    }
-    if (e.type === 'b') {
-      if (e.fuse === undefined && !player.dead && playing && dp < e.r + player.r + BLOATER_TRIGGER_REACH && walkLine(e.x, e.y, player.x, player.y)) { e.fuse = BLOATER_FUSE; sfx('fuse'); }
-      if (e.fuse !== undefined) {
-        e.fuse -= dt;
-        if (e.fuse <= 0) { e.dead = true; gibs(e.x, e.y, 8, ['#c9b86a', '#8fd14f', '#7a4a6a']); world.bursts.push({ x: e.x, y: e.y, t: 0 }); continue; }
-      }
-      if (playing && Math.random() < dt * .15) sfx('gloop', 400);
-    } else if (!player.dead && dp < e.r + player.r + MELEE_REACH && e.atk <= 0 && playing) {
-      hurtPlayer(ENEMY_MELEE_DAMAGE[e.type], false, e.type); e.atk = ENEMY_ATTACK_CD[e.type];
-      if (e.type === 'a' && !player.roll) { moveCircle(player, dxp / dp * ARMOR_SHOVE, 0); moveCircle(player, 0, dyp / dp * ARMOR_SHOVE); sfx('clang'); }
-      e.vx += dxp / dp * 60; e.vy += dyp / dp * 60;
-    }
-    if (e.bump >= 0 && e.atk <= 0) {
-      const b = blocks.get(e.bump);
-      if (b) { damageBlock(b, ENEMY_BLOCK_DAMAGE[e.type]); e.atk = BLOCK_ATTACK_CD; if (b.kind === 'wall' && mod('barbeles')) hurtEnemy(e, BARBELES_DAMAGE * mod('barbeles'), 0, 0, 0); dust(b.tx * T + T / 2, b.ty * T + T / 2, 2); }
-    }
-    if (e.type === 'd' && playing && !player.dead) {
-      e.fire -= dt;
-      if (e.fire <= 0) {
-        e.fire = DEVIL_FIRE_CD + rng() * DEVIL_FIRE_RAND;
-        if (dp < DEVIL_RANGE && los(e.x, e.y, player.x, player.y)) {
-          const a = Math.atan2(dyp, dxp) + jitter(DEVIL_SPREAD);
-          world.projs.push({ x: e.x + Math.cos(a) * 12, y: e.y + Math.sin(a) * 12, vx: Math.cos(a) * FIREBALL_SPEED, vy: Math.sin(a) * FIREBALL_SPEED, life: FIREBALL_LIFE });
-          sfx('fire', 80);
-        }
-      }
-    }
-  }
-  // séparation
-  for (let i = 0; i < world.enemies.length; i++) {
-    const a = world.enemies[i]; if (a.dead) continue;
-    for (let j = i + 1; j < world.enemies.length; j++) {
-      const b = world.enemies[j]; if (b.dead) continue;
-      const dx = b.x - a.x, dy = b.y - a.y, rr = a.r + b.r - 2, d2 = dx * dx + dy * dy;
-      if (d2 < rr * rr && d2 > .001) {
-        const d = Math.sqrt(d2), o = (rr - d) / d * .5;
-        moveCircle(a, -dx * o, -dy * o); moveCircle(b, dx * o, dy * o);
-      }
-    }
-    if (!player.dead) {
-      const dx = player.x - a.x, dy = player.y - a.y, rr = a.r + player.r, d2 = dx * dx + dy * dy;
-      if (d2 < rr * rr && d2 > .001) {
-        const d = Math.sqrt(d2), o = (rr - d) / d;
-        if (player.roll) moveCircle(a, -dx * o, -dy * o);
-        else { moveCircle(a, -dx * o * .7, -dy * o * .7); moveCircle(player, dx * o * .3, dy * o * .3); }
-      }
-    }
-  }
+  for (let i = 0; i < world.enemies.length; i++) updateEnemy(world.enemies[i], dt, playing);
+  separate();
   world.enemies = world.enemies.filter(e => !e.dead);
-  for (const f of world.fallers) f.t += dt;
+  for (let i = 0; i < world.fallers.length; i++) world.fallers[i].t += dt;
   world.fallers = world.fallers.filter(f => f.t < .7);
 
   // boules de feu
-  for (const p of world.projs) {
+  for (let i = 0; i < world.projs.length; i++) { const p = world.projs[i];
     p.life -= dt; p.x += p.vx * dt; p.y += p.vy * dt;
     if (Math.random() < .6) addPart({ t: 'fire', x: p.x, y: p.y, z: 14, vx: rnd(20), vy: rnd(20), vz: 20, life: .25, max: .25, size: 4 });
     const tx = Math.floor(p.x / T), ty = Math.floor(p.y / T), s = shotTile(tx, ty);
@@ -232,7 +147,7 @@ export function update(dt) {
   world.projs = world.projs.filter(p => p.life > 0);
 
   // grenades
-  for (const g of world.grenades) {
+  for (let i = 0; i < world.grenades.length; i++) { const g = world.grenades[i];
     g.t -= dt; g.vz -= 700 * dt; g.z += g.vz * dt;
     if (g.z <= 0) { g.z = 0; if (g.vz < -60) { g.vz = -g.vz * .38; g.vx *= .65; g.vy *= .65; } else g.vz = 0; }
     if (g.z === 0) { const f = Math.pow(.15, dt); g.vx *= f; g.vy *= f; }
@@ -247,12 +162,12 @@ export function update(dt) {
   world.grenades = world.grenades.filter(g => g.t > 0);
 
   // roquettes
-  for (const r of world.rockets) {
+  for (let i = 0; i < world.rockets.length; i++) { const r = world.rockets[i];
     r.life -= dt;
     const nx = r.x + r.vx * dt, ny = r.y + r.vy * dt;
     addPart({ t: 'smoke', x: r.x, y: r.y, z: 14, vx: rnd(15), vy: rnd(15), vz: 8, life: .5, max: .5, size: 4, color: 'rgba(200,196,188,' });
     let hit = shotTile(Math.floor(nx / T), Math.floor(ny / T)) !== 0;
-    if (!hit) for (const e of world.enemies) if (Math.hypot(e.x - nx, e.y - ny) < e.r + ROCKET_HIT_REACH) { hit = true; break; }
+    if (!hit) for (let j = 0; j < world.enemies.length; j++) { const e = world.enemies[j]; if (Math.hypot(e.x - nx, e.y - ny) < e.r + ROCKET_HIT_REACH) { hit = true; break; } }
     if (hit || r.life <= 0) {
       const tx = Math.floor(nx / T), ty = Math.floor(ny / T);
       const b = blocks.get(ty * MW + tx); if (b && b.kind === 'barrel') explodeBarrel(b);
@@ -263,14 +178,14 @@ export function update(dt) {
   world.rockets = world.rockets.filter(r => r.life > 0);
 
   // barils en chaîne
-  for (const p of world.pending) { p.t -= dt; if (p.t <= 0) explodeBarrel(p.b); }
+  for (let i = 0; i < world.pending.length; i++) { const p = world.pending[i]; p.t -= dt; if (p.t <= 0) explodeBarrel(p.b); }
   world.pending = world.pending.filter(p => p.t > 0);
-  for (const b of world.bursts) { b.t -= dt; if (b.t <= 0) toxicBurst(b.x, b.y); }
+  for (let i = 0; i < world.bursts.length; i++) { const b = world.bursts[i]; b.t -= dt; if (b.t <= 0) toxicBurst(b.x, b.y); }
   world.bursts = world.bursts.filter(b => b.t > 0);
   updateFires(dt);
 
   // ramassage
-  if (!player.dead) for (const p of world.pickups) {
+  if (!player.dead) for (let k = 0; k < world.pickups.length; k++) { const p = world.pickups[k];
     if (mod('aimant')) {
       const ax = player.x - p.x, ay = player.y - p.y, d = Math.hypot(ax, ay);
       if (d < AIMANT_RANGE * mod('aimant') && d > 1) { const sp = Math.min(d, AIMANT_SPEED * dt); p.x += ax / d * sp; p.y += ay / d * sp; }
@@ -296,7 +211,7 @@ export function update(dt) {
   for (const b of blocks.values()) { b.flash -= dt; b.drop = Math.max(0, b.drop - dt * 6); if (b.turret && playing) updateTurret(b, dt); }
 
   // particules
-  for (const p of world.parts) {
+  for (let i = 0; i < world.parts.length; i++) { const p = world.parts[i];
     p.life -= dt;
     if (p.t === 'smoke') { p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; p.size += dt * 10; continue; }
     if (p.t === 'fire') { p.x += p.vx * dt; p.y += p.vy * dt; p.z += p.vz * dt; p.vx *= .92; p.vy *= .92; continue; }
@@ -318,9 +233,9 @@ export function update(dt) {
   }
   world.parts = world.parts.filter(p => p.life > 0);
 
-  for (const t of world.tracers) t.t -= dt; world.tracers = world.tracers.filter(t => t.t > 0);
-  for (const p of world.pops) { p.t -= dt * .9; p.y -= 26 * dt; } world.pops = world.pops.filter(p => p.t > 0);
-  for (const b of world.booms) b.t += dt; world.booms = world.booms.filter(b => b.t < b.max);
+  for (let i = 0; i < world.tracers.length; i++) world.tracers[i].t -= dt; world.tracers = world.tracers.filter(t => t.t > 0);
+  for (let i = 0; i < world.pops.length; i++) { const p = world.pops[i]; p.t -= dt * .9; p.y -= 26 * dt; } world.pops = world.pops.filter(p => p.t > 0);
+  for (let i = 0; i < world.booms.length; i++) world.booms[i].t += dt; world.booms = world.booms.filter(b => b.t < b.max);
 
   // caméra
   const lead = player.dead ? 0 : 34;
@@ -335,6 +250,100 @@ export function update(dt) {
   cam.kx += cam.kvx * dt; cam.ky += cam.kvy * dt;
   player.recoilV += (-500 * player.recoil - 30 * player.recoilV) * dt;
   player.recoil = Math.max(0, player.recoil + player.recoilV * dt);
+}
+
+// Un ennemi : visée (champ de distances ou ligne droite), déplacement, attaques propres à son type.
+// Fonction à part, comme `separate`, pour que V8 l'optimise malgré la longueur d'`update`.
+function updateEnemy(e, dt, playing) {
+  if (e.dead) return;
+  e.flash -= dt; e.atk -= dt; e.bump = -1;
+  if (!passable(Math.floor(e.x / T), Math.floor(e.y / T))) unstick(e);
+  const dxp = player.x - e.x, dyp = player.y - e.y, dp = Math.hypot(dxp, dyp) || 1;
+  let tx = player.x, ty = player.y;
+  if (dp > T * 1.3 || player.dead || !walkLine(e.x, e.y, player.x, player.y)) {
+    const n = nextStep(e); if (n >= 0) { tx = (n % MW) * T + T / 2; ty = (n / MW | 0) * T + T / 2; }
+  }
+  if (player.dead) { tx = e.x + Math.cos(e.walk) * 20; ty = e.y + Math.sin(e.walk * .7) * 20; }
+  // cracheur : garde ses distances quand il voit le joueur, recule s'il est trop près
+  let hold = false;
+  if (e.type === 's' && !player.dead) {
+    e.see = dp < SPITTER_SIGHT && los(e.x, e.y, player.x, player.y);
+    if (e.see && dp < SPITTER_TOO_CLOSE) {
+      const bx = e.x - dxp / dp * SPITTER_BACKOFF, by = e.y - dyp / dp * SPITTER_BACKOFF;
+      if (walkLine(e.x, e.y, bx, by)) { tx = bx; ty = by; } else hold = true;
+    } else if (e.see && dp < SPITTER_HOLD) hold = true;
+    if (e.wind > 0) hold = true;
+    if (hold) { const sw = Math.sin(S.time * 1.3 + e.x * .1); tx = e.x - dyp / dp * 20 * sw; ty = e.y + dxp / dp * 20 * sw; }
+  }
+  let vx = tx - e.x, vy = ty - e.y; const l = Math.hypot(vx, vy) || 1;
+  const k = Math.min(1, dt * 6);
+  const sp = e.fuse !== undefined ? e.sp * BLOATER_FUSE_SPEED : hold ? (e.wind > 0 ? 0 : e.sp * SPITTER_HOLD_SPEED) : e.sp;
+  e.vx += (vx / l * sp - e.vx) * k; e.vy += (vy / l * sp - e.vy) * k;
+  const fxT = hold ? dxp / dp : vx / l, fyT = hold ? dyp / dp : vy / l;
+  const turn = Math.min(1, dt * (e.type === 'a' ? 2.4 : 8));
+  e.fx += (fxT - e.fx) * turn; e.fy += (fyT - e.fy) * turn;
+  const flung = e.knockT > 0; e.knockT = (e.knockT || 0) - dt;
+  moveCircle(e, e.vx * dt, 0, flung); moveCircle(e, 0, e.vy * dt, flung);
+  if (flung && isVoid(e.x, e.y)) { killEnemy(e, 0, 0, true); return; }
+  e.walk += dt * (e.type === 'd' ? 11 : e.type === 'b' ? 6 : e.type === 'r' ? 17 : e.type === 's' ? 7 : e.type === 'a' ? 7 : 8);
+  e.shieldFlash -= dt;
+  if (e.type === 'r' && Math.random() < dt * 6) dust(e.x - e.fx * 6, e.y - e.fy * 6, 1);
+  if (e.type === 's' && playing && !player.dead) {
+    e.spitCd -= dt;
+    if (e.wind > 0) { e.wind -= dt; if (e.wind <= 0) spit(e); }
+    else if (e.spitCd <= 0 && e.see && dp > SPITTER_MIN_RANGE) { e.wind = SPITTER_WINDUP; sfx('gurgle', 150); }
+  }
+  if (e.type === 'b') {
+    if (e.fuse === undefined && !player.dead && playing && dp < e.r + player.r + BLOATER_TRIGGER_REACH && walkLine(e.x, e.y, player.x, player.y)) { e.fuse = BLOATER_FUSE; sfx('fuse'); }
+    if (e.fuse !== undefined) {
+      e.fuse -= dt;
+      if (e.fuse <= 0) { e.dead = true; gibs(e.x, e.y, 8, ['#c9b86a', '#8fd14f', '#7a4a6a']); world.bursts.push({ x: e.x, y: e.y, t: 0 }); return; }
+    }
+    if (playing && Math.random() < dt * .15) sfx('gloop', 400);
+  } else if (!player.dead && dp < e.r + player.r + MELEE_REACH && e.atk <= 0 && playing) {
+    hurtPlayer(ENEMY_MELEE_DAMAGE[e.type], false, e.type); e.atk = ENEMY_ATTACK_CD[e.type];
+    if (e.type === 'a' && !player.roll) { moveCircle(player, dxp / dp * ARMOR_SHOVE, 0); moveCircle(player, 0, dyp / dp * ARMOR_SHOVE); sfx('clang'); }
+    e.vx += dxp / dp * 60; e.vy += dyp / dp * 60;
+  }
+  if (e.bump >= 0 && e.atk <= 0) {
+    const b = blocks.get(e.bump);
+    if (b) { damageBlock(b, ENEMY_BLOCK_DAMAGE[e.type]); e.atk = BLOCK_ATTACK_CD; if (b.kind === 'wall' && mod('barbeles')) hurtEnemy(e, BARBELES_DAMAGE * mod('barbeles'), 0, 0, 0); dust(b.tx * T + T / 2, b.ty * T + T / 2, 2); }
+  }
+  if (e.type === 'd' && playing && !player.dead) {
+    e.fire -= dt;
+    if (e.fire <= 0) {
+      e.fire = DEVIL_FIRE_CD + rng() * DEVIL_FIRE_RAND;
+      if (dp < DEVIL_RANGE && los(e.x, e.y, player.x, player.y)) {
+        const a = Math.atan2(dyp, dxp) + jitter(DEVIL_SPREAD);
+        world.projs.push({ x: e.x + Math.cos(a) * 12, y: e.y + Math.sin(a) * 12, vx: Math.cos(a) * FIREBALL_SPEED, vy: Math.sin(a) * FIREBALL_SPEED, life: FIREBALL_LIFE });
+        sfx('fire', 80);
+      }
+    }
+  }
+}
+
+// Séparation : les ennemis qui se chevauchent s'écartent, et repoussent le joueur. Fonction à part : dans
+// la longue `update`, V8 n'optimise pas cette double boucle et alloue un nombre à chaque calcul.
+function separate() {
+  for (let i = 0; i < world.enemies.length; i++) {
+    const a = world.enemies[i]; if (a.dead) continue;
+    for (let j = i + 1; j < world.enemies.length; j++) {
+      const b = world.enemies[j]; if (b.dead) continue;
+      const dx = b.x - a.x, dy = b.y - a.y, rr = a.r + b.r - 2, d2 = dx * dx + dy * dy;
+      if (d2 < rr * rr && d2 > .001) {
+        const d = Math.sqrt(d2), o = (rr - d) / d * .5;
+        moveCircle(a, -dx * o, -dy * o); moveCircle(b, dx * o, dy * o);
+      }
+    }
+    if (!player.dead) {
+      const dx = player.x - a.x, dy = player.y - a.y, rr = a.r + player.r, d2 = dx * dx + dy * dy;
+      if (d2 < rr * rr && d2 > .001) {
+        const d = Math.sqrt(d2), o = (rr - d) / d;
+        if (player.roll) moveCircle(a, -dx * o, -dy * o);
+        else { moveCircle(a, -dx * o * .7, -dy * o * .7); moveCircle(player, dx * o * .3, dy * o * .3); }
+      }
+    }
+  }
 }
 
 // Fin de vague, après les pièces et le Contrat : cotisation de l'Assurance, puis pile ou face du Casino.

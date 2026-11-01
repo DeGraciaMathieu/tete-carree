@@ -15,7 +15,7 @@ cartes de modificateurs entre les vagues. Publié sur itch.io comme jeu HTML jou
 | `npm test` | suite Vitest (`tests/*.test.js`) |
 | `npm run build` | `dist/` avec `index.html` à la racine, chemins relatifs |
 | `npm run package` | build + zip du **contenu** de `dist/` dans `tete-carree-itch.zip` (commande `zip` du système) |
-| `npm run perf` | 20 s de partie dans Chrome sans interface ; échoue si les allocations JS dépassent le budget (10 Mo/s) |
+| `npm run perf` | 20 s de partie en vague 15 dans Chrome sans interface ; échoue si les allocations JS dépassent le budget (10 Mo/s) |
 | `npm run balance` | parties jouées par cinq profils de pilote dans Chrome sans interface ; rapport HTML et mesures dans `reports/` (options `--profils`, `--parties`, `--vagues`, `--arene`, `--onglets`) |
 
 Pas de linter ni de formateur : n'en ajoute pas sans qu'on le demande.
@@ -62,7 +62,7 @@ et les questions ouvertes : lis-le avant tout changement structurel.
 - **Ne retire pas** les protections navigateur : son démarré au premier geste, pause sur `blur` et
   `visibilitychange`, `navigator.getGamepads` sous `try/catch`, accès `localStorage` sous `try/catch`.
 - **Ne corrige pas en passant** un comportement listé dans « Deliberately left alone » de
-  `docs/decisions.md` (bug d'arrondi du champ de distances, etc.) : c'est une décision à part.
+  `docs/decisions.md` (double balise viewport, etc.) : c'est une décision à part.
 - En dessin, n'utilise dans une fonction passée à `outlined()` que les méthodes de contexte que le
   proxy `OLP` de `render/canvas.js` connaît, ou ajoute-les au proxy.
 - **Pas d'allocation évitable dans les chemins chauds** (tout ce qui tourne à chaque image ou plusieurs
@@ -95,8 +95,7 @@ et les questions ouvertes : lis-le avant tout changement structurel.
 
 ## Comportement attendu
 
-- Ne déclare jamais une tâche terminée sans avoir lancé `npm test` et constaté qu'il passe
-  (`test.fails` du champ de distances compris : il doit rester en échec attendu).
+- Ne déclare jamais une tâche terminée sans avoir lancé `npm test` et constaté qu'il passe.
 - Si une approche échoue deux fois, reviens au plan avant de continuer.
 - Un changement de gameplay se teste au niveau macro dans `tests/`, dans le vocabulaire du jeu.
 - Toute question que le code ne tranche pas va dans « Open questions » de `docs/decisions.md`.

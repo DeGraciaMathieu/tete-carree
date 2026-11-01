@@ -44,8 +44,7 @@ Reste dans le périmètre demandé : pas de refonte ni de correction voisine non
 
 1. Écris ou adapte le test macro dans `tests/<module>.test.js` (skill `testing`) : une phrase que le
    joueur reconnaîtrait.
-2. Lance `npm test`. Corrige jusqu'à ce que tout soit vert (le `test.fails` du champ de distances
-   reste en échec attendu).
+2. Lance `npm test`. Corrige jusqu'à ce que tout soit vert.
 3. Pour ce qui n'est pas testable (rendu, entrées, sensations), lance `npm run dev` et vérifie à la
    main ; dis explicitement ce qui a été vérifié ainsi et ce qui ne l'a pas été.
 4. Si une approche échoue deux fois, arrête et reviens au plan avec l'utilisateur.

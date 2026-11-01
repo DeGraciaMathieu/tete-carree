@@ -46,10 +46,13 @@ const OLP = (() => {
     beginPath() { R.beginPath(); }, closePath() { R.closePath(); },
     moveTo(a, b) { R.moveTo(a, b); }, lineTo(a, b) { R.lineTo(a, b); },
     quadraticCurveTo(a, b, c, d) { R.quadraticCurveTo(a, b, c, d); },
-    arc(...a) { R.arc(...a); }, ellipse(...a) { R.ellipse(...a); }, rect(...a) { R.rect(...a); },
+    // paramètres nommés, pas de `...a` : le contour passe ici pour chaque personnage, à chaque image
+    arc(x, y, r, a0, a1, ccw) { R.arc(x, y, r, a0, a1, ccw); },
+    ellipse(x, y, rx, ry, rot, a0, a1, ccw) { R.ellipse(x, y, rx, ry, rot, a0, a1, ccw); },
+    rect(x, y, w, h) { R.rect(x, y, w, h); },
     clip() { R.clip(); },
-    createLinearGradient(...a) { return R.createLinearGradient(...a); },
-    createRadialGradient(...a) { return R.createRadialGradient(...a); },
+    createLinearGradient(x0, y0, x1, y1) { return R.createLinearGradient(x0, y0, x1, y1); },
+    createRadialGradient(x0, y0, r0, x1, y1, r1) { return R.createRadialGradient(x0, y0, r0, x1, y1, r1); },
     fillRect(x, y, w, h) { if (!opaque(fs)) return; R.fillStyle = OUT; R.fillRect(x - OUT_W, y - OUT_W, w + 2 * OUT_W, h + 2 * OUT_W); },
     strokeRect(x, y, w, h) { if (!opaque(ss)) return; R.strokeStyle = OUT; R.lineWidth = lw + 2 * OUT_W; R.strokeRect(x, y, w, h); },
     fill() { if (!opaque(fs)) return; R.fillStyle = OUT; R.fill(); R.strokeStyle = OUT; R.lineWidth = 2 * OUT_W; R.stroke(); },
@@ -60,9 +63,9 @@ export function outlined(ent, draw) {
   if (outlineOn) {
     const real = ctx;
     real.save(); real.lineJoin = 'round'; OLP.bind(real); ctx = OLP;
-    try { draw(); } finally { ctx = real; real.restore(); }
+    try { draw(ent); } finally { ctx = real; real.restore(); }
   }
-  draw();
+  draw(ent);
 }
 // Dessine sur un autre canvas (portraits du bestiaire) : ctx pointe sur g le temps de draw.
 export function drawOn(g, draw) {

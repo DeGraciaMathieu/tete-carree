@@ -86,7 +86,7 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 - Un module ES ne peut pas réaffecter une liaison importée : passe par `world.<x>`.
 - `ctx` est une liaison vivante remplacée pendant `outlined()` : importe-la, ne la copie pas dans
   une variable locale au chargement du module.
-- `computeField` (règle) renvoie un nouveau `Float32Array`, rangé dans `dist` par le wrapper de
-  `state/arena.js` ; `update` le recalcule quand `world.fieldDirty` est vrai (bloc posé ou détruit)
-  ou toutes les `FIELD_PERIOD` secondes.
+- `computeField` (règle) renvoie un nouveau `Float64Array`, rangé dans `dist` par le wrapper de
+  `state/arena.js` ; `update` le recalcule quand `world.fieldDirty` est vrai (bloc posé ou détruit,
+  nouvelle carte) ou toutes les `FIELD_PERIOD` secondes si le joueur a changé de tuile.
 - Les ordres d'appel à `rng()` font partie du comportement : ne les réordonne pas sans raison.

@@ -61,12 +61,11 @@ Champs d'un ennemi : `type`, `r`, `hp`, `sp` (vitesse), `x`, `y`, `vx`, `vy`, `f
 | Requêtes de tuiles | `rules/map.js` (pur, `map`/`blocks` en paramètres) ; wrappers liés à l'état dans `state/arena.js` |
 | Collisions | `moveCircle(e, dx, dy, fly)`, `unstick(e)` (`state/arena.js`) ; `fly` : en l'air, le vide ne bloque pas |
 | Chute dans une crevasse | ennemi projeté (`knockT > 0`) au-dessus d'un `isVoid` ⇒ `killEnemy(e, 0, 0, true)` |
-| Chemin vers le joueur | `computeField` (Dijkstra, `rules/pathfield.js`) recalculé quand `world.fieldDirty` ou toutes les `FIELD_PERIOD` s ; `nextStep(e)` donne la tuile suivante ; une construction coûte `PATH_BLOCK_COST` (la horde la défonce) |
+| Chemin vers le joueur | `computeField` (Dijkstra, `rules/pathfield.js`) recalculé quand `world.fieldDirty`, ou toutes les `FIELD_PERIOD` s si le joueur a changé de tuile ; `nextStep(e)` donne l'index de la tuile suivante (-1 si aucune) ; une construction coûte `PATH_BLOCK_COST` (la horde la défonce) |
 | Approche directe | à moins de `T × 1,3` avec `walkLine` libre, l'ennemi vise le joueur sans le champ |
 
-**Bug connu, ne pas corriger en passant** : `relax()` dans `rules/pathfield.js` saute des tuiles
-à cause de l'arrondi `Float32Array` ; certaines tuiles n'ont pas de `nextStep`. Documenté par le
-`test.fails` de `tests/pathfield.test.js` et dans `docs/decisions.md`.
+Le champ est stocké en `Float64Array`, comme les distances du tas : un stockage `Float32Array`
+faisait sauter des tuiles (sans `nextStep`) et coûtait ~14 ms par calcul (voir `docs/decisions.md`).
 
 ## Ajouter un type d'ennemi
 
@@ -75,12 +74,14 @@ Champs d'un ennemi : `type`, `r`, `hp`, `sp` (vitesse), `x`, `y`, `vx`, `vy`, `f
    (`src/config.js`). Attention : un type absent d'`ENEMY_STATS` retombe sur les stats du diable.
 2. Pour qu'il apparaisse dans les vagues : une entrée dans `WAVE_UNITS`, et une boucle dans
    `waveQueue` (`src/rules/waves.js`) — l'ordre des tirages `rng()` change pour les vagues concernées.
-3. Champs propres au type : dans `spawnEnemy` (`src/game/enemies.js`), comme `shield` ou `spitCd`.
-4. Comportement par image : une branche `e.type === '<lettre>'` dans la section « ennemis » de
+3. Champs propres au type : dans le littéral de `spawnEnemy` (`src/game/enemies.js`), comme `shield` ou
+   `spitCd`, avec une valeur neutre pour les autres types : tous les ennemis gardent la même forme d'objet
+   (sinon les boucles sur la horde allouent, voir « Performance » de `docs/decisions.md`).
+4. Comportement par image : une branche `e.type === '<lettre>'` dans `updateEnemy` de
    `src/loop/update.js` ; la cadence d'animation `e.walk` y est aussi choisie par type.
 5. Règle de dégâts spécifique : `src/rules/damage.js`, appelée depuis `hurtEnemy` (`src/game/combat.js`).
 6. Dessin : une fonction `draw<Nom>` dans `src/render/sprites.js` et sa branche dans les deux
-   aiguillages par type de `src/render/scene.js` (chutes et liste triée).
+   aiguillages par type de `src/render/scene.js` (chutes et `drawEnemy`).
 7. Tests : composition dans `tests/waves.test.js`, règle propre dans le test du module concerné.
 8. Documentation vivante : sa fiche dans le volet Bestiaire (`beasts` de `src/i18n/fr.js` et `en.js`,
    type ajouté à `ORDER`/`DRAW` de `src/render/bestiary.js` ; la vague d'arrivée vient de `firstWave`),

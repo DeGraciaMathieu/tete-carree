@@ -41,7 +41,7 @@ Textes, dans `src/i18n/fr.js` et `src/i18n/en.js`, sous `cards[id]` (lus par `tr
 | `rollboom`, `rollammo`, `firetrail` | `tryRoll` / `updateFires` (`game/player.js`) |
 | `epaule` | `shove` dans `updateRoll` (`game/player.js`), recul `shoveKnock` (`EPAULE_*`) |
 | `soif` | `soifHeal` (`rules/scoring.js`) |
-| `barbeles` | section « ennemis » de `update` (`BARBELES_DAMAGE`) ; aspect dans `render/scene.js` |
+| `barbeles` | `updateEnemy` de `loop/update.js` (`BARBELES_DAMAGE`) ; aspect dans `render/scene.js` |
 | `grosbaril` | `explodeBarrel` (`GROSBARIL_RADIUS_MUL`) |
 | `artificier` | `blastRadius` (`ARTIFICIER_RADIUS_MUL`), appelé pour grenades et roquettes dans `update` |
 | `frag` | `fragShards` (`FRAG_SHARDS`) et `fragments` (`game/weapons.js`, `FRAG_*`), à l'explosion d'une grenade dans `update` |
