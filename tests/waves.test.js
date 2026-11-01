@@ -1,7 +1,7 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import { createRng } from '../src/rules/rng.js';
-import { firstWave, waveQueue, queueCount, spawnBurst, spawnGap } from '../src/rules/waves.js';
+import { firstWave, waveCounts, waveQueue, queueCount, spawnBurst, spawnGap } from '../src/rules/waves.js';
 
 const tally = q => q.reduce((t, k) => ({ ...t, [k[0]]: (t[k[0]] || 0) + 1 }), {});
 
@@ -55,4 +55,20 @@ test('Élite : une meute compte au moins 2 coureurs, et deux fois moins qu\'à l
     const size = +k.slice(1);
     assert.ok(size >= 2 && size <= 4, k);
   }
+});
+
+const armored = q => q.filter(t => t === 'a').length;
+
+test('l\'Appât ajoute 2 Blindés à la vague', () => {
+  assert.equal(armored(waveQueue(8, {}, createRng(1), { appat: 1 })), armored(waveQueue(8, {}, createRng(1))) + 2);
+});
+
+test('le Répulsif retire 15 % des ennemis de chaque type', () => {
+  const k = waveCounts(12, {}), r = waveCounts(12, {}, { repulsif: 1 });
+  for (const t of ['z', 'b', 'd', 's', 'a', 'p']) assert.equal(r[t], Math.max(t === 'z' ? 1 : 0, Math.floor(k[t] * .85)), t);
+});
+
+test('le Leurre rend aux meutes leur taille normale sous Prime de risque', () => {
+  const runners = q => queueCount(q.filter(t => t[0] === 'p'));
+  assert.equal(runners(waveQueue(8, { prime: 1 }, createRng(4), { leurre: 1 })), runners(waveQueue(8, {}, createRng(4))));
 });

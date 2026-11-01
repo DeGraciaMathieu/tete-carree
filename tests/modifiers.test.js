@@ -2,7 +2,7 @@ import { test } from 'vitest';
 import assert from 'node:assert/strict';
 import {
   multiplier, frenzy, fireMul, comboTime, rollMax, rollAmmo, blastRadius, fragShards, shoveKnock, comboAfterHit, comboKillsAfterHit, repitBonus, waveBreak,
-  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, pickAfter, takeAllCards, canSwitch, specialMul, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul,
+  boxPeriod, boxKind, waveEndHp, enemyHpMul, enemySpeedMul, weaponCdMul, ammoCost, refillOf, shotKnockMul, selfPush, extraSpread, pickAfter, takeAllCards, canSwitch, specialMul, hpRate, rollCooldown, rollHpCost, speedMul, shotDamageMul, ownBlastRadius, ownBlastSelfMul, shopBonus, spreadMul,
 } from '../src/rules/modifiers.js';
 
 test('le multiplicateur gagne un cran tous les 5 kills enchaînés', () => {
@@ -252,4 +252,48 @@ test('Spécialiste : ses tirs, ses explosions et ses barricades comptent double'
 
 test('Aveugle : tes tirs font deux fois plus de dégâts', () => {
   assert.equal(shotDamageMul({ aveugle: 1 }, 'pistol', 100, false), 2);
+});
+
+test('Balles lourdes : l\'arme visée fait 30 % de dégâts de plus, les autres non', () => {
+  const buffs = { lourdes: 'uzi' };
+  assert.equal(shotDamageMul({}, 'uzi', 100, false, buffs), 1.3);
+  assert.equal(shotDamageMul({}, 'rifle', 100, false, buffs), 1);
+});
+
+test('Lunette : la dispersion de l\'arme visée est divisée par deux', () => {
+  assert.equal(spreadMul({ lunette: 'shotgun' }, 'shotgun'), .5);
+  assert.equal(spreadMul({ lunette: 'shotgun' }, 'uzi'), 1);
+});
+
+test('Grand chargeur : 25 % de munitions de plus par caisse pour l\'arme visée', () => {
+  assert.equal(refillOf({}, 1, { grandchargeur: 'uzi' }), 150);
+  assert.equal(refillOf({}, 2, { grandchargeur: 'uzi' }), 60);
+});
+
+test('Poche de sang : plus de perte de vie sans combo sous Vampire', () => {
+  assert.equal(hpRate({ vampire: 1 }, 0, 10, 10, true, { poche: 1 }), 0);
+});
+
+test('Sang-froid : la fenêtre de combo ignore Fièvre', () => {
+  assert.equal(comboTime({ fievre: 1 }, { sangfroid: 1 }), comboTime({}));
+});
+
+test('Mèche longue : le combo tient une seconde de plus', () => {
+  assert.equal(comboTime({}, { meche: 1 }), comboTime({}) + 1);
+});
+
+test('Roulade de réserve : une charge de plus, rien sous Sans échappatoire', () => {
+  assert.equal(rollMax({}, { roulade: 1 }), 2);
+  assert.equal(rollMax({ entrave: 1 }, { roulade: 1 }), 0);
+});
+
+test('Départ lancé : un cran de multiplicateur dès le premier kill', () => {
+  assert.equal(multiplier(0, {}, shopBonus({ depart: 1 })), 2);
+});
+
+test('sans effet du Comptoir, les règles donnent les mêmes résultats qu\'avant', () => {
+  assert.equal(comboTime({ fievre: 1 }, {}), comboTime({ fievre: 1 }));
+  assert.equal(hpRate({ vampire: 1 }, 0, 10, 10, true, {}), hpRate({ vampire: 1 }, 0, 10, 10, true));
+  assert.equal(refillOf({}, 1, {}), refillOf({}, 1));
+  assert.equal(shopBonus({}), 0);
 });

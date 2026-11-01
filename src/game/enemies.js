@@ -1,6 +1,6 @@
 // Apparition des ennemis, lancement des vagues, crachats d'acide.
 import { sfx } from '../audio/sfx.js';
-import { ACID_SPLASH_DAMAGE, ACID_SPLASH_RADIUS, ENEMY_FIRST_ATTACK, ENEMY_STATS, MH, MW, PUDDLE_LIFE, PUDDLE_RADIUS, SPIT_CD, SPIT_CD_RAND, SPIT_LEAD, SPIT_LEAD_MIN, SPIT_LEAD_RAND, T, WAVE_FIRST_SPAWN } from '../config.js';
+import { ACID_SPLASH_DAMAGE, ACID_SPLASH_RADIUS, ENEMY_FIRST_ATTACK, ENEMY_STATS, MH, MW, PUDDLE_LIFE, PUDDLE_RADIUS, SPIT_CD, SPIT_CD_RAND, SPIT_LEAD, SPIT_LEAD_MIN, SPIT_LEAD_RAND, LIVRAISON_DELAY, T, WAVE_FIRST_SPAWN } from '../config.js';
 import { hurtPlayer } from './combat.js';
 import { moveInput } from './player.js';
 import { tr } from '../i18n/index.js';
@@ -39,11 +39,12 @@ export function spawnEnemy(type, door) {
 
 export function startWave() {
   S.wave++; const n = S.wave;
-  S.queue = Waves.waveQueue(n, S.mods, rng);
-  S.waveActive = true; S.spawnT = WAVE_FIRST_SPAWN;
+  S.queue = Waves.waveQueue(n, S.mods, rng, S.buffs);
+  S.waveActive = true; S.spawnT = WAVE_FIRST_SPAWN; S.waveHurt = false;
+  if (S.buffs.livraison === 1) { S.buffs.livraison = 2; S.boxT = LIVRAISON_DELAY; } // Comptoir : la prochaine caisse sera de munitions
   S.lastKill = S.time + WAVE_FIRST_SPAWN; // Sablier : la perte ne commence qu'après la première apparition
   world.shake = Math.min(16, world.shake + 6);
-  banner(tr.waveN(n), tr.waveIntro[n] || tr.enemiesN(queueCount()), 'start');
+  banner(tr.waveN(n), S.buffs.eclaireur ? tr.forecast(Waves.waveCounts(n, S.mods, S.buffs)) : tr.waveIntro[n] || tr.enemiesN(queueCount()), 'start');
   sfx('wave');
 }
 /* Coureur : zombie maigre en survêtement, penché en avant */

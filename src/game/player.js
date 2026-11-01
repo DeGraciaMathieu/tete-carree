@@ -47,7 +47,7 @@ export function tryRoll(dirX = 0, dirY = 0) {
 function rollPerks() {
   const lb = mod('rollboom');
   if (lb) shockwave(player.x, player.y, ROLLBOOM_RADIUS + ROLLBOOM_RADIUS_LVL * lb, ROLLBOOM_DAMAGE + ROLLBOOM_DAMAGE_LVL * lb);
-  const wi = player.weapon, w = W[wi], n = rollAmmo(S.mods, refillOf(S.mods, wi), ammo[wi]);
+  const wi = player.weapon, w = W[wi], n = rollAmmo(S.mods, refillOf(S.mods, wi, S.buffs), ammo[wi]);
   if (n) { ammo[wi] += n; pop(player.x, player.y - 46, `+${n} ${tr.weapons[w.id].short}`, '#f2c230'); }
 }
 // Coup d'épaule : chaque ennemi traversé est bousculé une fois par roulade, loin du joueur

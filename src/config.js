@@ -231,7 +231,7 @@ export const SHIELD_ABSORB = .85, SHIELD_LEAK = .15; // part pour le bouclier, p
 /* ---------- Vagues ---------- */
 export const FIRST_BREAK = 1.6;
 export const WAVE_BREAK = 10;
-export const PICK_DELAY = 1.1;
+export const PICK_DELAY = 4; // fin de vague → écran des cartes (s) : le temps de ramasser les pièces encore au sol
 export const WAVE_BONUS = 250; // multiplié par le numéro de vague
 // Composition : 8 + 5n zombies ; chaque autre type entre à la vague `from`,
 // au nombre de floor((n - offset) × scale). `key` : fenêtre [min, min + span) de sa place dans la file.
@@ -272,6 +272,55 @@ export const COIN_SCATTER = 14;             // éparpillement autour du corps (p
 export const COIN_WAVE_BONUS = 1;           // pièces par numéro de vague, en fin de vague
 export const REROLL_COST = 10, REROLL_STEP = 5; // relance : prix de départ, hausse à chaque relance du même écran
 export const EXTRA_CARD_COST = 25, BAN_COST = 15, BUYBACK_COST = 60;
+
+/* ---------- Comptoir : étale de caisses entre les vagues ---------- */
+// Articles : rareté (poids de RAR), prix en pièces, famille, pactes dont l'un est requis (contre-pactes).
+// Sauf trousse, chargeur, plein et pistolet (immédiats), l'effet dure jusqu'à la fin de la vague suivante.
+// target : 'gun' (arme à feu débloquée), 'ammo' (arme à munitions), 'spread' (Uzi ou pompe), 'rent' (carte louée).
+export const SHOP_ITEMS = [
+  { id: 'trousse', rar: 'r', price: 15, fam: 'pact', pacts: ['sansarmure', 'vampire', 'brulee'] },
+  { id: 'poche', rar: 'r', price: 15, fam: 'pact', pacts: ['vampire'] },
+  { id: 'attelle', rar: 'r', price: 15, fam: 'pact', pacts: ['verre', 'diable'] },
+  { id: 'sangfroid', rar: 'r', price: 12, fam: 'pact', pacts: ['fievre'] },
+  { id: 'leurre', rar: 'r', price: 15, fam: 'pact', pacts: ['prime'] },
+  { id: 'pistolet', rar: 'c', price: 8, fam: 'pact', pacts: ['mitraille'] },
+  { id: 'gilet', rar: 'r', price: 20, fam: 'heal' },
+  { id: 'roulade', rar: 'r', price: 15, fam: 'heal' },
+  { id: 'rustine', rar: 'c', price: 8, fam: 'heal' },
+  { id: 'chargeur', rar: 'c', price: 8, fam: 'ammo', target: 'ammo' },
+  { id: 'plein', rar: 'l', price: 25, fam: 'ammo' },
+  { id: 'livraison', rar: 'r', price: 10, fam: 'ammo' },
+  { id: 'lourdes', rar: 'r', price: 20, fam: 'arms', target: 'gun' },
+  { id: 'grandchargeur', rar: 'c', price: 10, fam: 'arms', target: 'ammo' },
+  { id: 'lunette', rar: 'r', price: 12, fam: 'arms', target: 'spread' },
+  { id: 'meche', rar: 'c', price: 15, fam: 'combo' },
+  { id: 'depart', rar: 'r', price: 20, fam: 'combo' },
+  { id: 'tete', rar: 'c', price: 10, fam: 'combo' },
+  { id: 'fouille', rar: 'c', price: 15, fam: 'loot' },
+  { id: 'collantes', rar: 'c', price: 15, fam: 'loot' },
+  { id: 'eclaireur', rar: 'c', price: 5, fam: 'horde' },
+  { id: 'contrat', rar: 'r', price: 10, fam: 'horde' },
+  { id: 'appat', rar: 'c', price: 0, fam: 'horde' },
+  { id: 'repulsif', rar: 'r', price: 20, fam: 'horde' },
+  { id: 'location', rar: 'r', price: 15, fam: 'rent', target: 'rent', card: 'c' },
+  { id: 'locationrare', rar: 'l', price: 30, fam: 'rent', target: 'rent', card: 'r' },
+];
+export const SHOP_SLOTS = 4;
+export const RESTOCK_COST = 5, RESTOCK_STEP = 3;   // réassort : prix de départ, hausse à chaque réassort de la même visite
+export const SHOP_HEAVY_MUL = 1.3;                 // Balles lourdes : dégâts de l'arme visée
+export const SHOP_MAG_MUL = 1.25;                  // Grand chargeur : munitions par caisse de l'arme visée
+export const SHOP_SCOPE_MUL = .5;                  // Lunette : dispersion de l'arme visée
+export const SHOP_RUSTINE_HP = 10;                 // Rustine : vie max en plus
+export const SHOP_FUSE_T = 1;                      // Mèche longue : secondes de combo en plus
+export const SHOP_DEPART_BONUS = 1;                // Départ lancé : crans de multiplicateur en plus
+export const SHOP_HEAD_MUL = 5;                    // Prime de tête : points du premier Blindé abattu
+export const SHOP_DIG_CHANCE = .5;                 // Fouille : chance qu'un zombie lâche une pièce
+export const SHOP_COIN_LIFE = 10;                  // Pièces collantes : durée au sol (s)
+export const SHOP_CONTRACT_COINS = 30;             // Contrat : pièces gagnées sans coup encaissé
+export const SHOP_REPEL_MUL = .85;                 // Répulsif : part des ennemis de chaque type gardée
+export const SHOP_BAIT_ARMORED = 2;               // Appât : Blindés en plus (proposé dès la vague des premiers Blindés)
+export const LIVRAISON_DELAY = 2;                  // Livraison : délai avant la caisse de munitions (s)
+export const RENT_EXCLUDED = ['constitution', 'double']; // cartes à effet immédiat, jamais louées
 
 /* ---------- Moteur ---------- */
 export const MAX_PARTS = 1600;

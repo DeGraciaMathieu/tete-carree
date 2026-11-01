@@ -223,6 +223,23 @@ Spécification : `docs/prd/butin.md`.
 - Écarts avec le PRD : la carte en plus s'achète par un bouton de la boutique (pas de dos de carte en
   4ᵉ position) ; les pièces de fin de vague s'affichent en chiffre flottant au-dessus du joueur, pas dans la bannière.
 
+## Comptoir : étale de caisses entre les vagues
+
+Spécification : `docs/prd/comptoir.md`.
+
+- Écran à part (`world.state = 'shop'`, `src/game/counter.js`), ouvert à la fermeture de l'écran des cartes et, sans
+  carte (vagues impaires sous Pas de pause), quand `S.pickT` s'écoule. Jamais en démo ni avec une bourse vide. La
+  bannière de la carte prise attend la sortie du Comptoir (sinon elle s'affiche par-dessus).
+- Rien de durable : les effets vivent dans `S.buffs` jusqu'au bloc de fin de vague suivant (`endShopEffects`), sauf
+  trousse et munitions, immédiates. Les règles touchées reçoivent `buffs` en dernier paramètre ; sans lui, résultats
+  inchangés. La carte louée va dans `S.mods` et dans `S.buffs.rent`, et elle est rendue en fin de vague.
+- Tirage pondéré par les poids de `RAR`, sans garantie ; contre-pactes seulement avec leur pacte.
+- Écarts avec le PRD : le Gilet n'absorbe que les vrais coups (pas l'acide ni la perte du Sablier, qui l'auraient
+  consommé aussitôt), alors que le Contrat compte tout dégât reçu ; la Livraison rend de munitions la prochaine
+  caisse larguée, avancée à `LIVRAISON_DELAY`, qui attend si `MAX_PICKUPS` caisses sont déjà au sol ; l'étale passe
+  sur 2 colonnes sous 640 px (le seuil existant), pas 760.
+- L'étale et le réassort tirent avec `rng()` : pour une même graine, la partie diverge dès la première visite.
+
 ## Langues : français et anglais
 
 - Tous les textes affichés au joueur vivent dans `src/i18n/fr.js` et `src/i18n/en.js`, mêmes clés
@@ -334,3 +351,5 @@ Decisions the code does not settle and that were not made. Never resolved by gue
   la file de la vague et prolonge celle en cours s'il arrive avant sa fin. À garder ?
 - Butin : rachat d'un pacte à 60 pièces, est-ce assez cher (Prime de risque prise, rentabilisée, puis rachetée) ?
   Bannissement sans limite par écran : à garder ?
+- Comptoir : sous Pas de pause (pause de 1,5 s), il revient à chaque vague : le rythme tient-il ? Prix des deux
+  boutiques sur la même bourse à régler en jeu. Liste des cartes louables à vérifier carte par carte (Second souffle…).

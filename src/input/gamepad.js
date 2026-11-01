@@ -1,6 +1,7 @@
 // Manette : sondage à chaque image (getGamepads protégé), vibrations, navigation dans les cartes.
 import { audio } from '../audio/sfx.js';
 import { PAD_AIM_DEADZONE, PAD_MOVE_DEADZONE } from '../config.js';
+import { buyItem, focusItem, leaveShop, restockShop, shopFocus } from '../game/counter.js';
 import { buyExtraCard, buybackFocused, cancelBan, chooseArena, choosePick, focusCard, focusPact, pactFocus, pause, pickFocus, rerollPick, resume, startGame, toggleBan } from '../game/flow.js';
 import { tryRoll } from '../game/player.js';
 import { cycleWeapon } from '../game/weapons.js';
@@ -83,6 +84,15 @@ export function pollPad() {
     if (hit(14) || hit(12) || flick < 0) focusCard(pickFocus - 1);
     if (hit(15) || hit(13) || flick > 0) focusCard(pickFocus + 1);
     if (hit(0)) choosePick(pickFocus);
+    return;
+  }
+  if (world.state === 'shop') {
+    // Comptoir : croix ou stick pour choisir, A acheter, X réassort, Y ou Start pour repartir
+    if (hit(14) || hit(12) || flick < 0) focusItem(shopFocus - 1);
+    if (hit(15) || hit(13) || flick > 0) focusItem(shopFocus + 1);
+    if (hit(0)) buyItem(shopFocus);
+    if (hit(2)) restockShop();
+    if (hit(3) || hit(9)) leaveShop();
     return;
   }
   if (world.state !== 'play') return;

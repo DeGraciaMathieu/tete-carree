@@ -13,7 +13,7 @@ npm test            # vitest run : tous les tests/*.test.js
 npm run test:watch  # vitest en mode surveillance
 ```
 
-Résultat attendu aujourd'hui : 8 fichiers, tous les tests verts **plus un `test.fails`**
+Résultat attendu aujourd'hui : 13 fichiers, tous les tests verts **plus un `test.fails`**
 (`tests/pathfield.test.js`, bug d'arrondi Float32 documenté dans `docs/decisions.md`). Si ce test
 se met à « passer », Vitest le signale en échec : c'est que le champ de distances a changé — décision à
 prendre explicitement, pas un effet de bord à accepter.
@@ -76,6 +76,7 @@ Noms de tests en français, phrase complète qui se lit comme la règle.
 | `tests/waves.test.js` | `rules/waves.js` : 13 zombies en vague 1, entrée de chaque type à sa vague, Prime de risque grossit les meutes, compteur de restants, apparition deux par deux après la vague 6 |
 | `tests/scoring.test.js` | `rules/scoring.js` : points par kill et multiplicateur, Chair à canon, Prime de risque, Soif de sang, caisse lâchée par un blindé, pièces lâchées et pièces de fin de vague |
 | `tests/shop.test.js` | `rules/shop.js` : prix de la relance, carte en plus (une par écran, jamais sous Pas de pause), pactes rachetables, rachat sans mutation |
+| `tests/counter.test.js` | `rules/counter.js` : étale de 4 caisses distinctes pondérée par rareté, contre-pactes seulement avec leur pacte, articles interdits (Sans échappatoire, Spécialiste, Appât et Prime de tête avant les Blindés, effet encore actif), réassort, cartes louables, Éclaireur fidèle à la vague tirée |
 | `tests/damage.test.js` | `rules/damage.js` : bouclier du blindé (face, dos, explosions et railgun, bouclier brisé), recul, invulnérabilité de roulade, Second souffle |
 
 `rules/rng.js` n'a pas de fichier dédié : il est exercé par `cards` et `waves`.

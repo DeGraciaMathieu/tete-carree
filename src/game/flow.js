@@ -1,6 +1,7 @@
-// Enchaînement des écrans : titre, partie, pause, choix de carte, fin de partie.
+// Enchaînement des écrans : titre, partie, pause, choix de carte, Comptoir, fin de partie.
 import { audio, sfx, silence } from '../audio/sfx.js';
 import { ARENAS, BAN_COST, BUYBACK_COST, CONSTITUTION_HP, DIABLE_HP, EXTRA_CARD_COST, MITRAILLE_PISTOL_AMMO, STORAGE_ARENA, STORAGE_BEST, STORAGE_RUNS, TOP_RUNS, VERRE_HP, W } from '../config.js';
+import { openShop } from './counter.js';
 import { demoStart } from './demo.js';
 import { tr } from '../i18n/index.js';
 import { pad } from '../input/gamepad.js';
@@ -81,7 +82,7 @@ export function openPick() {
   const all = takeAllCards(S.mods);
   pickLegend = S.legendNext;
   pickChoices = rollCards(S.mods, rng, pickLegend, pickCtx());
-  if (!pickChoices.length) return;
+  if (!pickChoices.length) return false;
   S.legendNext = false;
   world.state = 'pick'; releaseFire();
   pickTimers.forEach(clearTimeout); pickTimers = []; pickLocked = false;
@@ -93,6 +94,7 @@ export function openPick() {
   $('pickScreen').hidden = false;
   pickFocus = 0; if (pad.on) focusCard(0);
   sfx('pickup');
+  return true;
 }
 // Contexte de tirage de l'écran en cours, complété par `more` (nombre de cartes, carte d'appoint…).
 function pickCtx(more) {
@@ -180,7 +182,7 @@ function banCard(i) {
   const r = extraCard();
   if (r) pickChoices[i] = r; else pickChoices.splice(i, 1);
   sfx('crumble');
-  if (!pickChoices.length) { $('pickScreen').hidden = true; world.state = 'play'; return; }
+  if (!pickChoices.length) { closePick(); return; }
   layHand(false);
   if (pad.on && pactFocus < 0) focusCard(Math.min(i, pickChoices.length - 1));
 }
@@ -194,6 +196,9 @@ export function buybackPact(id) {
   sfx('unlock');
   renderShop();
 }
+// L'écran des cartes se ferme sur le Comptoir, ou sur la partie si celui-ci ne s'ouvre pas ; la bannière de la carte
+// prise (`after`) attend la sortie du Comptoir.
+function closePick(after) { $('pickScreen').hidden = true; if (!openShop(after)) world.state = 'play'; }
 export function choosePick(i) {
   if (weaponChoices) { chooseWeapon(i); return; }
   if (pickBanning) { if (shopReady()) banCard(i); return; }
@@ -207,7 +212,7 @@ export function choosePick(i) {
   sfx('unlock');
   const sub = isPact(m) ? tr.pactSealed : mod(m.id) > 1 ? tr.levelN(mod(m.id)) : tr.cardGained;
   if (m.id === 'specialiste') { pickTimers.push(setTimeout(openWeaponPick, DEAL_OUT_MS)); return; }
-  pickTimers.push(setTimeout(() => { $('pickScreen').hidden = true; world.state = 'play'; banner(tr.cards[m.id].name, sub); }, DEAL_OUT_MS));
+  pickTimers.push(setTimeout(() => closePick(() => banner(tr.cards[m.id].name, sub)), DEAL_OUT_MS));
 }
 // Spécialiste : le pacte pris, le joueur choisit parmi ses armes débloquées celle qu'il gardera. Pas de retour en arrière.
 function openWeaponPick() {
@@ -238,7 +243,7 @@ function chooseWeapon(k) {
   S.special = wi; player.weapon = wi; ammo[wi] = Infinity;
   for (let j = 0; j < slots.length; j++) slots[j].classList.add(j === k ? 'chosen' : 'away');
   sfx('unlock');
-  pickTimers.push(setTimeout(() => { $('pickScreen').hidden = true; world.state = 'play'; banner(tr.cards.specialiste.name, `${tr.pactSealed} · ${tr.weapons[W[wi].id].name}`); }, DEAL_OUT_MS));
+  pickTimers.push(setTimeout(() => closePick(() => banner(tr.cards.specialiste.name, `${tr.pactSealed} · ${tr.weapons[W[wi].id].name}`)), DEAL_OUT_MS));
 }
 // Pas de pause : toutes les cartes sont gagnées d'un coup, une fois toutes retournées.
 function takeAll(slots) {
@@ -248,7 +253,7 @@ function takeAll(slots) {
   for (const m of won) applyCard(m);
   for (let k = 0; k < slots.length; k++) slots[k].classList.add('chosen');
   sfx('unlock');
-  pickTimers.push(setTimeout(() => { $('pickScreen').hidden = true; world.state = 'play'; banner(won.length > 1 ? tr.cardsGained : tr.cards[won[0].id].name, won.map(m => tr.cards[m.id].short).join(' · ')); }, DEAL_OUT_MS));
+  pickTimers.push(setTimeout(() => closePick(() => banner(won.length > 1 ? tr.cardsGained : tr.cards[won[0].id].name, won.map(m => tr.cards[m.id].short).join(' · '))), DEAL_OUT_MS));
 }
 // Effets d'une carte prise : niveau, et effet immédiat de certaines cartes.
 function applyCard(m) {

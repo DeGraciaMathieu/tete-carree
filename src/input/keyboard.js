@@ -1,4 +1,5 @@
 // Clavier et souris ; pause automatique sur perte de focus ou onglet masqué.
+import { buyItem, leaveShop, restockShop } from '../game/counter.js';
 import { buyExtraCard, cancelBan, chooseArena, choosePick, pause, rerollPick, resume, startGame, toggleBan } from '../game/flow.js';
 import { moveMenu, openPanel, panelOpen } from './buttons.js';
 import { tryRoll } from '../game/player.js';
@@ -29,6 +30,12 @@ addEventListener('keydown', e => {
     else if (e.code === 'KeyB') toggleBan();
     else if (e.code === 'Escape') cancelBan();
     else { const m = /^(Digit|Numpad)([1-9])$/.exec(e.code); if (m) choosePick(+m[2] - 1); }
+    return;
+  }
+  if (world.state === 'shop') {
+    if (e.code === 'KeyR') restockShop();
+    else if (e.code === 'Enter' || e.code === 'NumpadEnter') leaveShop();
+    else { const m = /^(Digit|Numpad)([1-9])$/.exec(e.code); if (m) buyItem(+m[2] - 1); }
     return;
   }
   if (e.code === 'KeyP' || e.code === 'Escape') { if (world.state === 'play') pause(); else if (world.state === 'pause') resume(); return; }

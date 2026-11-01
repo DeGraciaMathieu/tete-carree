@@ -29,7 +29,8 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/rules/pathfield.js` | `computeField`, `nextStep`, `UNREACHABLE` (Dijkstra de la horde) | config, map |
 | `src/rules/cards.js` | `rollCards(mods, rng, legend, ctx)` (`ctx.banned`, `without`, `count`, `free` pour la boutique) | config, modifiers |
 | `src/rules/shop.js` | boutique de l'écran des cartes : `rerollCost`, `canBuyExtra`, `buybackable`, `withoutPact`, `undoPact` | config, modifiers |
-| `src/rules/waves.js` | `waveQueue`, `queueCount`, `spawnBurst`, `spawnGap` | config, modifiers |
+| `src/rules/counter.js` | Comptoir : `rollStall` (étale pondérée par rareté), `itemAllowed`, `weaponsFor`, `rentable`, `restockCost` | config, cards, modifiers, waves |
+| `src/rules/waves.js` | `waveCounts` (comptes sans tirage), `waveQueue`, `queueCount`, `spawnBurst`, `spawnGap` | config, modifiers |
 | `src/rules/scoring.js` | `killPoints`, `soifHeal`, `rollDrop`, `rollCoins`, `waveCoins` | config, modifiers |
 | `src/rules/records.js` | `rankRun` (classement des meilleures parties) | — |
 | `src/rules/damage.js` | `resolveEnemyHit`, `playerProtected`, `secondWind` | config, modifiers |
@@ -41,11 +42,13 @@ de fin, seul `S.time` avance ; dans tous les cas `render()` (`render/scene.js`).
 | `src/game/player.js` | `moveInput`, `tryRoll`, `updateRoll`, `updateFires` (traînée de feu) | input, combat |
 | `src/game/score.js` | `addScore` (+ déblocage des armes) | rules/unlock |
 | `src/game/flow.js` | `newGame`, `startDemo`, `chooseArena`, `showArena`, `startGame`, `pause`, `resume`, `gameOver`, `openPick`, `choosePick`, `demoPick`, `focusCard`, boutique (`rerollPick`, `buyExtraCard`, `toggleBan`, `cancelBan`, `buybackPact`, `focusPact`) ; `gameOver` enregistre la partie dans `world.runs` | rules/cards, render |
+| `src/game/counter.js` | Comptoir (`world.state = 'shop'`) : `openShop`, `buyItem`, `restockShop`, `leaveShop`, `focusItem`, `endShopEffects` (effets de `S.buffs` retirés en fin de vague) | rules/counter, render |
 | `src/game/demo.js` | partie de démo de l'écran titre : `demoStart` (vague de départ, armes à feu débloquées), `demoControl` (pilote automatique, commandes dans `ctl`), `demoOver`, `DEMO_FIRST_WAVE`, `DEMO_LAST_WAVE`, `DEMO_BREAK` | rules/unlock, state, game/player, game/weapons |
 | `src/render/canvas.js` | `cv`, `ctx` (liaison vivante), `resize`, `zoom`, passe de contour `outlined` + proxy `OLP`, `setOutline` | — |
 | `src/render/floor.js` | sol peint hors écran (`floorC`, `fctx`), `paintFloor`, `stampBlood`, `stampScorch` | arena |
 | `src/render/effects.js` | particules : `addPart`, `blood`, `gibs`, `sparks`, `dust`, `pop`, `casing` | world |
 | `src/render/cardIcons.js` | `cardIcon(id)` : pictogramme SVG d'une carte de modificateur | rien |
+| `src/render/shopIcons.js` | `shopIcon(id)` : pictogramme SVG d'une caisse du Comptoir | rien |
 | `src/render/sprites.js` | `drawChar`, `drawBloater`, `drawRunner`, `drawSpitter`, `drawArmored`, `drawPlayerState`, `GUNS`… | canvas |
 | `src/render/scene.js` | `render()` : caméra, sol, tri en profondeur, entités, projectiles, effets | sprites, floor |
 | `src/render/hud.js` | `buildSlots`, `updateHud`, `resetHud`, `banner`, `drawFace`, `buildCardsPanel`, `renderRuns` (dernière partie et meilleures parties), `translatePage` (textes `data-i18n*`) | world, i18n |

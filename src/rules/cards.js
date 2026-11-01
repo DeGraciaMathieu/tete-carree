@@ -6,7 +6,7 @@ import { modLevel } from './modifiers.js';
 export const isPact = m => m.rar === 'p' || m.rar === 'm';
 const hasMajor = mods => MODS.some(m => m.rar === 'm' && modLevel(mods, m.id));
 // Exclusions symétriques : une carte n'est pas proposée si une carte possédée l'exclut, ou si elle en exclut une.
-const excluded = (m, mods) => (m.excl && m.excl.some(id => modLevel(mods, id))) || MODS.some(o => o.excl && modLevel(mods, o.id) && o.excl.includes(m.id));
+export const excluded = (m, mods) => (m.excl && m.excl.some(id => modLevel(mods, id))) || MODS.some(o => o.excl && modLevel(mods, o.id) && o.excl.includes(m.id));
 // Pacte majeur : à partir de la fin de la vague MAJOR_FROM_WAVE, un seul par partie, jamais en démo.
 const majorOk = (mods, wave, demo) => !demo && wave >= MAJOR_FROM_WAVE && !hasMajor(mods);
 // Fins de vague où un pacte majeur est garanti (s'il en reste un de permis) : MAJOR_FROM_WAVE, puis toutes les MAJOR_EVERY vagues.
