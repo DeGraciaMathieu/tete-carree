@@ -231,7 +231,7 @@ export const SHIELD_ABSORB = .85, SHIELD_LEAK = .15; // part pour le bouclier, p
 /* ---------- Vagues ---------- */
 export const FIRST_BREAK = 1.6;
 export const WAVE_BREAK = 10;
-export const PICK_DELAY = 1.1;
+export const PICK_DELAY = 4; // fin de vague → écran des cartes (s) : le temps de ramasser les pièces encore au sol
 export const WAVE_BONUS = 250; // multiplié par le numéro de vague
 // Composition : 8 + 5n zombies ; chaque autre type entre à la vague `from`,
 // au nombre de floor((n - offset) × scale). `key` : fenêtre [min, min + span) de sa place dans la file.
