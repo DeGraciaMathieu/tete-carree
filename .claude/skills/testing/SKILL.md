@@ -13,7 +13,7 @@ npm test            # vitest run : tous les tests/*.test.js
 npm run test:watch  # vitest en mode surveillance
 ```
 
-Résultat attendu aujourd'hui : 13 fichiers, tous les tests verts **plus un `test.fails`**
+Résultat attendu aujourd'hui : 14 fichiers, tous les tests verts **plus un `test.fails`**
 (`tests/pathfield.test.js`, bug d'arrondi Float32 documenté dans `docs/decisions.md`). Si ce test
 se met à « passer », Vitest le signale en échec : c'est que le champ de distances a changé — décision à
 prendre explicitement, pas un effet de bord à accepter.
@@ -33,6 +33,19 @@ profil échantillonné de Chrome. Il affiche les Mo/s par fonction et échoue au
 (10 Mo/s ; environ 2 aujourd'hui). Il ne fait pas partie de `npm test` ni du hook Stop : il exige
 Chrome et dure une vingtaine de secondes. Lance-le après un changement dans un chemin chaud et avant
 chaque publication.
+
+## Équilibrage
+
+```sh
+npm run balance     # 5 profils × 20 parties, plafond 25 vagues : rapport dans reports/
+npm run balance -- --profils prudent,pilleur --parties 10 --vagues 15 --onglets 4
+```
+
+`scripts/balance.mjs` lance Vite et Chrome sans interface, fait jouer de vraies parties par un pilote
+(`scripts/balance/pilot.js`, profils dans `profiles.js`, décisions pures dans `decide.js`) et écrit un rapport HTML
+autonome (`report.js`) et le `.json` des mesures. Parties reproductibles à la graine près. Long (une partie dépasse
+souvent la minute) : il ne fait partie ni de `npm test` ni du hook Stop. Il compare des réglages, il ne juge pas une
+vague dans l'absolu.
 
 ## Philosophie
 
@@ -77,6 +90,7 @@ Noms de tests en français, phrase complète qui se lit comme la règle.
 | `tests/scoring.test.js` | `rules/scoring.js` : points par kill et multiplicateur, Chair à canon, Prime de risque, Soif de sang, caisse lâchée par un blindé, pièces lâchées et pièces de fin de vague |
 | `tests/shop.test.js` | `rules/shop.js` : prix de la relance, carte en plus (une par écran, jamais sous Pas de pause), pactes rachetables, rachat sans mutation |
 | `tests/counter.test.js` | `rules/counter.js` : étale de 4 caisses distinctes pondérée par rareté, contre-pactes seulement avec leur pacte, articles interdits (Sans échappatoire, Spécialiste, Appât et Prime de tête avant les Blindés, effet encore actif), réassort, cartes louables, Éclaireur fidèle à la vague tirée |
+| `tests/balance.test.js` | `scripts/balance/decide.js` : décisions du pilote du harnais d'équilibrage (carte gardée par profil, pactes refusés, bannissement, relance, achats sous réserve de pièces) |
 | `tests/damage.test.js` | `rules/damage.js` : bouclier du blindé (face, dos, explosions et railgun, bouclier brisé), recul, invulnérabilité de roulade, Second souffle |
 
 `rules/rng.js` n'a pas de fichier dédié : il est exercé par `cards` et `waves`.

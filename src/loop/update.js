@@ -34,7 +34,7 @@ export function update(dt) {
   world.puddles = world.puddles.filter(p => p.t > 0);
   if (player.inAcid && !player.roll && playing) {
     player.acidT = (player.acidT || 0) - dt;
-    if (player.acidT <= 0) { player.acidT = ACID_TICK; hurtPlayer(ACID_DAMAGE, true); }
+    if (player.acidT <= 0) { player.acidT = ACID_TICK; hurtPlayer(ACID_DAMAGE, true, 'acid'); }
     if (Math.random() < dt * 12) addPart({ t: 'smoke', x: player.x + rnd(8), y: player.y + rnd(3), z: 2, vx: rnd(10), vy: rnd(6), vz: 18, life: .5, max: .5, size: 3, color: 'rgba(182,224,74,' });
   } else player.acidT = Math.min(player.acidT || 0, ACID_TICK_RESET);
   updateGlobs(dt);
@@ -49,7 +49,8 @@ export function update(dt) {
     let ay = (keys.ArrowDown ? 1 : 0) - (keys.ArrowUp ? 1 : 0);
     if (aim.id !== null && Math.hypot(aim.x, aim.y) > .3) { ax = aim.x; ay = aim.y; }
     if (pad.on && (pad.ax || pad.ay)) { ax = pad.ax; ay = pad.ay; }
-    if (world.demo) { demoControl(); mx = ctl.mx; my = ctl.my; ax = ctl.ax; ay = ctl.ay; }
+    // démo de l'accueil, ou pilote du harnais d'équilibrage (scripts/balance/) : commandes lues dans ctl
+    if (world.demo || world.pilot) { (world.pilot || demoControl)(); mx = ctl.mx; my = ctl.my; ax = ctl.ax; ay = ctl.ay; }
     const al = Math.hypot(ax, ay), aiming = al > .3;
     if (aiming) { player.fx = ax / al; player.fy = ay / al; }
     let l = Math.hypot(mx, my);
@@ -69,7 +70,7 @@ export function update(dt) {
     if ((aiming || (!world.demo && (mouseFire || pad.fire))) && player.cd <= 0) fireWeapon();
     const rate = hpRate(S.mods, S.combo, S.time - player.lastHurt, S.time - S.lastKill, S.waveActive, S.buffs);
     if (rate > 0) player.hp = Math.min(player.maxHp, player.hp + rate * dt);
-    else if (rate < 0 && mod('sablier')) { if (player.hp + rate * dt > 0) player.hp += rate * dt; else hurtPlayer(player.hp, true); } // le Sablier peut tuer
+    else if (rate < 0 && mod('sablier')) { if (player.hp + rate * dt > 0) player.hp += rate * dt; else hurtPlayer(player.hp, true, 'sablier'); } // le Sablier peut tuer
     else if (rate < 0) player.hp = Math.max(Math.min(1, player.hp), player.hp + rate * dt); // Vampire ne prend jamais le dernier PV
   }
   player.flash -= dt; player.hurtT -= dt; player.muzzle -= dt; player.invuln -= dt;
@@ -176,7 +177,7 @@ export function update(dt) {
       }
       if (playing && Math.random() < dt * .15) sfx('gloop', 400);
     } else if (!player.dead && dp < e.r + player.r + MELEE_REACH && e.atk <= 0 && playing) {
-      hurtPlayer(ENEMY_MELEE_DAMAGE[e.type]); e.atk = ENEMY_ATTACK_CD[e.type];
+      hurtPlayer(ENEMY_MELEE_DAMAGE[e.type], false, e.type); e.atk = ENEMY_ATTACK_CD[e.type];
       if (e.type === 'a' && !player.roll) { moveCircle(player, dxp / dp * ARMOR_SHOVE, 0); moveCircle(player, 0, dyp / dp * ARMOR_SHOVE); sfx('clang'); }
       e.vx += dxp / dp * 60; e.vy += dyp / dp * 60;
     }
@@ -226,7 +227,7 @@ export function update(dt) {
     if (Math.random() < .6) addPart({ t: 'fire', x: p.x, y: p.y, z: 14, vx: rnd(20), vy: rnd(20), vz: 20, life: .25, max: .25, size: 4 });
     const tx = Math.floor(p.x / T), ty = Math.floor(p.y / T), s = shotTile(tx, ty);
     if (s) { if (s === 2) damageBlock(blocks.get(ty * MW + tx), FIREBALL_BLOCK_DAMAGE); sparks(p.x, p.y, 5, '#ff8a3a'); p.life = 0; continue; }
-    if (!player.dead && Math.hypot(p.x - player.x, p.y - player.y) < player.r + FIREBALL_HIT_REACH) { hurtPlayer(FIREBALL_DAMAGE); sparks(p.x, p.y, 6, '#ff8a3a'); p.life = 0; }
+    if (!player.dead && Math.hypot(p.x - player.x, p.y - player.y) < player.r + FIREBALL_HIT_REACH) { hurtPlayer(FIREBALL_DAMAGE, false, 'feu'); sparks(p.x, p.y, 6, '#ff8a3a'); p.life = 0; }
   }
   world.projs = world.projs.filter(p => p.life > 0);
 
