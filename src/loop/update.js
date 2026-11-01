@@ -4,6 +4,7 @@ import { ACID_DAMAGE, ACID_SPEED_MUL, ACID_TICK, ACID_TICK_RESET, AIMANT_RANGE, 
 import { explosion, hurtEnemy, hurtPlayer, killEnemy, toxicBurst } from '../game/combat.js';
 import { spawnEnemy, spit, startWave, updateGlobs } from '../game/enemies.js';
 import { DEMO_BREAK, ctl, demoControl } from '../game/demo.js';
+import { endShopEffects, openShop } from '../game/counter.js';
 import { demoPick, gameOver, openPick } from '../game/flow.js';
 import { moveInput, updateFires, updateRoll } from '../game/player.js';
 import { addScore } from '../game/score.js';
@@ -66,7 +67,7 @@ export function update(dt) {
     }
     player.cd -= dt;
     if ((aiming || (!world.demo && (mouseFire || pad.fire))) && player.cd <= 0) fireWeapon();
-    const rate = hpRate(S.mods, S.combo, S.time - player.lastHurt, S.time - S.lastKill, S.waveActive);
+    const rate = hpRate(S.mods, S.combo, S.time - player.lastHurt, S.time - S.lastKill, S.waveActive, S.buffs);
     if (rate > 0) player.hp = Math.min(player.maxHp, player.hp + rate * dt);
     else if (rate < 0 && mod('sablier')) { if (player.hp + rate * dt > 0) player.hp += rate * dt; else hurtPlayer(player.hp, true); } // le Sablier peut tuer
     else if (rate < 0) player.hp = Math.max(Math.min(1, player.hp), player.hp + rate * dt); // Vampire ne prend jamais le dernier PV
@@ -80,7 +81,8 @@ export function update(dt) {
   if (playing) {
     // vagues
     if (!S.waveActive) {
-      if (S.pickT > 0) { S.pickT -= dt; if (S.pickT <= 0) { if (world.demo) demoPick(); else openPick(); } }
+      // écran des cartes s'il y en a un, puis le Comptoir (aussi les vagues sans carte)
+      if (S.pickT > 0) { S.pickT -= dt; if (S.pickT <= 0) { if (world.demo) demoPick(); else if (!pickAfter(S.mods, S.wave) || !openPick()) openShop(); } }
       else { S.breakT -= dt; if (S.breakT <= 0) startWave(); }
     }
     else {
@@ -91,10 +93,11 @@ export function update(dt) {
         S.spawnT = Waves.spawnGap(S.wave);
       }
       if (!S.queue.length && world.enemies.length === 0) {
-        S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = pickAfter(S.mods, S.wave) ? PICK_DELAY : 0; S.repit = repitBonus(S.mods, S.repit);
+        S.waveActive = false; S.breakT = world.demo ? DEMO_BREAK : waveBreak(S.mods); S.pickT = pickAfter(S.mods, S.wave) || !world.demo ? PICK_DELAY : 0; S.repit = repitBonus(S.mods, S.repit);
         const bonus = waveBonus(S.wave, S.mods) + S.pot; S.pot = 0; addScore(bonus); // Tout ou rien : la cagnotte est versée
         banner(tr.waveCleared, tr.waveBonus, 'end', bonus);
         if (!world.demo) { const coins = waveCoins(S.wave) + S.coinPot; S.coinPot = 0; S.money += coins; pop(player.x, player.y - 62, tr.coinsGained(coins), '#e8b23a'); }
+        if (!world.demo) endShopEffects();
         const hp = waveEndHp(S.mods, player.hp, player.maxHp);
         if (hp > player.hp && !player.dead) { player.hp = hp; pop(player.x, player.y - 46, tr.lifeRestored, '#62c46e'); }
       }
@@ -110,7 +113,9 @@ export function update(dt) {
           const tx = 2 + rng() * (MW - 4) | 0, ty = 2 + rng() * (MH - 4) | 0;
           const x = tx * T + T / 2, y = ty * T + T / 2;
           if (!openT(tx, ty) || Math.hypot(x - player.x, y - player.y) < BOX_MIN_DIST || dist[ty * MW + tx] > 1e8) continue;
-          world.pickups.push({ x, y, kind: boxKind(S.mods, rng(), BOX_HP_CHANCE), ph: Math.random() * 6 });
+          const kind = boxKind(S.mods, rng(), BOX_HP_CHANCE);
+          world.pickups.push({ x, y, kind: S.buffs.livraison === 2 ? 'ammo' : kind, ph: Math.random() * 6 }); // Livraison : munitions
+          if (S.buffs.livraison === 2) S.buffs.livraison = 3;
           if (mod('ravito')) for (let k = 0; k < RAVITO_ZOMBIES; k++) spawnEnemy('z');
           break;
         }
@@ -277,8 +282,8 @@ export function update(dt) {
         if (!pool.length) { addScore(AMMO_NO_WEAPON_BONUS); pop(p.x, p.y - 30, `+${AMMO_NO_WEAPON_BONUS}`, '#ffffff'); }
         else {
           const picks = pool.sort(() => rng() - .5).slice(0, AMMO_REFILL_WEAPONS);
-          for (const i of picks) ammo[i] += refillOf(S.mods, i);
-          pop(p.x, p.y - 30, picks.map(i => `+${refillOf(S.mods, i)} ${tr.weapons[W[i].id].short}`).join(' · '), '#f2c230');
+          for (const i of picks) ammo[i] += refillOf(S.mods, i, S.buffs);
+          pop(p.x, p.y - 30, picks.map(i => `+${refillOf(S.mods, i, S.buffs)} ${tr.weapons[W[i].id].short}`).join(' · '), '#f2c230');
         }
       }
     }

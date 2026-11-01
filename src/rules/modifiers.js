@@ -9,9 +9,12 @@ import {
   RACINE_SPEED_MUL, VERRE_DAMAGE_MUL, SABLIER_DRAIN, SABLIER_HOLD, ELITE_HP_MUL, ELITE_SPEED_MUL,
   ENTRAVE_SPEED_MUL, ENTRAVE_DAMAGE_MUL, MITRAILLE_CD_MUL, MITRAILLE_AMMO_COST, MITRAILLE_PISTOL_REFILL, W,
   TOUTOURIEN_KILLS_PER_MULTIPLIER, SANSPAUSE_BREAK, SPECIALISTE_DAMAGE_MUL, AVEUGLE_DAMAGE_MUL, LOURDE_DAMAGE_MUL, LOURDE_KNOCK_MUL, LOURDE_SELF_PUSH, LOURDE_SPREAD,
+  SHOP_DEPART_BONUS, SHOP_FUSE_T, SHOP_HEAVY_MUL, SHOP_MAG_MUL, SHOP_SCOPE_MUL,
 } from '../config.js';
 
 export const modLevel = (mods, id) => (mods && mods[id]) || 0;
+// Effets du Comptoir actifs jusqu'à la fin de la vague (`buffs` : { id: valeur }, valeur = arme visée pour l'Armurerie).
+const buff = (buffs, id) => (buffs && buffs[id]) || 0;
 
 // Fièvre : un cran tous les FIEVRE_KILLS_PER_MULTIPLIER kills au lieu de KILLS_PER_MULTIPLIER.
 // Tout ou rien : tous les TOUTOURIEN_KILLS_PER_MULTIPLIER kills. bonus : crans gagnés par Sans répit, qui s'ajoutent à ceux du combo.
@@ -19,7 +22,12 @@ const killsPerMultiplier = mods => modLevel(mods, 'toutourien') ? TOUTOURIEN_KIL
 export function multiplier(combo, mods, bonus = 0) { return 1 + bonus + Math.floor(combo / killsPerMultiplier(mods)); }
 export function frenzy(mods, combo, bonus = 0) { return modLevel(mods, 'frenesie') > 0 && multiplier(combo, mods, bonus) >= FRENZY_MULTIPLIER; }
 export function fireMul(mods, combo, bonus = 0) { return Math.pow(CADENCE_CD_MUL, modLevel(mods, 'cadence')) * (modLevel(mods, 'sansarmure') ? SANSARMURE_CD_MUL : 1) * (frenzy(mods, combo, bonus) ? FRENZY_CD_MUL : 1); }
-export function comboTime(mods) { return (COMBO_T + TENACE_BONUS * modLevel(mods, 'tenace')) * (modLevel(mods, 'fievre') ? FIEVRE_COMBO_MUL : 1); }
+// Mèche longue : une seconde de plus ; Sang-froid : Fièvre ne raccourcit plus la fenêtre.
+export function comboTime(mods, buffs) {
+  return (COMBO_T + TENACE_BONUS * modLevel(mods, 'tenace') + (buff(buffs, 'meche') ? SHOP_FUSE_T : 0)) * (modLevel(mods, 'fievre') && !buff(buffs, 'sangfroid') ? FIEVRE_COMBO_MUL : 1);
+}
+// Départ lancé : crans de multiplicateur en plus pendant la vague, ajoutés au bonus de Sans répit.
+export function shopBonus(buffs) { return buff(buffs, 'depart') ? SHOP_DEPART_BONUS : 0; }
 // Temps de combo restant après un coup encaissé : Quitte ou double le remet à zéro.
 export function comboAfterHit(mods, comboT) { return modLevel(mods, 'quitte') ? 0 : Math.max(0, comboT - COMBO_HIT_DRAIN); }
 // Kills enchaînés après un coup encaissé : le combo est cassé sur-le-champ quand son temps tombe à zéro,
@@ -36,10 +44,11 @@ export function boxPeriod(mods, r) { return (BOX_PERIOD_MIN + r * BOX_PERIOD_RAN
 // Points de vie gagnés (> 0) ou perdus (< 0) par seconde hors des coups : régénération après REGEN_DELAY s sans
 // dégât, aucune sous Sans armure ; Vampire : aucune régénération, perte quand le combo est retombé.
 // Plus de soins : aucune régénération. Sablier : en vague (inWave), perte dès SABLIER_HOLD s sans kill, jamais de régénération.
-export function hpRate(mods, combo, sinceHurt, sinceKill = Infinity, inWave = false) {
+// Poche de sang (Comptoir) : plus de perte sous Vampire.
+export function hpRate(mods, combo, sinceHurt, sinceKill = Infinity, inWave = false, buffs) {
   if (modLevel(mods, 'sanssoin')) return 0;
   if (modLevel(mods, 'sablier') && inWave) return sinceKill > SABLIER_HOLD ? -SABLIER_DRAIN : 0;
-  if (modLevel(mods, 'vampire')) return combo ? 0 : -VAMPIRE_DRAIN;
+  if (modLevel(mods, 'vampire')) return combo || buff(buffs, 'poche') ? 0 : -VAMPIRE_DRAIN;
   return !modLevel(mods, 'sansarmure') && sinceHurt > REGEN_DELAY ? REGEN_RATE : 0;
 }
 // Nature d'une caisse (r : tirage entre 0 et 1, hpChance : part des caisses de soin). Plus de soins, Une seule vie :
@@ -47,8 +56,8 @@ export function hpRate(mods, combo, sinceHurt, sinceKill = Infinity, inWave = fa
 export function boxKind(mods, r, hpChance) { return r < hpChance && !modLevel(mods, 'sanssoin') && !modLevel(mods, 'unevie') ? 'hp' : 'ammo'; }
 // Vie après une vague terminée : Plus de soins la rend en entier.
 export function waveEndHp(mods, hp, maxHp) { return modLevel(mods, 'sanssoin') ? maxHp : hp; }
-// Sans échappatoire : aucune charge de roulade.
-export function rollMax(mods) { return modLevel(mods, 'entrave') ? 0 : 1 + modLevel(mods, 'double'); }
+// Sans échappatoire : aucune charge de roulade. Roulade de réserve (Comptoir) : une charge de plus.
+export function rollMax(mods, buffs) { return modLevel(mods, 'entrave') ? 0 : 1 + modLevel(mods, 'double') + (buff(buffs, 'roulade') ? 1 : 0); }
 // Terre brûlée : recharge de la roulade, et PV qu'elle coûte sans jamais prendre le dernier.
 export function rollCooldown(mods) { return ROLL.CD * (modLevel(mods, 'brulee') ? BRULEE_ROLL_CD_MUL : 1); }
 export function rollHpCost(mods, hp) { return modLevel(mods, 'brulee') ? Math.max(0, Math.min(BRULEE_ROLL_HP, hp - 1)) : 0; }
@@ -66,12 +75,18 @@ export function shotKnockMul(mods) { return modLevel(mods, 'lourde') ? LOURDE_KN
 export function selfPush(mods, weapon) { return modLevel(mods, 'lourde') && isGun(weapon) ? LOURDE_SELF_PUSH : 0; }
 export function extraSpread(mods, weapon) { return modLevel(mods, 'lourde') && isGun(weapon) ? LOURDE_SPREAD : 0; }
 // Munitions d'une caisse pour l'arme i : le pistolet, infini d'ordinaire, en reçoit sous Mitraille.
-export function refillOf(mods, i) { return i === 0 && modLevel(mods, 'mitraille') ? MITRAILLE_PISTOL_REFILL : W[i].refill; }
+// Grand chargeur (Comptoir) : plus de munitions pour l'arme visée.
+export function refillOf(mods, i, buffs) {
+  const n = i === 0 && modLevel(mods, 'mitraille') ? MITRAILLE_PISTOL_REFILL : W[i].refill;
+  return buff(buffs, 'grandchargeur') === W[i].id ? Math.round(n * SHOP_MAG_MUL) : n;
+}
+// Lunette (Comptoir) : dispersion propre de l'arme visée.
+export function spreadMul(buffs, weapon) { return buff(buffs, 'lunette') === weapon ? SHOP_SCOPE_MUL : 1; }
 // Enraciné, Sans échappatoire : vitesse de déplacement.
 export function speedMul(mods) { return (modLevel(mods, 'racine') ? RACINE_SPEED_MUL : 1) * (modLevel(mods, 'entrave') ? ENTRAVE_SPEED_MUL : 1); }
-// Dégâts des tirs du joueur selon ses pactes : arme tirée, distance à la cible (px), joueur immobile.
-export function shotDamageMul(mods, weapon, d, still) {
-  let m = 1;
+// Dégâts des tirs du joueur selon ses pactes : arme tirée, distance à la cible (px), joueur immobile ; Balles lourdes (Comptoir).
+export function shotDamageMul(mods, weapon, d, still, buffs) {
+  let m = buff(buffs, 'lourdes') === weapon ? SHOP_HEAVY_MUL : 1;
   if (weapon === 'pistol' && modLevel(mods, 'fidele')) m *= FIDELE_PISTOL_MUL;
   if (modLevel(mods, 'verre')) m *= VERRE_DAMAGE_MUL;
   if (modLevel(mods, 'entrave')) m *= ENTRAVE_DAMAGE_MUL;

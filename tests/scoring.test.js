@@ -100,3 +100,10 @@ test('sous Tout ou rien, les pièces ramassées pendant la vague sont en jeu et 
   assert.equal(potAfterHit({ toutourien: 1 }, 7), 0);
   assert.equal(potsKill({ toutourien: 1 }, false), false); // pendant la pause, elles vont droit dans la bourse
 });
+
+test('Fouille : un zombie lâche une pièce environ une fois sur deux', () => {
+  const rng = createRng(11);
+  let coins = 0;
+  for (let k = 0; k < 10000; k++) coins += rollCoins('z', false, rng, { fouille: 1 });
+  assert.ok(coins > 4700 && coins < 5300, coins);
+});

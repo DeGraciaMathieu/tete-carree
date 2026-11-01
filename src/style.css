@@ -184,12 +184,43 @@ button:focus-visible{outline:2px solid var(--hazard);outline-offset:2px}
 .buyback .mchip{cursor:pointer;display:inline-flex;gap:8px;align-items:center;font-family:var(--mono);color:var(--text)}
 .buyback .mchip:hover:not(:disabled),.buyback .mchip.focus{border-color:var(--coin);border-left-color:var(--rc)}
 .buyback .mchip:disabled{opacity:.45;cursor:not-allowed}
+/* Comptoir : étale de 4 caisses en vue 3/4 (dessus écrasé, contour sombre), couleur par famille */
+.stall{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}
+.item{position:relative;display:flex;flex-direction:column;align-items:center;gap:8px;padding:12px 10px;background:var(--panel);border:1px solid var(--line);border-radius:4px;text-align:center;cursor:pointer;transition:transform .15s,border-color .15s}
+.item:hover:not(.sold):not(.poor),.item.focus{transform:translateY(-4px);border-color:var(--coin)}
+.item.poor{opacity:.45;cursor:not-allowed}
+.item.sold{cursor:default}
+.item.sold .crate,.item.sold .iname,.item.sold .idesc{opacity:.25}
+.item .price{margin-top:auto}
+.item .mkey{margin-top:0}
+.ifam{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--fc)}
+.iname{font-family:var(--display);font-size:17px;line-height:1.1}
+.idesc{font-size:12px;color:var(--muted);min-height:3.2em}
+.idesc b{color:var(--text);font-weight:400}
+.stamp{position:absolute;top:58px;font-family:var(--display);font-size:20px;color:var(--blood);border:2px solid var(--blood);padding:0 8px;transform:rotate(-12deg)}
+.crate{width:84px;height:78px;position:relative;margin-top:4px}
+.crate::after{content:'';position:absolute;left:4px;right:-6px;bottom:-7px;height:8px;background:rgba(0,0,0,.45);border-radius:50%;z-index:-1}
+.crate .top{position:absolute;left:0;right:0;top:0;height:24px;background:var(--ct);border:2px solid #17191a;border-radius:3px 3px 0 0}
+.crate .face{position:absolute;left:0;right:0;top:22px;bottom:0;background:var(--cf);border:2px solid #17191a;border-radius:0 0 3px 3px;display:grid;place-items:center}
+.crate svg{width:30px;height:30px;position:relative;z-index:1;display:block}
+.crate .rent svg{fill:none;stroke:#eef0ea;stroke-width:2.2}
+.f-pact{--fc:#ff8f84;--ct:#c4544b;--cf:#7a2620}
+.f-heal{--fc:var(--life);--ct:#7fd38a;--cf:#4f9e59}
+.f-ammo{--fc:var(--hazard);--ct:#c9a64a;--cf:#8e7431}
+.f-arms{--fc:var(--r-r);--ct:#7cb8e6;--cf:#3f77a3}
+.f-combo{--fc:#ff9a3c;--ct:#ffb36b;--cf:#c0662a}
+.f-loot{--fc:var(--coin);--ct:#f0c766;--cf:#a8801f}
+.f-horde{--fc:var(--r-m);--ct:#b48cff;--cf:#6f45b3}
+.f-rent{--fc:var(--r-c);--ct:#d7dcd6;--cf:#8d938c}
+.scout{font-size:12px;color:var(--r-m);margin:0;text-align:center}
+.mchip.r-shop{--rc:var(--coin)}
 @keyframes cardin{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
 @keyframes pip{50%{background:transparent}}
 @keyframes burst{from{opacity:1;transform:scale(.4)}to{opacity:0;transform:scale(1.5)}}
 /* Téléphone : cartes couchées, coin à gauche, texte à droite */
 @media (max-width:640px){
   .cards,.cards.four{grid-template-columns:1fr;gap:10px}
+  .stall{grid-template-columns:1fr 1fr;gap:10px}
   .cards.weapons{grid-template-columns:1fr 1fr}
   .mcard.wcard{display:flex;min-height:72px;text-align:center}
   .mcard.wcard .rar{position:static}

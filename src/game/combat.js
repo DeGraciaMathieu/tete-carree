@@ -1,6 +1,6 @@
 // Dégâts infligés et subis, mort des ennemis, explosions et ondes de choc.
 import { sfx } from '../audio/sfx.js';
-import { BARREL_CHAIN_DELAY, BLAST_BLOCK_DAMAGE, BLAST_BLOCK_REACH, BLAST_FALLOFF, BLAST_KNOCK, BLAST_SELF_DAMAGE, BLAST_SELF_FALLOFF, BLAST_SELF_RANGE, BLOATER_DAMAGE, BLOATER_RADIUS, CHAIR_RADIUS_MUL, COIN_LIFE, COIN_MAX, COIN_SCATTER, SECOND_WIND_SHOCK_DAMAGE, SECOND_WIND_SHOCK_KNOCK, SECOND_WIND_SHOCK_RADIUS, T } from '../config.js';
+import { BARREL_CHAIN_DELAY, BLAST_BLOCK_DAMAGE, BLAST_BLOCK_REACH, BLAST_FALLOFF, BLAST_KNOCK, BLAST_SELF_DAMAGE, BLAST_SELF_FALLOFF, BLAST_SELF_RANGE, BLOATER_DAMAGE, BLOATER_RADIUS, CHAIR_RADIUS_MUL, COIN_LIFE, COIN_MAX, COIN_SCATTER, SECOND_WIND_SHOCK_DAMAGE, SECOND_WIND_SHOCK_KNOCK, SECOND_WIND_SHOCK_RADIUS, SHOP_COIN_LIFE, SHOP_HEAD_MUL, T } from '../config.js';
 import { addScore } from './score.js';
 import { damageBlock } from './weapons.js';
 import { tr } from '../i18n/index.js';
@@ -43,7 +43,9 @@ export function hurtEnemy(e, dmg, dx, dy, knock, kind) {
 // fell : l'ennemi a été projeté dans une crevasse
 export function killEnemy(e, dx, dy, fell) {
   e.dead = true; S.kills++; S.combo++; S.lastKill = S.time; S.comboT = comboTime(); S.bestCombo = Math.max(S.bestCombo, S.combo);
-  const m = multiplier(), pts = killPoints(e.type, S.mods, m), heal = soifHeal(S.mods, m);
+  const m = multiplier(), heal = soifHeal(S.mods, m);
+  let pts = killPoints(e.type, S.mods, m);
+  if (e.type === 'a' && S.buffs.tete === 1) { pts *= SHOP_HEAD_MUL; S.buffs.tete = 2; } // Prime de tête (Comptoir) : le premier Blindé seulement
   if (heal && !player.dead) player.hp = Math.min(player.maxHp, player.hp + heal);
   if (potsKill(S.mods, S.waveActive)) S.pot += pts; else addScore(pts);
   pop(e.x, e.y - 40, (fell ? tr.fall : '+') + fmt(pts), m > 1 || fell ? '#f2c230' : '#ffffff');
@@ -56,7 +58,7 @@ export function killEnemy(e, dx, dy, fell) {
   sfx('splat', 25); sfx('kill', 30);
   const kind = rollDrop(e.type, isVoid(e.x, e.y), rng, S.mods);
   if (kind) world.pickups.push({ x: e.x, y: e.y, kind, ph: Math.random() * 6 });
-  if (!world.demo) dropCoins(e.x, e.y, rollCoins(e.type, isVoid(e.x, e.y), rng));
+  if (!world.demo) dropCoins(e.x, e.y, rollCoins(e.type, isVoid(e.x, e.y), rng, S.buffs));
 }
 // Pièces éparpillées autour du corps, jamais dans un mur, une construction ou le vide ; au-delà de COIN_MAX, la plus ancienne disparaît.
 // z, vz : petit saut à la chute ; ph : phase de la rotation et de l'éclat. Cosmétiques.
@@ -65,13 +67,16 @@ function dropCoins(x, y, n) {
     let cx = x + jitter(COIN_SCATTER), cy = y + jitter(COIN_SCATTER) * .55;
     if (!openT(cx / T | 0, cy / T | 0)) { cx = x; cy = y; }
     if (world.coins.length >= COIN_MAX) world.coins.shift();
-    world.coins.push({ x: cx, y: cy, z: 2, vz: -(60 + Math.random() * 50), life: COIN_LIFE, ph: Math.random() * 6 });
+    world.coins.push({ x: cx, y: cy, z: 2, vz: -(60 + Math.random() * 50), life: S.buffs.collantes ? SHOP_COIN_LIFE : COIN_LIFE, ph: Math.random() * 6 });
   }
 }
 
 export function hurtPlayer(dmg, soft) {
   if (player.dead || (world.state !== 'play' && !world.demo)) return;
   if (playerProtected(player)) return;
+  // Gilet (Comptoir) : le premier vrai coup de la vague ne fait rien
+  if (!soft && S.buffs.gilet === 1) { S.buffs.gilet = 2; player.invuln = .3; pop(player.x, player.y - 46, tr.shop.gilet.name, '#dfe8ef'); sfx('shieldbreak'); return; }
+  S.waveHurt = true; // Contrat (Comptoir)
   player.hp -= dmg; player.hurtT = .35; player.flash = .08; player.lastHurt = S.time;
   if (!soft) { world.shake = Math.min(16, world.shake + 4); S.combo = comboKillsAfterHit(S.mods, S.combo, S.comboT); S.comboT = comboAfterHit(S.mods, S.comboT); }
   S.coinPot = potAfterHit(S.mods, S.coinPot); // Tout ou rien : les pièces en jeu sont perdues comme les points

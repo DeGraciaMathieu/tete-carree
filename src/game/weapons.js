@@ -7,7 +7,7 @@ import { casing, dust, gibs, muzzleFx, sparks } from '../render/effects.js';
 import { GUNS } from '../render/sprites.js';
 import { clearShot, doorSet, frontTile, map, moveCircle, shotTile } from '../state/arena.js';
 import { S, ammo, blocks, cam, fireMul, jitter, mod, player, rng, unlocked, world } from '../state/world.js';
-import { ammoCost, canSwitch, extraSpread, selfPush, shotDamageMul, shotKnockMul, specialMul, weaponCdMul } from '../rules/modifiers.js';
+import { ammoCost, canSwitch, extraSpread, selfPush, shotDamageMul, shotKnockMul, specialMul, spreadMul, weaponCdMul } from '../rules/modifiers.js';
 import { clamp } from '../util.js';
 
 // pierce : nombre d'ennemis que le tir peut toucher (Infinity pour le railgun) ; bounce : rebonds restants
@@ -33,7 +33,7 @@ function shoot(ang, range, dmg, pierce, knock, look, bounce = 0, from = null, pa
   if (hits.length >= pierce) { hits.length = pierce; endT = Math.max(0, hits[pierce - 1][0]); hitB = null; wallHit = false; }
   const wid = W[player.weapon].id, still = !player.moving, kmul = pact ? shotKnockMul(S.mods) : 1;
   for (let k = 0; k < hits.length; k++) {
-    const e = hits[k][1], mul = pact ? shotDamageMul(S.mods, wid, Math.hypot(e.x - player.x, e.y - player.y), still) : 1;
+    const e = hits[k][1], mul = pact ? shotDamageMul(S.mods, wid, Math.hypot(e.x - player.x, e.y - player.y), still, S.buffs) : 1;
     if (hurtEnemy(e, dmg * mul, dx, dy, knock * kmul, pierce === Infinity ? 'ap' : 'bullet') === 'blocked') {
       endT = Math.max(0, hits[k][0] - 8); hitB = null; wallHit = false; break;
     }
@@ -106,13 +106,13 @@ export function fireWeapon() {
       shoot(ang + jitter(SHOTS.pistol.spread), SHOTS.pistol.speed, SHOTS.pistol.damage, 1 + mod('perce'), SHOTS.pistol.knock, { t: .07, w: 1.6, c: '255,236,170' }, mod('ricochet'));
       player.muzzle = .05; recoil(80, 135); muzzleFx(3, 1); sfx('pistol'); casing('pistol'); rumble(0, .14, 35); break;
     case 'uzi':
-      shoot(ang + jitter(SHOTS.uzi.spread), SHOTS.uzi.speed, SHOTS.uzi.damage, 1 + mod('perce'), SHOTS.uzi.knock, { t: .05, w: 1.3, c: '255,226,150' }, mod('ricochet'));
+      shoot(ang + jitter(SHOTS.uzi.spread * spreadMul(S.buffs, 'uzi')), SHOTS.uzi.speed, SHOTS.uzi.damage, 1 + mod('perce'), SHOTS.uzi.knock, { t: .05, w: 1.3, c: '255,226,150' }, mod('ricochet'));
       player.muzzle = .04; recoil(45, 90); muzzleFx(2, Math.random() < .3 ? 1 : 0); sfx('uzi'); casing('uzi'); rumble(0, .12, 30); break;
     case 'rifle':
       shoot(ang + jitter(SHOTS.rifle.spread), SHOTS.rifle.speed, SHOTS.rifle.damage, 1 + mod('perce'), SHOTS.rifle.knock, { t: .06, w: 1.5, c: '255,232,160' }, mod('ricochet'));
       player.muzzle = .05; recoil(90, 135); muzzleFx(3, 1); sfx('rifle'); casing('rifle'); rumble(0, .16, 40); break;
     case 'shotgun':
-      for (let k = 0; k < SHOTS.shotgun.pellets; k++) shoot(ang + jitter(SHOTS.shotgun.spread), SHOTS.shotgun.speed + rng() * SHOTS.shotgun.speedRand, SHOTS.shotgun.damage, 1, SHOTS.shotgun.knock * (1 + mod('calibre')), { t: .08, w: 1.2, c: '255,214,140' }, mod('ricochet'));
+      for (let k = 0; k < SHOTS.shotgun.pellets; k++) shoot(ang + jitter(SHOTS.shotgun.spread * spreadMul(S.buffs, 'shotgun')), SHOTS.shotgun.speed + rng() * SHOTS.shotgun.speedRand, SHOTS.shotgun.damage, 1, SHOTS.shotgun.knock * (1 + mod('calibre')), { t: .08, w: 1.2, c: '255,214,140' }, mod('ricochet'));
       player.muzzle = .08; world.shake = Math.min(16, world.shake + 1.5); recoil(260, 270); muzzleFx(7, 3, '#ffc070'); sfx('shotgun'); player.shellT = .3; rumble(.35, .25, 90);
       moveCircle(player, -player.fx * 4, -player.fy * 4); break;
     case 'wall': ok = placeBlock('wall'); if (!ok) sfx('click'); break;

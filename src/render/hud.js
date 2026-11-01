@@ -46,12 +46,20 @@ export function buildSlots() {
 let modsSig = '';
 // Vide les caches du HUD pour forcer un redessin complet en début de partie.
 export function resetHud() { slotSig = []; hudCache = {}; modsSig = ''; $('pauseScore').textContent = ''; }
+// Effets du Comptoir actifs (la carte louée est marquée parmi les cartes) : une puce « 1 vague » chacun.
+function shopChips() {
+  return Object.keys(S.buffs).filter(id => tr.shop[id]).map(id => {
+    const v = S.buffs[id], target = typeof v === 'string' ? ` ${tr.weapons[v].short}` : '';
+    return `<span class="mchip r-shop">${tr.shop[id].name}${target} <i>${tr.oneWave}</i></span>`;
+  }).join('');
+}
 function renderMods() {
   const act = MODS.filter(m => mod(m.id));
-  const sig = act.map(m => m.id + mod(m.id)).join(',') + (S.souffleUsed ? 'u' : '');
+  const sig = act.map(m => m.id + mod(m.id)).join(',') + (S.souffleUsed ? 'u' : '') + S.buffsVer;
   if (sig === modsSig) return;
   modsSig = sig;
-  const html = act.map(m => `<span class="mchip r-${m.rar}">${tr.cards[m.id].short}${m.max > 1 ? ` <b>${mod(m.id)}</b>` : ''}${m.id === 'souffle' && S.souffleUsed ? ` <i>${tr.used}</i>` : ''}</span>`).join('');
+  const html = act.map(m => `<span class="mchip r-${m.rar}">${tr.cards[m.id].short}${m.max > 1 ? ` <b>${mod(m.id)}</b>` : ''}${m.id === 'souffle' && S.souffleUsed ? ` <i>${tr.used}</i>` : ''}${S.buffs.rent === m.id ? ` <i>${tr.oneWave}</i>` : ''}</span>`).join('')
+    + shopChips();
   $('mods').innerHTML = html;
   $('pauseMods').innerHTML = html || `<span class="none">${tr.noCards}</span>`;
   $('hud').classList.toggle('silence', !!mod('silence')); // Silence : le HUD s'efface, la pause montre le score
