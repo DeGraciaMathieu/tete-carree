@@ -1,6 +1,7 @@
 // Profils de joueurs du harnais d'équilibrage : réglages du pilote, préférences de cartes et d'achats.
 // Déplacement (px) : flee (fuite), centerPull, cratePull, coinPull, lootDanger (pas de ramassage si un ennemi est
-// plus près), avoidAcid (s'écarter des flaques d'acide) ; visée : reaction (s), aimError (degrés) ; dodge : contact qui déclenche la roulade (0 : jamais).
+// plus près), avoidAcid (s'écarter des flaques d'acide), fireDodge (force pour sortir de la course des boules de feu,
+// 0 : jamais) ; visée : reaction (s), aimError (degrés) ; dodge : contact qui déclenche la roulade (0 : jamais).
 // cards : poids par carte (défaut 1), pactes et pacte majeur acceptés ; reroll : relance si la meilleure carte pèse
 // moins que `below`, en gardant `reserve` pièces ; ban : bannit une carte de poids négatif ; shop : poids des
 // familles du Comptoir (0 : jamais), réserve, réassort.
@@ -12,7 +13,8 @@ const weights = (ids, w) => Object.fromEntries(ids.map(id => [id, w]));
 
 // Pilote de la démo de l'accueil (src/game/demo.js) : FLEE 170, CENTER_PULL .45, CRATE_PULL .6, DODGE 30.
 // avoidAcid en plus : sans lui, l'acide domine les causes de mort de tous les profils.
-const DEMO_MOVE = { flee: 170, centerPull: .45, cratePull: .6, coinPull: 0, lootDanger: 90, avoidAcid: true, reaction: 0, aimError: 0, dodge: 30 };
+// fireDodge en plus : la démo ne les esquive pas, et elles tuaient plus de la moitié des parties.
+const DEMO_MOVE = { flee: 170, centerPull: .45, cratePull: .6, coinPull: 0, lootDanger: 90, avoidAcid: true, fireDodge: 2, reaction: 0, aimError: 0, dodge: 30 };
 
 export const PROFILES = [
   {
@@ -23,7 +25,7 @@ export const PROFILES = [
   },
   {
     id: 'debutant', name: 'Débutant',
-    ...DEMO_MOVE, flee: 120, coinPull: .4, lootDanger: 160, avoidAcid: false, reaction: .4, aimError: 15, dodge: 0,
+    ...DEMO_MOVE, flee: 120, coinPull: .4, lootDanger: 160, avoidAcid: false, fireDodge: 0, reaction: .4, aimError: 15, dodge: 0,
     cards: { weights: {}, pacts: true, majors: true, jitter: 10 },
     reroll: null, ban: false, shop: null,
   },

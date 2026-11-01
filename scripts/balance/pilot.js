@@ -1,20 +1,24 @@
 // Harnais d'équilibrage, côté page : pilote paramétré, écrans de choix, boucle de simulation et mesures d'une partie.
 // Chargé par scripts/balance.mjs dans la page du jeu servie par Vite : il agit sur les vrais modules de src/.
-import { MH, MW, SHOTS, T, W } from '/src/config.js';
+import { FIREBALL_HIT_REACH, MH, MW, SHOTS, T, W } from '/src/config.js';
 import { silence } from '/src/audio/sfx.js';
 import { buyItem, leaveShop, restockShop, stallOptions } from '/src/game/counter.js';
 import { ctl } from '/src/game/demo.js';
-import { choosePick, pickOptions, rerollPick, startGame, toggleBan } from '/src/game/flow.js';
+import { choosePick, pickOptions, rerollPick, resume, startGame, toggleBan } from '/src/game/flow.js';
 import { tryRoll } from '/src/game/player.js';
 import { selectWeapon } from '/src/game/weapons.js';
 import { update } from '/src/loop/update.js';
 import { discounted } from '/src/rules/shop.js';
-import { los } from '/src/state/arena.js';
+import { dist, los } from '/src/state/arena.js';
 import { S, ammo, player, unlocked, world } from '/src/state/world.js';
 import { banIndex, bestIndex, cardScore, shopPicks, wantsReroll } from './decide.js';
 import { profileById } from './profiles.js';
 
 const DT = 1 / 60, STEPS_PER_SLICE = 240;
+// Tours de boucle de suite hors de la partie (écran de choix qui ne se ferme pas) avant d'abandonner en erreur.
+const MAX_IDLE = 2000;
+// Boules de feu du Diable : horizon de prévision (s) et marge autour du joueur (px) en dessous de laquelle on s'écarte.
+const FIRE_HORIZON = 1.2, FIRE_MARGIN = 14, FIRE_ROLL_T = .25;
 // Armes que le pilote sait manier, de la préférée à la dernière (comme la démo : pas de construction ni d'explosif).
 const GUNS = ['shotgun', 'rifle', 'uzi', 'pistol'].map(id => W.findIndex(w => w.id === id));
 
@@ -29,14 +33,15 @@ const priceIn = id => parseInt(document.getElementById(id).textContent, 10) || 0
 
 let P, prng, aimTarget = null, aimSince = 0, aimErr = 0;
 
-// Une image de pilotage : arme, déplacement (fuite, acide, centre, butin), visée avec délai et erreur, roulade.
+// Une image de pilotage : arme, déplacement (fuite, acide, boules de feu, centre, butin, dernier ennemi), visée avec délai et erreur, roulade.
 function control() {
   for (const i of GUNS) if (unlocked[i] && ammo[i] > 0) { selectWeapon(i); break; }
   const shot = SHOTS[W[player.weapon].id], range = shot ? shot.speed : 400;
-  let fx = 0, fy = 0, aim = null, ad = range, near = Infinity;
+  let fx = 0, fy = 0, aim = null, ad = range, near = Infinity, prey = null, pd = Infinity;
   for (const e of world.enemies) {
     if (e.dead) continue;
     const dx = player.x - e.x, dy = player.y - e.y, d = Math.hypot(dx, dy) || 1;
+    if (d < pd) { pd = d; prey = e; }
     if (d < P.flee) { fx += dx / d * (1 - d / P.flee); fy += dy / d * (1 - d / P.flee); }
     if (d - e.r < near) near = d - e.r;
     if (d < ad && los(player.x, player.y, e.x, e.y)) { ad = d; aim = e; }
@@ -46,8 +51,25 @@ function control() {
     const dx = player.x - p.x, dy = (player.y - p.y) * 1.6, d = Math.hypot(dx, dy) || 1, reach = p.r + 40;
     if (d < reach) { fx += dx / d * 1.5 * (1 - d / reach); fy += dy / d * 1.5 * (1 - d / reach); }
   }
+  // boules de feu : chacune dont la trajectoire passe trop près dans les FIRE_HORIZON prochaines secondes pousse le
+  // joueur perpendiculairement à sa course, du côté où il se trouve déjà ; trop proche, il roule pour s'en sortir
+  let sx = 0, sy = 0, soon = false;
+  if (P.fireDodge) for (const p of world.projs) {
+    const rx = player.x - p.x, ry = player.y - p.y, v2 = p.vx * p.vx + p.vy * p.vy || 1;
+    const t = Math.max(0, Math.min(FIRE_HORIZON, (rx * p.vx + ry * p.vy) / v2));
+    const mx0 = rx - p.vx * t, my0 = ry - p.vy * t, miss = Math.hypot(mx0, my0), danger = player.r + FIREBALL_HIT_REACH + FIRE_MARGIN;
+    if (t <= 0 || miss > danger) continue;
+    const vl = Math.sqrt(v2), side = (p.vx * ry - p.vy * rx) >= 0 ? 1 : -1; // côté de la course où est le joueur
+    const w = P.fireDodge * (1 - miss / danger + .3) * (1 - t / FIRE_HORIZON + .3);
+    sx += -p.vy / vl * side * w; sy += p.vx / vl * side * w;
+    if (t < FIRE_ROLL_T) soon = true;
+  }
+  fx += sx; fy += sy;
   const cx = MW * T / 2 - player.x, cy = MH * T / 2 - player.y, cd = Math.hypot(cx, cy) || 1, pull = P.centerPull * Math.min(1, cd / 300);
   let mx = fx + cx / cd * pull, my = fy + cy / cd * pull;
+  // fin de vague : plus rien à sortir et personne en vue, on va chercher le dernier ennemi (il peut attendre au bord
+  // d'une crevasse, dans une zone sans chemin jusqu'au joueur : computeField l'y fait converger)
+  if (!aim && prey && S.waveActive && !S.queue.length) { mx = (prey.x - player.x) / pd; my = (prey.y - player.y) / pd; }
   // butin : la caisse ou la pièce la plus attirante, si aucun ennemi n'est trop près
   if (near > P.lootDanger) {
     let best = null, bw = 0;
@@ -64,6 +86,7 @@ function control() {
     ctl.ax = Math.cos(a); ctl.ay = Math.sin(a);
   } else { ctl.ax = 0; ctl.ay = 0; }
   if (P.dodge && near < P.dodge && fx * fx + fy * fy > .01) tryRoll(fx, fy);
+  else if (P.dodge && soon && sx * sx + sy * sy > .01) tryRoll(sx, sy);
 }
 
 // Écran des cartes : arme gardée (Spécialiste), bannissement, relances, puis la carte du profil.
@@ -115,7 +138,7 @@ export async function runGame({ seed, profile, cap, waveLimit, arena }) {
   startGame(); silence(true);
   world.pilot = control;
   const run = { seed, profile, wave: 0, outcome: '', cause: '', score: 0, kills: 0, time: 0, waves: [], cards: [], buys: [], unlocks: {}, spent: 0, stuck: null };
-  let active = false, start = 0, kills0 = 0, money0 = 0;
+  let active = false, start = 0, kills0 = 0, money0 = 0, idle = 0;
   // fenêtre d'une vague : de son début au début de la suivante (pause comprise), pour les pièces
   const closeCoins = () => { const w = run.waves[run.waves.length - 1]; if (w) { w.earned = S.money - money0 + run.spent; w.spent = run.spent; } };
   const unlocksNow = () => { for (let i = 0; i < W.length; i++) if (unlocked[i] && W[i].unlock > 0 && !(W[i].id in run.unlocks)) run.unlocks[W[i].id] = S.wave; };
@@ -129,17 +152,25 @@ export async function runGame({ seed, profile, cap, waveLimit, arena }) {
         unlocksNow();
       }
       if (active && S.time - start > waveLimit) {
-        const left = {};
-        for (const e of world.enemies) if (!e.dead) left[e.type] = (left[e.type] || 0) + 1;
-        run.stuck = { left, queue: S.queue.length };
+        const left = {}, where = [];
+        for (const e of world.enemies) if (!e.dead) {
+          left[e.type] = (left[e.type] || 0) + 1;
+          const tx = e.x / T | 0, ty = e.y / T | 0;
+          where.push({ type: e.type, tx, ty, field: Math.round(dist[ty * MW + tx]), player: [player.x / T | 0, player.y / T | 0] });
+        }
+        run.stuck = { left, queue: S.queue.length, where };
         run.outcome = 'bloquée'; break;
       }
       if (!active && S.wave >= cap && !player.dead) { run.outcome = 'plafond'; break; }
     }
     if (run.outcome) break;
     if (world.state === 'over') { run.outcome = 'mort'; run.cause = S.lastHurtBy; break; }
-    if (world.state === 'pick') await pickScreen(run);
+    // pause automatique : l'onglet a pu être signalé masqué (blur, visibilitychange) ; on reprend
+    if (world.state === 'pause') resume();
+    else if (world.state === 'pick') await pickScreen(run);
     else if (world.state === 'shop') shopScreen(run);
+    if (world.state === 'play') idle = 0;
+    else if (++idle > MAX_IDLE) { run.outcome = 'erreur'; run.error = `partie coincée hors du jeu (écran « ${world.state} »)`; break; }
     await nextTask();
   }
   closeCoins(); unlocksNow();

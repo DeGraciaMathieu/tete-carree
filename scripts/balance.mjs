@@ -33,7 +33,7 @@ const base = join('reports', `balance-${stamp}`);
 const profileDir = mkdtempSync(join(tmpdir(), 'tete-carree-balance-'));
 const vite = spawn('./node_modules/.bin/vite', ['--port', String(VITE_PORT), '--strictPort'], { stdio: 'ignore' });
 const chrome = spawn(CHROME, ['--headless=new', `--remote-debugging-port=${DEBUG_PORT}`, `--user-data-dir=${profileDir}`,
-  '--window-size=1280,800', '--no-first-run', '--disable-extensions', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', 'about:blank'], { stdio: 'ignore' });
+  '--window-size=1280,800', '--no-first-run', '--disable-extensions', '--disable-background-timer-throttling', '--disable-renderer-backgrounding', '--disable-backgrounding-occluded-windows', 'about:blank'], { stdio: 'ignore' });
 chrome.on('error', () => { console.error(`Chrome introuvable : ${CHROME} (variable CHROME pour un autre chemin)`); process.exit(2); });
 function cleanup() { chrome.kill(); vite.kill(); try { rmSync(profileDir, { recursive: true, force: true }); } catch {} }
 
@@ -58,6 +58,7 @@ async function openTab() {
   return async job => {
     const r = await send('Runtime.evaluate', { expression: `import('/scripts/balance/pilot.js').then(m => m.runGame(${JSON.stringify(job)}))`, awaitPromise: true, returnByValue: true });
     if (r.result?.exceptionDetails) return { ...job, outcome: 'erreur', error: r.result.exceptionDetails.exception?.description || r.result.exceptionDetails.text };
+    if (!r.result?.result?.value) return { ...job, outcome: 'erreur', error: r.error?.message || 'réponse vide de Chrome' };
     return r.result.result.value;
   };
 }

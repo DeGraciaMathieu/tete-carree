@@ -267,8 +267,15 @@ Spécification : `docs/prd/harnais-equilibrage.md`. Commande `npm run balance`, 
 - `Math.random` est remplacé par un tirage à graine avant chaque partie : même graine, même partie, tant que le code
   ne change pas. Le pilote a son propre tirage, dérivé de la graine.
 - `hurtPlayer(dmg, soft, by)` garde la source du dernier coup dans `S.lastHurtBy` (cause de la mort du rapport).
-- Le pilote s'écarte des flaques d'acide (sauf le profil Débutant) : la démo ne le fait pas, et l'acide dominait
-  les causes de mort de tous les profils au premier essai.
+- Le pilote s'écarte des flaques d'acide et sort de la course des boules de feu du Diable (roulade si elle arrive
+  trop vite), sauf le profil Débutant : la démo ne fait ni l'un ni l'autre, et l'acide puis les boules de feu
+  dominaient les causes de mort de tous les profils (boules de feu : 10 à 12 morts sur 20 avant, 3 à 5 après).
+- Fin de vague : quand la file est vide et qu'aucun ennemi n'est en vue, le pilote va chercher le plus proche. Sans
+  cela, un ennemi resté dans une zone sans chemin jusqu'au joueur (il attend au bord de la crevasse, voulu par
+  `computeField`) bloquait la vague indéfiniment.
+- La source `feu` (boule de feu) est distincte de `d` (coup du Diable au contact).
+- Le pilote reprend une partie mise en pause par `blur` ou `visibilitychange` (un onglet sans interface peut être
+  signalé masqué) ; une partie coincée hors du jeu trop longtemps finit en erreur au lieu de bloquer le lancement.
 - Ce que le pilote ne sait pas faire : poser barricades et barils, lancer grenades et roquettes, bannir ou racheter
   un pacte autrement que par les règles simples de son profil. Ces armes ne sont pas mesurées.
 - Mesuré au premier essai : environ 16 fois le temps réel par onglet, une partie jusqu'à la vague 8 en une vingtaine

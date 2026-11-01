@@ -227,7 +227,7 @@ export function update(dt) {
     if (Math.random() < .6) addPart({ t: 'fire', x: p.x, y: p.y, z: 14, vx: rnd(20), vy: rnd(20), vz: 20, life: .25, max: .25, size: 4 });
     const tx = Math.floor(p.x / T), ty = Math.floor(p.y / T), s = shotTile(tx, ty);
     if (s) { if (s === 2) damageBlock(blocks.get(ty * MW + tx), FIREBALL_BLOCK_DAMAGE); sparks(p.x, p.y, 5, '#ff8a3a'); p.life = 0; continue; }
-    if (!player.dead && Math.hypot(p.x - player.x, p.y - player.y) < player.r + FIREBALL_HIT_REACH) { hurtPlayer(FIREBALL_DAMAGE, false, 'd'); sparks(p.x, p.y, 6, '#ff8a3a'); p.life = 0; }
+    if (!player.dead && Math.hypot(p.x - player.x, p.y - player.y) < player.r + FIREBALL_HIT_REACH) { hurtPlayer(FIREBALL_DAMAGE, false, 'feu'); sparks(p.x, p.y, 6, '#ff8a3a'); p.life = 0; }
   }
   world.projs = world.projs.filter(p => p.life > 0);
 

@@ -72,7 +72,8 @@ function dropCoins(x, y, n, lost = false) {
   }
 }
 
-// by : source du coup (type d'ennemi, 'acid', 'blast' pour une explosion du joueur, 'sablier'), gardée pour les mesures.
+// by : source du coup (type d'ennemi au contact, 'feu' pour une boule de feu du Diable, 'acid', 'blast' pour une explosion
+// du joueur, 'sablier'), gardée pour les mesures du harnais d'équilibrage.
 export function hurtPlayer(dmg, soft, by = '') {
   if (player.dead || (world.state !== 'play' && !world.demo)) return;
   if (playerProtected(player)) return;

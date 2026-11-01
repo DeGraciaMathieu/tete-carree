@@ -3,7 +3,7 @@ import { ARENAS, MODS, W } from '../../src/config.js';
 import fr from '../../src/i18n/fr.js';
 import { profileById } from './profiles.js';
 
-const CAUSES = { z: 'Zombie', r: 'Coureur', b: 'Gonflé', s: 'Cracheur', a: 'Blindé', d: 'Diable', acid: 'Acide', blast: 'Tes explosions', sablier: 'Sablier', '': 'Inconnue' };
+const CAUSES = { z: 'Zombie', r: 'Coureur', b: 'Gonflé', s: 'Cracheur', a: 'Blindé', d: 'Diable', feu: 'Boule de feu', acid: 'Acide', blast: 'Tes explosions', sablier: 'Sablier', '': 'Inconnue' };
 const COLORS = ['var(--p1)', 'var(--p2)', 'var(--p3)', 'var(--p4)', 'var(--p5)'];
 const median = a => { if (!a.length) return null; const s = [...a].sort((x, y) => x - y), m = s.length >> 1; return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2; };
 const mean = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
