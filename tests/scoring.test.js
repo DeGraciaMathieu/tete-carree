@@ -1,7 +1,8 @@
 import { test } from 'vitest';
 import assert from 'node:assert/strict';
-import { killPoints, soifHeal, rollDrop, waveBonus, potsKill, potAfterHit, rollCoins, waveCoins, coinLife, coinBlink, coinWorth, coinHeal, coinsLostOnHit, insuranceFee, casinoPurse } from '../src/rules/scoring.js';
+import { killPoints, soifHeal, rollDrop, waveBonus, potsKill, potAfterHit, rollCoins, waveCoins, coinLife, coinBlink, coinWorth, coinHeal, coinsLostOnHit, lostCoinOffset, insuranceFee, casinoPurse } from '../src/rules/scoring.js';
 import { createRng } from '../src/rules/rng.js';
+import { PICKUP_RADIUS } from '../src/config.js';
 
 const fixed = (...values) => () => values.shift();
 
@@ -182,6 +183,14 @@ test('Cupidité : un coup fait perdre 5 pièces, ou toutes s\'il en reste moins'
 
 test('sans Cupidité, un coup ne fait perdre aucune pièce', () => {
   assert.equal(coinsLostOnHit({}, 12), 0);
+});
+
+test('Cupidité : une pièce perdue retombe hors de portée de ramassage du joueur', () => {
+  const rng = createRng(7);
+  for (let k = 0; k < 200; k++) {
+    const { dx, dy } = lostCoinOffset(rng);
+    assert.ok(Math.hypot(dx, dy) > PICKUP_RADIUS);
+  }
 });
 
 test('Mercenaire : un zombie rapporte 25 points au lieu de 50', () => {

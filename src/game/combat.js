@@ -10,7 +10,7 @@ import { fctx, stampBlood, stampScorch } from '../render/floor.js';
 import { banner } from '../render/hud.js';
 import { coinShield, debtHurtMul, insured, playerProtected, resolveEnemyHit, secondWind } from '../rules/damage.js';
 import { comboAfterHit, comboKillsAfterHit, ownBlastMul, ownBlastRadius, ownBlastSelfMul } from '../rules/modifiers.js';
-import { coinLife, coinsLostOnHit, killPoints, potAfterHit, potsKill, rollCoins, rollDrop, soifHeal } from '../rules/scoring.js';
+import { coinLife, coinsLostOnHit, killPoints, lostCoinOffset, potAfterHit, potsKill, rollCoins, rollDrop, soifHeal } from '../rules/scoring.js';
 import { isVoid, openT } from '../state/arena.js';
 import { S, blocks, comboTime, jitter, mod, multiplier, player, rng, world } from '../state/world.js';
 import { $, fmt, rnd } from '../util.js';
@@ -61,11 +61,14 @@ export function killEnemy(e, dx, dy, fell) {
   if (!world.demo) dropCoins(e.x, e.y, rollCoins(e.type, isVoid(e.x, e.y), rng, S.buffs, S.mods));
 }
 // Pièces éparpillées autour du corps, jamais dans un mur, une construction ou le vide ; au-delà de COIN_MAX, la plus ancienne disparaît.
-// z, vz : petit saut à la chute ; ph : phase de la rotation et de l'éclat. Cosmétiques. lost : pièce tombée de la bourse (Cupidité).
+// z, vz : petit saut à la chute ; ph : phase de la rotation et de l'éclat. Cosmétiques. lost : pièce tombée de la bourse (Cupidité),
+// projetée hors de portée de ramassage, en quelques essais pour éviter murs et vide.
+const LOST_COIN_TRIES = 6;
 function dropCoins(x, y, n, lost = false) {
   const life = coinLife(S.mods, S.buffs);
   for (let k = 0; k < n; k++) {
     let cx = x + jitter(COIN_SCATTER), cy = y + jitter(COIN_SCATTER) * .55;
+    if (lost) for (let tries = 0; tries < LOST_COIN_TRIES; tries++) { const o = lostCoinOffset(rng); cx = x + o.dx; cy = y + o.dy; if (openT(cx / T | 0, cy / T | 0)) break; }
     if (!openT(cx / T | 0, cy / T | 0)) { cx = x; cy = y; }
     if (world.coins.length >= COIN_MAX) world.coins.shift();
     world.coins.push({ x: cx, y: cy, z: 2, vz: -(60 + Math.random() * 50), life, ph: Math.random() * 6, lost });

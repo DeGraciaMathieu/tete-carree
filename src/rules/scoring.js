@@ -1,5 +1,5 @@
 // Ce que rapporte un ennemi abattu : points, soin de Soif de sang, caisse et pièces au sol.
-import { ASSURANCE_FEE, CASINO_CHANCE, CASINO_LOSS, CASINO_WIN, PIEGEE_COIN_LIFE, AVARICE_BLINK, AVARICE_COIN_LIFE, AVARICE_MUL, COIN_BLINK, COIN_CHANCE, COIN_LIFE, COIN_VALUE, COIN_WAVE_BONUS, CUPIDITE_BONUS, CUPIDITE_LOSS, MERCENAIRE_COINS, MERCENAIRE_POINTS_MUL, MIDAS_VALUE, PILLARD_CHANCE, POCHES_LIFE, SANGDOR_HEAL, SHOP_COIN_LIFE, SHOP_DIG_CHANCE, KILL_POINTS, WAVE_BONUS, UNEVIE_POINTS_MUL, SABLIER_POINTS_MUL, ELITE_POINTS_MUL, SILENCE_POINTS_MUL, DROP_CHANCE, DROP_HP_CHANCE, SOIF_MULTIPLIER, PRIME_POINTS_MUL, CHAIR_POINTS_MUL, VAMPIRE_HEAL } from '../config.js';
+import { ASSURANCE_FEE, CASINO_CHANCE, CASINO_LOSS, CASINO_WIN, PIEGEE_COIN_LIFE, AVARICE_BLINK, AVARICE_COIN_LIFE, AVARICE_MUL, COIN_BLINK, COIN_CHANCE, COIN_LIFE, COIN_VALUE, COIN_WAVE_BONUS, CUPIDITE_BONUS, CUPIDITE_LOSS, CUPIDITE_THROW_MAX, CUPIDITE_THROW_MIN, MERCENAIRE_COINS, MERCENAIRE_POINTS_MUL, MIDAS_VALUE, PILLARD_CHANCE, POCHES_LIFE, SANGDOR_HEAL, SHOP_COIN_LIFE, SHOP_DIG_CHANCE, KILL_POINTS, WAVE_BONUS, UNEVIE_POINTS_MUL, SABLIER_POINTS_MUL, ELITE_POINTS_MUL, SILENCE_POINTS_MUL, DROP_CHANCE, DROP_HP_CHANCE, SOIF_MULTIPLIER, PRIME_POINTS_MUL, CHAIR_POINTS_MUL, VAMPIRE_HEAL } from '../config.js';
 import { boxKind, modLevel, quittePoints } from './modifiers.js';
 
 // Types d'ennemis : 'z' zombie, 'b' gonflé, 'r' coureur, 's' cracheur, 'a' blindé, 'd' diable.
@@ -60,6 +60,11 @@ export function coinWorth(mods, lost) { return !lost && modLevel(mods, 'midas') 
 export function coinHeal(mods) { return modLevel(mods, 'sangdor') ? SANGDOR_HEAL : 0; }
 // Pièces qui tombent de la bourse sur un coup encaissé : Cupidité, jamais plus que la bourse.
 export function coinsLostOnHit(mods, money) { return modLevel(mods, 'cupidite') ? Math.min(Math.max(0, money), CUPIDITE_LOSS) : 0; }
+// Où retombe une pièce perdue sous Cupidité, par rapport au joueur : assez loin pour qu'il doive aller la chercher.
+export function lostCoinOffset(rng) {
+  const a = rng() * Math.PI * 2, d = CUPIDITE_THROW_MIN + rng() * (CUPIDITE_THROW_MAX - CUPIDITE_THROW_MIN);
+  return { dx: Math.cos(a) * d, dy: Math.sin(a) * d * .55 };
+}
 // Assurance : cotisation prise sur la bourse en fin de vague.
 export function insuranceFee(mods, money) { return modLevel(mods, 'assurance') && money > 0 ? Math.floor(money * ASSURANCE_FEE) : 0; }
 // Casino : bourse après le pile ou face de fin de vague (r entre 0 et 1) ; une bourse vide ou négative ne tire rien.
