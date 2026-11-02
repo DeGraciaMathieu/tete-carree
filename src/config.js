@@ -301,6 +301,7 @@ export const MIDAS_VALUE = 2;                     // Midas : valeur d'une pièce
 export const TRESOR_STEP = .02, TRESOR_COINS = 10, TRESOR_MAX = .4; // Trésor de guerre : dégâts par tranche de pièces, plafond
 export const AVARICE_MUL = 2, AVARICE_COIN_LIFE = 3, AVARICE_BLINK = 1; // Avarice : pièces lâchées, durée au sol et clignotement (s)
 export const CUPIDITE_BONUS = 1, CUPIDITE_LOSS = 5; // Cupidité : pièce en plus par ennemi qui en lâche, pièces perdues par coup
+export const CUPIDITE_THROW_MIN = 45, CUPIDITE_THROW_MAX = 80; // Cupidité : distance de projection des pièces perdues (px), au-delà de PICKUP_RADIUS même écrasée en 3/4
 export const MERCENAIRE_COINS = 1, MERCENAIRE_POINTS_MUL = .5; // Mercenaire : pièce en plus par kill, points des kills
 // Pactes de la bourse
 export const PEAGE_COST = 10;                     // Péage : pièces par roulade
